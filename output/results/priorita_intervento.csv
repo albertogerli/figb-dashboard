@@ -1,0 +1,6 @@
+priorita,nome,urgenza,impatto,metric_attuale,metric_target,giocatori_coinvolti,azione,roi_stimato
+1,RETENTION GIOVANI UNDER 40,10,9,55.8%,70%,421,"Programmi dedicati giovani, tornei universitari, tessera giovani scontata",Alto - LTV potenziale 40 anni
+2,CONVERSIONE SCUOLA BRIDGE,9,8,19.6%,35%,1492,"Follow-up strutturato, tornei principianti, mentorship",Alto - +200 giocatori/anno
+3,EMERGENZA LAZIO,9,7,80.3%,85%,2159,"Task force dedicata, audit circoli, incentivi retention",Medio-Alto - 2a regione per dimensione
+4,RECUPERO CIRCOLI IN DECLINO,7,7,155 circoli,Ridurre del 50%,5052,"Supporto consulenziale, best practices, fusioni strategiche",Medio - prevenzione desertificazione
+5,PROTEZIONE SEGMENTO ORO 60-70,5,6,"3,331 giocatori",Retention 95%,3331,"Programmi fidelizzazione, eventi dedicati, servizi premium",Molto Alto - LTV massimo

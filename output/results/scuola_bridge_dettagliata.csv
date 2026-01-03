@@ -1,0 +1,9 @@
+Anno,TesseratiSB,EtaMedia,GareMediae,Ritesserati,Progressione,Convertiti,Churn,TassoSuccesso%,TassoConversione%,TassoChurn%,ConversioniDettaglio
+2017,1672,69.2,21.4,1325,881,444,347,79.2,26.6,20.8,"{'Non Agonista': 10, 'Ordinario Sportivo': 411, 'Ordinario Amatoriale': 12, 'Agonista': 11}"
+2018,1977,68.5,25.5,1399,972,427,578,70.8,21.6,29.2,"{'Ordinario Sportivo': 367, 'Non Agonista': 15, 'Agonista': 11, 'Ordinario Amatoriale': 33, 'Aderente': 1}"
+2019,1981,67.5,24.9,1187,811,376,794,59.9,19.0,40.1,"{'Ordinario Sportivo': 321, 'Ordinario Amatoriale': 22, 'Agonista': 17, 'Non Agonista': 16}"
+2020,1150,67.4,10.9,696,603,93,454,60.5,8.1,39.5,"{'Ordinario Sportivo': 84, 'Ordinario Amatoriale': 5, 'Agonista': 1, 'Non Agonista': 3}"
+2021,1042,65.4,30.7,760,557,203,282,72.9,19.5,27.1,"{'Ordinario Sportivo': 180, 'Non Agonista': 3, 'Agonista': 8, 'Ordinario Amatoriale': 10, 'Aderente': 1, 'Studente CAS': 1}"
+2022,1156,66.1,26.4,847,592,255,309,73.3,22.1,26.7,"{'Ordinario Sportivo': 219, 'Ordinario Amatoriale': 23, 'Agonista': 12, 'Non Agonista': 1}"
+2023,1366,65.5,21.3,1001,718,283,365,73.3,20.7,26.7,"{'Ordinario Sportivo': 246, 'Agonista': 16, 'Non Agonista': 11, 'Ordinario Amatoriale': 10}"
+2024,1592,64.7,21.1,1226,915,311,366,77.0,19.5,23.0,"{'Ordinario Sportivo': 262, 'Agonista': 9, 'Ordinario Amatoriale': 32, 'Non Agonista': 7, 'Aderente': 1}"

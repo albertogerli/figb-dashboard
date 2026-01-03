@@ -1,0 +1,21 @@
+{
+  "periodo": "2017-2025",
+  "anni_analizzati": 9,
+  "totale_tesseramenti": 137432,
+  "giocatori_unici": 31094,
+  "circoli_unici": 836,
+  "regioni": 23,
+  "eta_media": 73.2,
+  "eta_mediana": 75.0,
+  "eta_min": 0,
+  "eta_max": 112,
+  "gare_media": 44.7,
+  "gare_totali": 6145767,
+  "punti_medi": 11566.0,
+  "percentuale_maschi": 51.5,
+  "percentuale_femmine": 48.5,
+  "retention_rate_medio": 81.62,
+  "tesserati_2025": 13662,
+  "variazione_2024_2025": 1.5,
+  "scuola_bridge_successo_medio": 70.9
+}

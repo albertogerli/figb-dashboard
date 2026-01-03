@@ -1,0 +1,51 @@
+{
+  "generali": {
+    "tesseramenti_totali": 137432,
+    "giocatori_unici": 31094,
+    "circoli_totali": 836,
+    "regioni": 23,
+    "periodo": "2017-2025"
+  },
+  "anno_2025": {
+    "tesserati": 13662,
+    "circoli_attivi": 463,
+    "eta_media": 71.0,
+    "gare_medie": 44.9,
+    "under_40_pct": 3.3,
+    "over_70_pct": 58.7,
+    "maschi_pct": 51.6,
+    "scuola_bridge": 1936,
+    "agonisti": 2819
+  },
+  "categorie": {
+    "nc_pct": 38.3,
+    "terza_pct": 24.5,
+    "master_pct": 1.5,
+    "progressione_media_saliti": 25.2,
+    "progressione_media_stabili": 56.8
+  },
+  "retention": {
+    "media_globale": 75.2,
+    "migliore_regione": "VAO",
+    "peggiore_regione": "   "
+  },
+  "scuola_bridge": {
+    "tasso_successo_medio": 70.9,
+    "tasso_conversione_medio": 19.6,
+    "tasso_churn_medio": 29.1,
+    "correlazione_gare_retention": 0.311
+  },
+  "churn": {
+    "totale": 23021,
+    "stima_decessi": 3637,
+    "stima_infermi": 7295,
+    "recuperabile": 12089,
+    "pct_recuperabile": 52.5
+  },
+  "ltv": {
+    "totale_milioni": 52.96,
+    "ltv_medio": 5017.0,
+    "segmento_oro": "60-70"
+  },
+  "grafici_generati": 30
+}

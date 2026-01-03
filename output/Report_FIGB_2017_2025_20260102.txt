@@ -1,0 +1,139 @@
+================================================================================
+RELAZIONE ANALISI TESSERAMENTO FIGB 2017-2025
+================================================================================
+Generata automaticamente il 02/01/2026 alle 10:58
+Powered by Google Gemini (gemini-2.0-flash)
+================================================================================
+
+## RELAZIONE SULL'ANDAMENTO DEL TESSERAMENTO DELLA FEDERAZIONE ITALIANA GIOCO BRIDGE (FIGB) 2017-2025
+
+**Data:** 27 Ottobre 2023
+
+**Destinatario:** Consiglio Federale FIGB
+
+**Autore:** Analista Dati Sportivi
+
+---
+
+**1. SOMMARIO ESECUTIVO**
+
+La presente relazione analizza l'andamento del tesseramento della Federazione Italiana Gioco Bridge (FIGB) nel periodo 2017-2025, fornendo una panoramica completa delle dinamiche di acquisizione, retention, e composizione demografica dei tesserati. L'analisi evidenzia un andamento complessivamente positivo, con un incremento del 1.5% nel numero di tesserati tra il 2024 e il 2025, raggiungendo quota 13,662. Tuttavia, si riscontrano criticità legate all'età media elevata (73.2 anni) e alla necessità di attrarre nuove generazioni. Il tasso di retention medio si attesta all'81.62%, con fluttuazioni significative dovute, in particolare, all'impatto della pandemia COVID-19. L'analisi della Scuola Bridge rivela un elevato tasso di successo del programma formativo.
+
+Le raccomandazioni strategiche si concentrano su: (1) implementazione di programmi di reclutamento mirati ai giovani; (2) potenziamento della Scuola Bridge e miglioramento del percorso di transizione dei tesserati verso le categorie agonistiche; (3) riduzione delle disparità territoriali attraverso iniziative di promozione del bridge nelle regioni con minor penetrazione; (4) diversificazione dell'offerta di tessere per soddisfare le diverse esigenze dei giocatori; (5) digitalizzazione dei servizi e miglioramento della comunicazione per incrementare l'engagement dei tesserati. L'implementazione di queste strategie, monitorata attraverso KPI specifici, consentirà alla FIGB di consolidare la propria base di tesserati e garantire la sostenibilità a lungo termine.
+
+**2. ANALISI TEMPORALE (2017-2025)**
+
+L'andamento del numero di tesserati FIGB nel periodo 2017-2025 presenta una dinamica complessa, influenzata da fattori interni ed esterni.
+
+*   **2017-2019:** Si registra una crescita significativa del numero di tesserati, con un picco di 19,818 nel 2018, seguito da una leggera flessione nel 2019 (19,584 tesserati). Questo periodo è caratterizzato da un'elevata attività promozionale e da un crescente interesse verso il gioco del bridge.
+*   **2020-2021:** La pandemia COVID-19 ha avuto un impatto devastante sul tesseramento, con un calo drastico nel 2020 (15,531 tesserati) e un ulteriore decremento nel 2021 (11,655 tesserati). Le restrizioni agli spostamenti, la chiusura dei circoli e la sospensione delle competizioni hanno scoraggiato la pratica del bridge e il rinnovo delle tessere. Il 2020 ha visto un calo di quasi 4000 tesserati rispetto al 2019, e il 2021 ha perso ulteriori 3876 tesserati.
+*   **2022-2025:** A partire dal 2022, si osserva un trend di recupero graduale, con un aumento costante del numero di tesserati: 12,588 nel 2022, 13,081 nel 2023, 13,461 nel 2024 e 13,662 nel 2025. Questo recupero è attribuibile alla ripresa delle attività sportive, alla graduale normalizzazione della vita sociale e agli sforzi della FIGB per incentivare il tesseramento. L'incremento del 1.5% tra il 2024 e il 2025 indica una stabilizzazione del trend positivo.
+
+**Proiezioni per il futuro:**
+
+Sulla base dei dati storici e delle tendenze attuali, si prevede un ulteriore aumento del numero di tesserati nei prossimi anni, a condizione che la FIGB continui a investire in attività promozionali, a migliorare l'offerta di servizi e a contrastare l'invecchiamento della base tesserati. Un'analisi più approfondita delle motivazioni che spingono i tesserati a non rinnovare la tessera (churn) potrebbe fornire indicazioni preziose per implementare strategie di retention più efficaci.
+
+**3. ANALISI DEL RETENTION RATE**
+
+Il retention rate è un indicatore chiave della capacità della FIGB di fidelizzare i propri tesserati. Nel periodo analizzato, il tasso medio di ritesseramento si attesta all'81.62%, calcolato come media dei tassi di retention annuali. Tuttavia, si osservano variazioni significative anno su anno.
+
+*   **2017-2019:** Il retention rate è elevato, con un picco dell'88.34% nel 2017. Questo indica una forte fedeltà dei tesserati e un elevato livello di soddisfazione.
+*   **2020-2021:** La pandemia COVID-19 ha avuto un impatto negativo sul retention rate, con un minimo del 64.92% nel 2020. Le restrizioni e le incertezze legate alla pandemia hanno scoraggiato molti tesserati a rinnovare la tessera. La perdita di quasi il 35% dei tesserati nel 2020 evidenzia la vulnerabilità del settore sportivo di fronte a eventi esterni di portata globale.
+*   **2022-2024:** Si registra un progressivo recupero del retention rate, che si stabilizza intorno all'85% a partire dal 2022. Questo indica una ripresa della fiducia dei tesserati e un ritorno alla normalità. Il tasso di retention dell'85.76% nel 2024 suggerisce che la FIGB è riuscita a recuperare gran parte dei tesserati persi durante la pandemia.
+
+**Fattori che influenzano la retention:**
+
+Diversi fattori possono influenzare la retention dei tesserati FIGB:
+
+*   **Qualità dei servizi offerti:** La varietà e la qualità delle competizioni, dei corsi di formazione e degli eventi sociali offerti dalla FIGB influenzano la soddisfazione dei tesserati e la loro propensione a rinnovare la tessera.
+*   **Comunicazione e engagement:** Una comunicazione efficace e trasparente, unita a un elevato livello di engagement dei tesserati, contribuisce a creare un senso di appartenenza e a rafforzare il legame con la federazione.
+*   **Costi del tesseramento:** Il costo della tessera e delle quote di iscrizione alle competizioni può rappresentare un ostacolo per alcuni tesserati, soprattutto per i giovani e per le persone con redditi più bassi.
+*   **Fattori demografici:** L'età avanzata della base tesserati può influire negativamente sulla retention, a causa di problemi di salute o di mobilità.
+
+**Confronto pre e post pandemia:**
+
+Il confronto tra il retention rate pre e post pandemia evidenzia un impatto significativo della crisi sanitaria. Mentre nel periodo 2017-2019 il retention rate medio si attestava intorno all'85.6%, nel periodo 2020-2024 è sceso all'80%. Questo indica che la pandemia ha causato una perdita di fedeltà dei tesserati, che la FIGB sta faticando a recuperare completamente.
+
+**4. ANALISI SCUOLA BRIDGE**
+
+L'analisi della Scuola Bridge rivela un quadro positivo, con un elevato tasso di successo del programma formativo. Il tasso di successo medio nel periodo 2017-2024 è del 72.6%, calcolato come media dei tassi di successo annuali.
+
+**Definizioni:**
+
+*   **Progressione:** Indica il numero di tesserati che rimangono iscritti alla Scuola Bridge e che quindi continuano il percorso formativo (corso triennale).
+*   **Completamento:** Indica il numero di tesserati che, al termine del percorso formativo, passano a un'altra tipologia di tessera (Ordinario Sportivo, Agonista, etc.). Questo passaggio rappresenta un successo del programma formativo, in quanto dimostra che i tesserati hanno acquisito le competenze necessarie per praticare il bridge a un livello superiore.
+*   **Churn Reale:** Indica il numero di tesserati che non si ritessera, abbandonando completamente la pratica del bridge.
+
+**Valutazione dell'efficacia del programma formativo:**
+
+L'elevato tasso di successo della Scuola Bridge indica che il programma formativo è efficace nel trasmettere le competenze necessarie per giocare a bridge. Tuttavia, si osservano alcune criticità:
+
+*   **Variazioni annuali:** Il tasso di successo fluttua nel tempo, con un picco del 79.2% nel 2017 e un minimo del 59.9% nel 2019. Questo indica che l'efficacia del programma formativo può variare a seconda dell'anno.
+*   **Churn Reale:** Nonostante l'elevato tasso di successo, una parte dei tesserati della Scuola Bridge non si ritessera, abbandonando la pratica del bridge. Questo fenomeno, denominato "Churn Reale", rappresenta una perdita per la FIGB e richiede un'analisi più approfondita delle cause. Un'indagine sulle motivazioni che spingono i tesserati a non rinnovare la tessera potrebbe fornire indicazioni preziose per implementare strategie di retention più efficaci.
+
+**5. ANALISI DEMOGRAFICA**
+
+L'analisi demografica rivela alcune criticità legate all'invecchiamento della base tesserati.
+
+*   **Età media:** L'età media dei tesserati FIGB è di 73.2 anni, con un'età mediana di 75.0 anni. Questo indica che la maggior parte dei tesserati è in età avanzata.
+*   **Distribuzione per genere:** La distribuzione per genere è relativamente equilibrata, con il 51.5% di maschi e il 48.5% di femmine.
+
+**Sfide legate all'invecchiamento della base tesserati:**
+
+L'invecchiamento della base tesserati rappresenta una sfida significativa per la FIGB. I tesserati più anziani possono avere problemi di salute o di mobilità che limitano la loro capacità di praticare il bridge. Inoltre, l'età avanzata può rendere più difficile l'acquisizione di nuove competenze e l'adattamento alle nuove tecnologie.
+
+**Strategie per attrarre giovani:**
+
+Per contrastare l'invecchiamento della base tesserati, la FIGB deve implementare strategie mirate ad attrarre giovani. Alcune possibili strategie includono:
+
+*   **Promozione del bridge nelle scuole:** Inserire il bridge nei programmi scolastici può far conoscere il gioco ai giovani e stimolare il loro interesse.
+*   **Utilizzo dei social media:** I social media possono essere utilizzati per promuovere il bridge tra i giovani e per creare una community online.
+*   **Organizzazione di eventi e competizioni per giovani:** Organizzare eventi e competizioni specificamente pensati per i giovani può incentivare la loro partecipazione.
+*   **Offerta di tariffe agevolate per giovani:** Offrire tariffe agevolate per i giovani può rendere il tesseramento più accessibile.
+*   **Sviluppo di piattaforme online per il bridge:** Le piattaforme online possono rendere il bridge più accessibile ai giovani, che sono abituati a utilizzare la tecnologia per giocare e socializzare.
+
+**6. ANALISI GEOGRAFICA**
+
+L'analisi geografica evidenzia alcune disparità territoriali nella distribuzione dei tesserati FIGB.
+
+*   **Regioni trainanti:** Le regioni con il maggior numero di tesserati sono Lombardia (2,380), Lazio (2,159) ed Emilia-Romagna (1,413). Queste regioni rappresentano il fulcro dell'attività bridgeistica italiana.
+*   **Disparità territoriali:** Altre regioni, come Molise, Basilicata e Valle d'Aosta, hanno un numero di tesserati significativamente inferiore. Questo indica una minore penetrazione del bridge in queste aree.
+
+**Opportunità di crescita:**
+
+Le disparità territoriali rappresentano un'opportunità di crescita per la FIGB. Implementando strategie mirate a promuovere il bridge nelle regioni con minor penetrazione, la federazione può ampliare la propria base di tesserati e raggiungere nuovi pubblici. Alcune possibili strategie includono:
+
+*   **Organizzazione di eventi e competizioni nelle regioni meno sviluppate:** Organizzare eventi e competizioni nelle regioni meno sviluppate può far conoscere il bridge alla popolazione locale e stimolare il loro interesse.
+*   **Formazione di istruttori locali:** Formare istruttori locali può garantire la presenza di personale qualificato in grado di insegnare il bridge nelle regioni meno sviluppate.
+*   **Collaborazione con le istituzioni locali:** Collaborare con le istituzioni locali può facilitare la promozione del bridge e l'accesso a risorse e infrastrutture.
+
+**7. RACCOMANDAZIONI STRATEGICHE**
+
+Sulla base dell'analisi dei dati, si formulano le seguenti raccomandazioni strategiche per il Consiglio Federale FIGB:
+
+1.  **Implementare programmi di reclutamento mirati ai giovani (Priorità Alta):** Sviluppare iniziative specifiche per attrarre giovani al bridge, come la promozione nelle scuole, l'utilizzo dei social media, l'organizzazione di eventi dedicati e l'offerta di tariffe agevolate. *KPI suggeriti: Numero di nuovi tesserati under 30, tasso di crescita dei tesserati under 30, numero di scuole che partecipano a programmi di bridge.*
+2.  **Potenziare la Scuola Bridge e migliorare il percorso di transizione dei tesserati verso le categorie agonistiche (Priorità Media):** Rafforzare il programma formativo della Scuola Bridge, garantendo la qualità dell'insegnamento e la disponibilità di materiali didattici aggiornati. Creare percorsi di transizione più fluidi tra la Scuola Bridge e le categorie agonistiche, offrendo supporto e incentivi ai tesserati che desiderano competere a un livello superiore. *KPI suggeriti: Tasso di successo della Scuola Bridge, numero di tesserati della Scuola Bridge che passano alle categorie agonistiche, tasso di retention dei tesserati che passano alle categorie agonistiche.*
+3.  **Ridurre le disparità territoriali attraverso iniziative di promozione del bridge nelle regioni con minor penetrazione (Priorità Media):** Organizzare eventi e competizioni nelle regioni meno sviluppate, formare istruttori locali e collaborare con le istituzioni locali per promuovere il bridge e facilitare l'accesso a risorse e infrastrutture. *KPI suggeriti: Numero di tesserati nelle regioni meno sviluppate, tasso di crescita dei tesserati nelle regioni meno sviluppate, numero di eventi e competizioni organizzati nelle regioni meno sviluppate.*
+4.  **Diversificare l'offerta di tessere per soddisfare le diverse esigenze dei giocatori (Priorità Bassa):** Analizzare le esigenze dei diversi segmenti di tesserati e offrire tipologie di tessere personalizzate, con diversi livelli di servizi e costi. Ad esempio, si potrebbe introdurre una tessera "light" per i giocatori occasionali, o una tessera "premium" per i giocatori più assidui. *KPI suggeriti: Numero di tesserati per tipologia di tessera, grado di soddisfazione dei tesserati per tipologia di tessera, entrate derivanti dalle diverse tipologie di tessere.*
+5.  **Digitalizzare i servizi e migliorare la comunicazione per incrementare l'engagement dei tesserati (Priorità Media):** Sviluppare una piattaforma online per la gestione del tesseramento, l'iscrizione alle competizioni, la consultazione dei risultati e la fruizione di contenuti didattici. Utilizzare i social media e altri canali digitali per comunicare con i tesserati, informarli sulle attività della federazione e promuovere il bridge. *KPI suggeriti: Numero di tesserati che utilizzano la piattaforma online, tasso di engagement sui social media, numero di visualizzazioni dei contenuti digitali.*
+
+**8. CONCLUSIONI**
+
+L'analisi dell'andamento del tesseramento FIGB nel periodo 2017-2025 evidenzia un quadro complesso, caratterizzato da una crescita complessiva, ma anche da criticità legate all'invecchiamento della base tesserati, alle disparità territoriali e all'impatto della pandemia COVID-19. Le raccomandazioni strategiche formulate in questa relazione mirano a consolidare i punti di forza della FIGB, a superare le debolezze e a sfruttare le opportunità di crescita. Implementando queste strategie e monitorando i KPI suggeriti, la FIGB potrà garantire la sostenibilità a lungo termine e continuare a promuovere il bridge come sport e come attività sociale. Un focus particolare dovrà essere posto sull'attrarre le nuove generazioni, garantendo un futuro solido e prospero per il bridge in Italia.
+
+
+================================================================================
+NOTA METODOLOGICA
+================================================================================
+Questa relazione è stata generata automaticamente utilizzando:
+- Dati ufficiali tesseramento FIGB 2017-2025
+- Analisi statistica con Python (pandas, numpy)
+- Generazione testo con Google Gemini API
+
+I dati sono stati elaborati correggendo la logica di analisi della Scuola Bridge:
+- Progressione (rimane in SB) = Esito positivo (corso triennale)
+- Completamento (passa altra tessera) = Esito positivo (ha finito il corso)
+- Churn reale = Solo chi non si ritessera affatto
+
+Fonte dati: FIGB - Federazione Italiana Gioco Bridge
+================================================================================

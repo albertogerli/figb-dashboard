@@ -1,0 +1,614 @@
+{
+  "churn_segmentato": [
+    {
+      "FasciaEta": "18-30",
+      "Tesserati": 2256,
+      "ChurnTotale": 1385,
+      "StimaDecessi": 0,
+      "StimaInfermi": 5,
+      "ChurnReale": 1380,
+      "ChurnTotale%": 61.4,
+      "ChurnReale%": 61.2,
+      "Recuperabili": 1380
+    },
+    {
+      "FasciaEta": "30-40",
+      "Tesserati": 1466,
+      "ChurnTotale": 424,
+      "StimaDecessi": 0,
+      "StimaInfermi": 2,
+      "ChurnReale": 422,
+      "ChurnTotale%": 28.9,
+      "ChurnReale%": 28.8,
+      "Recuperabili": 422
+    },
+    {
+      "FasciaEta": "40-50",
+      "Tesserati": 2046,
+      "ChurnTotale": 443,
+      "StimaDecessi": 0,
+      "StimaInfermi": 7,
+      "ChurnReale": 436,
+      "ChurnTotale%": 21.7,
+      "ChurnReale%": 21.3,
+      "Recuperabili": 436
+    },
+    {
+      "FasciaEta": "50-60",
+      "Tesserati": 7258,
+      "ChurnTotale": 1254,
+      "StimaDecessi": 18,
+      "StimaInfermi": 54,
+      "ChurnReale": 1182,
+      "ChurnTotale%": 17.3,
+      "ChurnReale%": 16.3,
+      "Recuperabili": 1182
+    },
+    {
+      "FasciaEta": "60-70",
+      "Tesserati": 24561,
+      "ChurnTotale": 3478,
+      "StimaDecessi": 98,
+      "StimaInfermi": 264,
+      "ChurnReale": 3116,
+      "ChurnTotale%": 14.2,
+      "ChurnReale%": 12.7,
+      "Recuperabili": 3116
+    },
+    {
+      "FasciaEta": "70-80",
+      "Tesserati": 46692,
+      "ChurnTotale": 7057,
+      "StimaDecessi": 341,
+      "StimaInfermi": 783,
+      "ChurnReale": 5933,
+      "ChurnTotale%": 15.1,
+      "ChurnReale%": 12.7,
+      "Recuperabili": 5933
+    },
+    {
+      "FasciaEta": "80-85",
+      "Tesserati": 19761,
+      "ChurnTotale": 3630,
+      "StimaDecessi": 260,
+      "StimaInfermi": 491,
+      "ChurnReale": 2879,
+      "ChurnTotale%": 18.4,
+      "ChurnReale%": 14.6,
+      "Recuperabili": 2879
+    },
+    {
+      "FasciaEta": "85-90",
+      "Tesserati": 12348,
+      "ChurnTotale": 2724,
+      "StimaDecessi": 242,
+      "StimaInfermi": 405,
+      "ChurnReale": 2077,
+      "ChurnTotale%": 22.1,
+      "ChurnReale%": 16.8,
+      "Recuperabili": 2077
+    },
+    {
+      "FasciaEta": "90+",
+      "Tesserati": 5798,
+      "ChurnTotale": 1720,
+      "StimaDecessi": 179,
+      "StimaInfermi": 254,
+      "ChurnReale": 1287,
+      "ChurnTotale%": 29.7,
+      "ChurnReale%": 22.2,
+      "Recuperabili": 1287
+    },
+    {
+      "FasciaEta": "<18",
+      "Tesserati": 1178,
+      "ChurnTotale": 906,
+      "StimaDecessi": 0,
+      "StimaInfermi": 1,
+      "ChurnReale": 905,
+      "ChurnTotale%": 76.9,
+      "ChurnReale%": 76.8,
+      "Recuperabili": 905
+    }
+  ],
+  "ltv": [
+    {
+      "FasciaEta": "60-70",
+      "Giocatori": 6032,
+      "RetentionRate": 85.9,
+      "AnniVitaResidui": 15,
+      "ValoreAnnuale": 518.0,
+      "LTV": 2705.0,
+      "ValoreTotale": 16.32
+    },
+    {
+      "FasciaEta": "70-80",
+      "Giocatori": 10087,
+      "RetentionRate": 85.0,
+      "AnniVitaResidui": 10,
+      "ValoreAnnuale": 533.0,
+      "LTV": 2464.0,
+      "ValoreTotale": 24.85
+    },
+    {
+      "FasciaEta": "40-60",
+      "Giocatori": 2762,
+      "RetentionRate": 81.8,
+      "AnniVitaResidui": 25,
+      "ValoreAnnuale": 442.0,
+      "LTV": 1993.0,
+      "ValoreTotale": 5.5
+    },
+    {
+      "FasciaEta": "80+",
+      "Giocatori": 8983,
+      "RetentionRate": 78.7,
+      "AnniVitaResidui": 5,
+      "ValoreAnnuale": 517.0,
+      "LTV": 1575.0,
+      "ValoreTotale": 14.15
+    },
+    {
+      "FasciaEta": "<40",
+      "Giocatori": 3044,
+      "RetentionRate": 56.6,
+      "AnniVitaResidui": 40,
+      "ValoreAnnuale": 285.0,
+      "LTV": 617.0,
+      "ValoreTotale": 1.88
+    }
+  ],
+  "scuola_bridge": {
+    "tasso_successo_medio": 70.9,
+    "tasso_conversione_medio": 19.6,
+    "tasso_churn_medio": 29.1,
+    "dettaglio": [
+      {
+        "Anno": 2017,
+        "TesseratiSB": 1672,
+        "EtaMedia": 69.2,
+        "GareMediae": 21.4,
+        "Ritesserati": 1325,
+        "Progressione": 881,
+        "Convertiti": 444,
+        "Churn": 347,
+        "TassoSuccesso%": 79.2,
+        "TassoConversione%": 26.6,
+        "TassoChurn%": 20.8
+      },
+      {
+        "Anno": 2018,
+        "TesseratiSB": 1977,
+        "EtaMedia": 68.5,
+        "GareMediae": 25.5,
+        "Ritesserati": 1399,
+        "Progressione": 972,
+        "Convertiti": 427,
+        "Churn": 578,
+        "TassoSuccesso%": 70.8,
+        "TassoConversione%": 21.6,
+        "TassoChurn%": 29.2
+      },
+      {
+        "Anno": 2019,
+        "TesseratiSB": 1981,
+        "EtaMedia": 67.5,
+        "GareMediae": 24.9,
+        "Ritesserati": 1187,
+        "Progressione": 811,
+        "Convertiti": 376,
+        "Churn": 794,
+        "TassoSuccesso%": 59.9,
+        "TassoConversione%": 19.0,
+        "TassoChurn%": 40.1
+      },
+      {
+        "Anno": 2020,
+        "TesseratiSB": 1150,
+        "EtaMedia": 67.4,
+        "GareMediae": 10.9,
+        "Ritesserati": 696,
+        "Progressione": 603,
+        "Convertiti": 93,
+        "Churn": 454,
+        "TassoSuccesso%": 60.5,
+        "TassoConversione%": 8.1,
+        "TassoChurn%": 39.5
+      },
+      {
+        "Anno": 2021,
+        "TesseratiSB": 1042,
+        "EtaMedia": 65.4,
+        "GareMediae": 30.7,
+        "Ritesserati": 760,
+        "Progressione": 557,
+        "Convertiti": 203,
+        "Churn": 282,
+        "TassoSuccesso%": 72.9,
+        "TassoConversione%": 19.5,
+        "TassoChurn%": 27.1
+      },
+      {
+        "Anno": 2022,
+        "TesseratiSB": 1156,
+        "EtaMedia": 66.1,
+        "GareMediae": 26.4,
+        "Ritesserati": 847,
+        "Progressione": 592,
+        "Convertiti": 255,
+        "Churn": 309,
+        "TassoSuccesso%": 73.3,
+        "TassoConversione%": 22.1,
+        "TassoChurn%": 26.7
+      },
+      {
+        "Anno": 2023,
+        "TesseratiSB": 1366,
+        "EtaMedia": 65.5,
+        "GareMediae": 21.3,
+        "Ritesserati": 1001,
+        "Progressione": 718,
+        "Convertiti": 283,
+        "Churn": 365,
+        "TassoSuccesso%": 73.3,
+        "TassoConversione%": 20.7,
+        "TassoChurn%": 26.7
+      },
+      {
+        "Anno": 2024,
+        "TesseratiSB": 1592,
+        "EtaMedia": 64.7,
+        "GareMediae": 21.1,
+        "Ritesserati": 1226,
+        "Progressione": 915,
+        "Convertiti": 311,
+        "Churn": 366,
+        "TassoSuccesso%": 77.0,
+        "TassoConversione%": 19.5,
+        "TassoChurn%": 23.0
+      }
+    ]
+  },
+  "regioni": [
+    {
+      "Regione": "LOM",
+      "Tesserati2017": 3592,
+      "Tesserati2025": 2380,
+      "Variazione": -1212,
+      "Variazione%": -33.7,
+      "Retention%": 84.2,
+      "Circoli2025": 71,
+      "TessPerCircolo": 33.5,
+      "EtaMedia": 71.8
+    },
+    {
+      "Regione": "LAZ",
+      "Tesserati2017": 3218,
+      "Tesserati2025": 2159,
+      "Variazione": -1059,
+      "Variazione%": -32.9,
+      "Retention%": 80.3,
+      "Circoli2025": 61,
+      "TessPerCircolo": 35.4,
+      "EtaMedia": 72.5
+    },
+    {
+      "Regione": "EMI",
+      "Tesserati2017": 1654,
+      "Tesserati2025": 1413,
+      "Variazione": -241,
+      "Variazione%": -14.6,
+      "Retention%": 87.6,
+      "Circoli2025": 37,
+      "TessPerCircolo": 38.2,
+      "EtaMedia": 68.8
+    },
+    {
+      "Regione": "PIE",
+      "Tesserati2017": 1544,
+      "Tesserati2025": 1139,
+      "Variazione": -405,
+      "Variazione%": -26.2,
+      "Retention%": 86.1,
+      "Circoli2025": 35,
+      "TessPerCircolo": 32.5,
+      "EtaMedia": 70.4
+    },
+    {
+      "Regione": "TOS",
+      "Tesserati2017": 1318,
+      "Tesserati2025": 1125,
+      "Variazione": -193,
+      "Variazione%": -14.6,
+      "Retention%": 86.7,
+      "Circoli2025": 36,
+      "TessPerCircolo": 31.2,
+      "EtaMedia": 70.1
+    },
+    {
+      "Regione": "VEN",
+      "Tesserati2017": 1177,
+      "Tesserati2025": 930,
+      "Variazione": -247,
+      "Variazione%": -21.0,
+      "Retention%": 84.7,
+      "Circoli2025": 38,
+      "TessPerCircolo": 24.5,
+      "EtaMedia": 73.7
+    },
+    {
+      "Regione": "SIC",
+      "Tesserati2017": 974,
+      "Tesserati2025": 813,
+      "Variazione": -161,
+      "Variazione%": -16.5,
+      "Retention%": 86.5,
+      "Circoli2025": 29,
+      "TessPerCircolo": 28.0,
+      "EtaMedia": 69.2
+    },
+    {
+      "Regione": "SAR",
+      "Tesserati2017": 721,
+      "Tesserati2025": 573,
+      "Variazione": -148,
+      "Variazione%": -20.5,
+      "Retention%": 90.8,
+      "Circoli2025": 17,
+      "TessPerCircolo": 33.7,
+      "EtaMedia": 71.1
+    },
+    {
+      "Regione": "MAR",
+      "Tesserati2017": 676,
+      "Tesserati2025": 570,
+      "Variazione": -106,
+      "Variazione%": -15.7,
+      "Retention%": 84.4,
+      "Circoli2025": 28,
+      "TessPerCircolo": 20.4,
+      "EtaMedia": 68.4
+    },
+    {
+      "Regione": "LIG",
+      "Tesserati2017": 765,
+      "Tesserati2025": 514,
+      "Variazione": -251,
+      "Variazione%": -32.8,
+      "Retention%": 82.3,
+      "Circoli2025": 17,
+      "TessPerCircolo": 30.2,
+      "EtaMedia": 71.0
+    },
+    {
+      "Regione": "PUG",
+      "Tesserati2017": 483,
+      "Tesserati2025": 470,
+      "Variazione": -13,
+      "Variazione%": -2.7,
+      "Retention%": 84.3,
+      "Circoli2025": 23,
+      "TessPerCircolo": 20.4,
+      "EtaMedia": 69.2
+    },
+    {
+      "Regione": "CAM",
+      "Tesserati2017": 520,
+      "Tesserati2025": 384,
+      "Variazione": -136,
+      "Variazione%": -26.2,
+      "Retention%": 79.9,
+      "Circoli2025": 21,
+      "TessPerCircolo": 18.3,
+      "EtaMedia": 70.3
+    },
+    {
+      "Regione": "CAB",
+      "Tesserati2017": 315,
+      "Tesserati2025": 281,
+      "Variazione": -34,
+      "Variazione%": -10.8,
+      "Retention%": 82.0,
+      "Circoli2025": 14,
+      "TessPerCircolo": 20.1,
+      "EtaMedia": 68.8
+    },
+    {
+      "Regione": "FRI",
+      "Tesserati2017": 332,
+      "Tesserati2025": 244,
+      "Variazione": -88,
+      "Variazione%": -26.5,
+      "Retention%": 89.5,
+      "Circoli2025": 7,
+      "TessPerCircolo": 34.9,
+      "EtaMedia": 73.7
+    },
+    {
+      "Regione": "ABR",
+      "Tesserati2017": 137,
+      "Tesserati2025": 194,
+      "Variazione": 57,
+      "Variazione%": 41.6,
+      "Retention%": 86.1,
+      "Circoli2025": 8,
+      "TessPerCircolo": 24.2,
+      "EtaMedia": 71.0
+    },
+    {
+      "Regione": "UMB",
+      "Tesserati2017": 288,
+      "Tesserati2025": 184,
+      "Variazione": -104,
+      "Variazione%": -36.1,
+      "Retention%": 87.7,
+      "Circoli2025": 7,
+      "TessPerCircolo": 26.3,
+      "EtaMedia": 73.6
+    },
+    {
+      "Regione": "TRT",
+      "Tesserati2017": 108,
+      "Tesserati2025": 138,
+      "Variazione": 30,
+      "Variazione%": 27.8,
+      "Retention%": 81.4,
+      "Circoli2025": 6,
+      "TessPerCircolo": 23.0,
+      "EtaMedia": 74.7
+    },
+    {
+      "Regione": "FIB",
+      "Tesserati2017": 1,
+      "Tesserati2025": 66,
+      "Variazione": 65,
+      "Variazione%": 6500.0,
+      "Retention%": 0.0,
+      "Circoli2025": 2,
+      "TessPerCircolo": 33.0,
+      "EtaMedia": 42.1
+    },
+    {
+      "Regione": "VAO",
+      "Tesserati2017": 41,
+      "Tesserati2025": 34,
+      "Variazione": -7,
+      "Variazione%": -17.1,
+      "Retention%": 87.9,
+      "Circoli2025": 2,
+      "TessPerCircolo": 17.0,
+      "EtaMedia": 71.1
+    },
+    {
+      "Regione": "   ",
+      "Tesserati2017": 46,
+      "Tesserati2025": 27,
+      "Variazione": -19,
+      "Variazione%": -41.3,
+      "Retention%": 0.0,
+      "Circoli2025": 1,
+      "TessPerCircolo": 27.0,
+      "EtaMedia": 78.6
+    },
+    {
+      "Regione": "BAS",
+      "Tesserati2017": 20,
+      "Tesserati2025": 20,
+      "Variazione": 0,
+      "Variazione%": 0.0,
+      "Retention%": 86.4,
+      "Circoli2025": 1,
+      "TessPerCircolo": 20.0,
+      "EtaMedia": 78.6
+    },
+    {
+      "Regione": "MOL",
+      "Tesserati2017": 25,
+      "Tesserati2025": 2,
+      "Variazione": -23,
+      "Variazione%": -92.0,
+      "Retention%": 66.7,
+      "Circoli2025": 1,
+      "TessPerCircolo": 2.0,
+      "EtaMedia": 73.5
+    },
+    {
+      "Regione": "TRB",
+      "Tesserati2017": 97,
+      "Tesserati2025": 0,
+      "Variazione": -97,
+      "Variazione%": -100.0,
+      "Retention%": 0.0,
+      "Circoli2025": 0,
+      "TessPerCircolo": 0.0,
+      "EtaMedia": NaN
+    }
+  ],
+  "circoli": {
+    "totali": 463,
+    "in_crescita": 262,
+    "stabili": 46,
+    "in_declino": 155
+  },
+  "generali": {
+    "periodo": "2017-2025",
+    "anni_analizzati": 9,
+    "tesseramenti_totali": 137432,
+    "giocatori_unici": 31094,
+    "circoli_totali": 836,
+    "regioni": 23,
+    "tipologie_tessera": 14
+  },
+  "anno_2025": {
+    "tesserati": 13662,
+    "circoli_attivi": 463,
+    "eta_media": 71.0,
+    "eta_mediana": 73.0,
+    "gare_medie": 44.9,
+    "gare_totali": 613135,
+    "punti_medi": 14357.0,
+    "maschi_pct": 51.6,
+    "femmine_pct": 48.4,
+    "under_40_pct": 3.1,
+    "over_70_pct": 62.6,
+    "scuola_bridge": 1936,
+    "agonisti": 2819
+  },
+  "variazioni": {
+    "var_2017_2025_pct": -24.3,
+    "var_2019_2025_pct": -30.2,
+    "var_2024_2025_pct": 1.5,
+    "picco_2018": 19818,
+    "minimo_2021": 11655,
+    "ripresa_post_covid_pct": 17.2
+  },
+  "retention": {
+    "media_2017_2024": 81.6,
+    "annuale": [
+      {
+        "anno": 2017,
+        "retention": 88.3
+      },
+      {
+        "anno": 2018,
+        "retention": 83.5
+      },
+      {
+        "anno": 2019,
+        "retention": 74.9
+      },
+      {
+        "anno": 2020,
+        "retention": 64.9
+      },
+      {
+        "anno": 2021,
+        "retention": 84.9
+      },
+      {
+        "anno": 2022,
+        "retention": 85.0
+      },
+      {
+        "anno": 2023,
+        "retention": 85.6
+      },
+      {
+        "anno": 2024,
+        "retention": 85.8
+      }
+    ]
+  },
+  "churn": {
+    "totale_2017_2024": 23021,
+    "stima_decessi": 1138,
+    "stima_infermi": 2266,
+    "churn_reale_recuperabile": 19617,
+    "pct_recuperabile": 85.2
+  },
+  "ltv_totale": {
+    "valore_totale_euro": 62701967.0,
+    "valore_totale_milioni": 62.7,
+    "ltv_medio": 2017.0
+  }
+}

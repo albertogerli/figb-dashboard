@@ -1,0 +1,479 @@
+{
+  "summary": {
+    "periodo": "2017-2025",
+    "anni_analizzati": 9,
+    "totale_tesseramenti": 137432,
+    "giocatori_unici": 31094,
+    "circoli_unici": 836,
+    "regioni": 23,
+    "eta_media": 73.2,
+    "eta_mediana": 75.0,
+    "eta_min": 0,
+    "eta_max": 112,
+    "gare_media": 44.7,
+    "gare_totali": 6145767,
+    "punti_medi": 11566.0,
+    "percentuale_maschi": 51.5,
+    "percentuale_femmine": 48.5,
+    "retention_rate_medio": 81.62,
+    "tesserati_2025": 13662,
+    "variazione_2024_2025": 1.5,
+    "scuola_bridge_successo_medio": 70.9
+  },
+  "retention": [
+    {
+      "Anno": 2017,
+      "Tesserati": 18052,
+      "Ritesserati": 15948,
+      "RetentionRate_%": 88.34,
+      "Persi": 2104,
+      "Nuovi_AnnoSuccessivo": 3870
+    },
+    {
+      "Anno": 2018,
+      "Tesserati": 19818,
+      "Ritesserati": 16548,
+      "RetentionRate_%": 83.5,
+      "Persi": 3270,
+      "Nuovi_AnnoSuccessivo": 3036
+    },
+    {
+      "Anno": 2019,
+      "Tesserati": 19584,
+      "Ritesserati": 14677,
+      "RetentionRate_%": 74.94,
+      "Persi": 4907,
+      "Nuovi_AnnoSuccessivo": 854
+    },
+    {
+      "Anno": 2020,
+      "Tesserati": 15531,
+      "Ritesserati": 10082,
+      "RetentionRate_%": 64.92,
+      "Persi": 5449,
+      "Nuovi_AnnoSuccessivo": 1573
+    },
+    {
+      "Anno": 2021,
+      "Tesserati": 11655,
+      "Ritesserati": 9893,
+      "RetentionRate_%": 84.88,
+      "Persi": 1762,
+      "Nuovi_AnnoSuccessivo": 2695
+    },
+    {
+      "Anno": 2022,
+      "Tesserati": 12588,
+      "Ritesserati": 10703,
+      "RetentionRate_%": 85.03,
+      "Persi": 1885,
+      "Nuovi_AnnoSuccessivo": 2378
+    },
+    {
+      "Anno": 2023,
+      "Tesserati": 13081,
+      "Ritesserati": 11197,
+      "RetentionRate_%": 85.6,
+      "Persi": 1884,
+      "Nuovi_AnnoSuccessivo": 2264
+    },
+    {
+      "Anno": 2024,
+      "Tesserati": 13461,
+      "Ritesserati": 11544,
+      "RetentionRate_%": 85.76,
+      "Persi": 1917,
+      "Nuovi_AnnoSuccessivo": 2118
+    }
+  ],
+  "scuola_bridge": [
+    {
+      "Anno": 2017,
+      "TesseratiSB": 1672,
+      "Progressione": 881,
+      "Completamento": 444,
+      "ChurnReale": 347,
+      "TassoSuccesso_%": 79.2,
+      "TassoChurn_%": 20.8
+    },
+    {
+      "Anno": 2018,
+      "TesseratiSB": 1977,
+      "Progressione": 972,
+      "Completamento": 427,
+      "ChurnReale": 578,
+      "TassoSuccesso_%": 70.8,
+      "TassoChurn_%": 29.2
+    },
+    {
+      "Anno": 2019,
+      "TesseratiSB": 1981,
+      "Progressione": 811,
+      "Completamento": 376,
+      "ChurnReale": 794,
+      "TassoSuccesso_%": 59.9,
+      "TassoChurn_%": 40.1
+    },
+    {
+      "Anno": 2020,
+      "TesseratiSB": 1150,
+      "Progressione": 603,
+      "Completamento": 93,
+      "ChurnReale": 454,
+      "TassoSuccesso_%": 60.5,
+      "TassoChurn_%": 39.5
+    },
+    {
+      "Anno": 2021,
+      "TesseratiSB": 1042,
+      "Progressione": 557,
+      "Completamento": 203,
+      "ChurnReale": 282,
+      "TassoSuccesso_%": 72.9,
+      "TassoChurn_%": 27.1
+    },
+    {
+      "Anno": 2022,
+      "TesseratiSB": 1156,
+      "Progressione": 592,
+      "Completamento": 255,
+      "ChurnReale": 309,
+      "TassoSuccesso_%": 73.3,
+      "TassoChurn_%": 26.7
+    },
+    {
+      "Anno": 2023,
+      "TesseratiSB": 1366,
+      "Progressione": 718,
+      "Completamento": 283,
+      "ChurnReale": 365,
+      "TassoSuccesso_%": 73.3,
+      "TassoChurn_%": 26.7
+    },
+    {
+      "Anno": 2024,
+      "TesseratiSB": 1592,
+      "Progressione": 915,
+      "Completamento": 311,
+      "ChurnReale": 366,
+      "TassoSuccesso_%": 77.0,
+      "TassoChurn_%": 23.0
+    }
+  ],
+  "nuovi_veterani": [
+    {
+      "Anno": 2017,
+      "Totali": 18052,
+      "Nuovi": 18052,
+      "Veterani": 0,
+      "PercNuovi": 100.0
+    },
+    {
+      "Anno": 2018,
+      "Totali": 19818,
+      "Nuovi": 3870,
+      "Veterani": 15948,
+      "PercNuovi": 19.5
+    },
+    {
+      "Anno": 2019,
+      "Totali": 19584,
+      "Nuovi": 2739,
+      "Veterani": 16845,
+      "PercNuovi": 14.0
+    },
+    {
+      "Anno": 2020,
+      "Totali": 15531,
+      "Nuovi": 643,
+      "Veterani": 14888,
+      "PercNuovi": 4.1
+    },
+    {
+      "Anno": 2021,
+      "Totali": 11655,
+      "Nuovi": 805,
+      "Veterani": 10850,
+      "PercNuovi": 6.9
+    },
+    {
+      "Anno": 2022,
+      "Totali": 12588,
+      "Nuovi": 971,
+      "Veterani": 11617,
+      "PercNuovi": 7.7
+    },
+    {
+      "Anno": 2023,
+      "Totali": 13081,
+      "Nuovi": 1205,
+      "Veterani": 11876,
+      "PercNuovi": 9.2
+    },
+    {
+      "Anno": 2024,
+      "Totali": 13461,
+      "Nuovi": 1390,
+      "Veterani": 12071,
+      "PercNuovi": 10.3
+    },
+    {
+      "Anno": 2025,
+      "Totali": 13662,
+      "Nuovi": 1420,
+      "Veterani": 12242,
+      "PercNuovi": 10.4
+    }
+  ],
+  "regioni_top": [
+    {
+      "Anno": 2025,
+      "Regione": "LOM",
+      "Tesserati": 2380,
+      "Gare": 96140.0,
+      "Punti": 34861164.0
+    },
+    {
+      "Anno": 2025,
+      "Regione": "LAZ",
+      "Tesserati": 2159,
+      "Gare": 91489.0,
+      "Punti": 30663784.0
+    },
+    {
+      "Anno": 2025,
+      "Regione": "EMI",
+      "Tesserati": 1413,
+      "Gare": 69840.0,
+      "Punti": 21618142.0
+    },
+    {
+      "Anno": 2025,
+      "Regione": "PIE",
+      "Tesserati": 1139,
+      "Gare": 58698.0,
+      "Punti": 16222954.0
+    },
+    {
+      "Anno": 2025,
+      "Regione": "TOS",
+      "Tesserati": 1125,
+      "Gare": 49592.0,
+      "Punti": 17888067.0
+    },
+    {
+      "Anno": 2025,
+      "Regione": "VEN",
+      "Tesserati": 930,
+      "Gare": 48473.0,
+      "Punti": 14118769.0
+    },
+    {
+      "Anno": 2025,
+      "Regione": "SIC",
+      "Tesserati": 813,
+      "Gare": 55173.0,
+      "Punti": 12941083.0
+    },
+    {
+      "Anno": 2025,
+      "Regione": "SAR",
+      "Tesserati": 573,
+      "Gare": 29059.0,
+      "Punti": 4818497.0
+    },
+    {
+      "Anno": 2025,
+      "Regione": "MAR",
+      "Tesserati": 570,
+      "Gare": 22447.0,
+      "Punti": 7833825.0
+    },
+    {
+      "Anno": 2025,
+      "Regione": "LIG",
+      "Tesserati": 514,
+      "Gare": 21556.0,
+      "Punti": 11361883.0
+    }
+  ],
+  "tipologie_tessera": [
+    {
+      "Anno": 2025,
+      "TipoTessera": "Ordinario Sportivo",
+      "Tesserati": 7239,
+      "GareMediane": 46.25804669153198,
+      "PuntiMedi": 8394.938665561542
+    },
+    {
+      "Anno": 2025,
+      "TipoTessera": "Agonista",
+      "Tesserati": 2544,
+      "GareMediane": 69.59551886792453,
+      "PuntiMedi": 48617.856132075474
+    },
+    {
+      "Anno": 2025,
+      "TipoTessera": "Scuola Bridge",
+      "Tesserati": 1936,
+      "GareMediane": 21.90857438016529,
+      "PuntiMedi": 464.67561983471074
+    },
+    {
+      "Anno": 2025,
+      "TipoTessera": "Ordinario Amatoriale",
+      "Tesserati": 1416,
+      "GareMediane": 28.132062146892654,
+      "PuntiMedi": 3092.513418079096
+    },
+    {
+      "Anno": 2025,
+      "TipoTessera": "Non Agonista",
+      "Tesserati": 275,
+      "GareMediane": 62.661818181818184,
+      "PuntiMedi": 21439.294545454544
+    },
+    {
+      "Anno": 2025,
+      "TipoTessera": "Studente CAS",
+      "Tesserati": 140,
+      "GareMediane": 7.135714285714286,
+      "PuntiMedi": 274.35714285714283
+    },
+    {
+      "Anno": 2025,
+      "TipoTessera": "Aderente",
+      "Tesserati": 47,
+      "GareMediane": 10.46808510638298,
+      "PuntiMedi": 2269.404255319149
+    },
+    {
+      "Anno": 2025,
+      "TipoTessera": "Normale",
+      "Tesserati": 29,
+      "GareMediane": 6.655172413793103,
+      "PuntiMedi": 11731.310344827587
+    },
+    {
+      "Anno": 2025,
+      "TipoTessera": "Ist.Scolastici",
+      "Tesserati": 22,
+      "GareMediane": 1.6818181818181819,
+      "PuntiMedi": 25.454545454545453
+    },
+    {
+      "Anno": 2025,
+      "TipoTessera": "Promozionale",
+      "Tesserati": 11,
+      "GareMediane": 1.2727272727272727,
+      "PuntiMedi": 9.636363636363637
+    }
+  ],
+  "top_circoli": [
+    {
+      "Anno": 2025,
+      "Circolo": "F0503",
+      "Tesserati": 261,
+      "GareTotali": 14800.0,
+      "PuntiTotali": 4505917.0
+    },
+    {
+      "Anno": 2025,
+      "Circolo": "F0787",
+      "Tesserati": 261,
+      "GareTotali": 14160.0,
+      "PuntiTotali": 6544327.0
+    },
+    {
+      "Anno": 2025,
+      "Circolo": "F0789",
+      "Tesserati": 215,
+      "GareTotali": 10119.0,
+      "PuntiTotali": 3553337.0
+    },
+    {
+      "Anno": 2025,
+      "Circolo": "F0266",
+      "Tesserati": 186,
+      "GareTotali": 13764.0,
+      "PuntiTotali": 4444079.0
+    },
+    {
+      "Anno": 2025,
+      "Circolo": "F0030",
+      "Tesserati": 157,
+      "GareTotali": 12032.0,
+      "PuntiTotali": 5058877.0
+    },
+    {
+      "Anno": 2025,
+      "Circolo": "F0737",
+      "Tesserati": 144,
+      "GareTotali": 8353.0,
+      "PuntiTotali": 3315006.0
+    },
+    {
+      "Anno": 2025,
+      "Circolo": "F0719",
+      "Tesserati": 143,
+      "GareTotali": 5452.0,
+      "PuntiTotali": 3780457.0
+    },
+    {
+      "Anno": 2025,
+      "Circolo": "F0162",
+      "Tesserati": 140,
+      "GareTotali": 6804.0,
+      "PuntiTotali": 4301918.0
+    },
+    {
+      "Anno": 2025,
+      "Circolo": "F0136",
+      "Tesserati": 126,
+      "GareTotali": 9051.0,
+      "PuntiTotali": 2030183.0
+    },
+    {
+      "Anno": 2025,
+      "Circolo": "F0635",
+      "Tesserati": 125,
+      "GareTotali": 8860.0,
+      "PuntiTotali": 1590636.0
+    },
+    {
+      "Anno": 2025,
+      "Circolo": "F0174",
+      "Tesserati": 117,
+      "GareTotali": 9725.0,
+      "PuntiTotali": 4673628.0
+    },
+    {
+      "Anno": 2025,
+      "Circolo": "F0546",
+      "Tesserati": 117,
+      "GareTotali": 4694.0,
+      "PuntiTotali": 3435716.0
+    },
+    {
+      "Anno": 2025,
+      "Circolo": "F0624",
+      "Tesserati": 117,
+      "GareTotali": 8709.0,
+      "PuntiTotali": 1489678.0
+    },
+    {
+      "Anno": 2025,
+      "Circolo": "F0722",
+      "Tesserati": 116,
+      "GareTotali": 7439.0,
+      "PuntiTotali": 1684281.0
+    },
+    {
+      "Anno": 2025,
+      "Circolo": "F0158",
+      "Tesserati": 114,
+      "GareTotali": 4613.0,
+      "PuntiTotali": 904663.0
+    }
+  ]
+}

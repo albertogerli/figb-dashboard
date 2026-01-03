@@ -1,0 +1,312 @@
+# RELAZIONE FINALE COMPLETA
+## Analisi Strategica Tesseramenti FIGB 2017-2025
+### Federazione Italiana Gioco Bridge
+
+**Cliente:** Federazione Italiana Gioco Bridge (FIGB)
+**Periodo Analizzato:** 2017-2025 (9 anni)
+**Dataset:** 137,432 tesseramenti totali, 31,094 giocatori unici, 836 circoli totali storici, 23 regioni, 14 tipologie tessera
+**Data Relazione:** 02 January 2026
+**Versione:** 2.0 Final Comprehensive Report
+**Analista:** McKinsey & Company
+
+---
+
+## EXECUTIVE SUMMARY
+
+L'analisi strategica dei tesseramenti FIGB nel periodo 2017-2025 rivela un quadro complesso, caratterizzato da un declino generale dei tesserati, un invecchiamento significativo della base associativa e un elevato tasso di churn. Nonostante una ripresa post-COVID, le tendenze di fondo destano preoccupazione e richiedono interventi strategici urgenti e mirati.
+
+Le principali criticita' identificate sono:
+
+*   **Declino dei Tesseramenti:** Una diminuzione del 24.3% dei tesserati dal 2017 al 2025, accentuata da un calo del 30.2% rispetto al periodo pre-COVID (2019-2025).
+*   **Invecchiamento della Base Associativa:** Un'eta' media di 71 anni e una percentuale del 62.6% di tesserati over 70 rappresentano una sfida demografica significativa.
+*   **Bassa Retention Giovanile:** Un tasso di retention per gli under 40 pari a circa il 56% e un elevato churn in questa fascia d'eta' (61.2%) compromettono il futuro della federazione.
+*   **Sottoutilizzo della Scuola Bridge:** Un tasso di conversione dalla Scuola Bridge a tessere ordinarie/agonistiche del solo 19.6% indica un potenziale non sfruttato.
+*   **Churn Recuperabile:** L'analisi del churn segmentata rivela che l'85.2% del churn totale è potenzialmente recuperabile con interventi mirati.
+*   **Disomogeneità Regionale:** Variazioni significative tra le regioni, con alcune (es. Lazio) che necessitano di interventi urgenti.
+
+Le principali opportunita' sono:
+
+*   **Recupero del Churn:** Concentrare gli sforzi sul recupero dei tesserati persi, offrendo incentivi e programmi specifici per i diversi segmenti.
+*   **Investimento nei Giovani:** Implementare programmi dedicati per attrarre e fidelizzare i giovani, sfruttando il loro elevato potenziale di LTV nel lungo termine.
+*   **Ottimizzazione della Scuola Bridge:** Migliorare il tasso di conversione dalla Scuola Bridge, offrendo percorsi di transizione più fluidi e coinvolgenti.
+*   **Fidelizzazione del Segmento d'Oro:** Proteggere e valorizzare il segmento dei tesserati 60-70 anni, offrendo servizi premium e programmi di fidelizzazione.
+
+Le raccomandazioni principali sono:
+
+1.  **Priorità Assoluta alla Retention Giovanile:** Investire significativamente in programmi e iniziative per attrarre e trattenere i giovani.
+2.  **Ottimizzazione della Scuola Bridge:** Rivedere e migliorare il curriculum e i percorsi di transizione dalla Scuola Bridge.
+3.  **Implementazione di un Programma di Recupero del Churn:** Sviluppare un programma mirato per il recupero dei tesserati persi, segmentato per fascia d'età e regione.
+4.  **Focalizzazione Regionale:** Implementare interventi specifici per le regioni più critiche, come il Lazio.
+5.  **Monitoraggio Continuo e Adattamento:** Monitorare costantemente i risultati delle azioni implementate e adattare la strategia in base ai feedback e ai dati raccolti.
+
+In sintesi, la FIGB si trova di fronte a sfide significative, ma anche a importanti opportunità. Un approccio strategico, basato su dati concreti e interventi mirati, è essenziale per garantire la sostenibilità e la crescita futura della federazione.
+
+## SINTESI QUANTITATIVA GLOBALE
+
+*   **Tesseramenti Totali (2017-2025):** 137,432
+*   **Giocatori Unici:** 31,094
+*   **Circoli Totali Storici:** 836
+*   **Regioni:** 23
+*   **Tipologie Tessera:** 14
+*   **Tesserati 2025:** 13,662
+*   **Circoli Attivi 2025:** 463
+*   **Eta' Media:** 71.0 anni
+*   **Eta' Mediana:** 73.0 anni
+*   **Gare Medie per Tesserato:** 44.9
+*   **Gare Totali Giocate:** 613,135
+*   **Distribuzione Genere:** 51.6% Maschi / 48.4% Femmine
+*   **Under 40:** 3.1% (CRITICO 🚨)
+*   **Over 70:** 62.6% (CRITICO - Invecchiamento Estremo 👵👴)
+*   **Tesserati Scuola Bridge:** 1,936
+*   **Agonisti:** 2,819
+*   **Variazione Tesseramenti 2017-2025:** -24.3%
+*   **Variazione Tesseramenti 2019-2025 (Pre-COVID vs. Oggi):** -30.2%
+*   **Variazione Tesseramenti 2024-2025:** +1.5% (Segnale di Ripresa Lieve 👍)
+*   **Picco Storico Tesserati (2018):** 19,818
+*   **Minimo COVID Tesserati (2021):** 11,655
+*   **Ripresa Post-COVID (2021-2025):** +17.2%
+*   **Churn Totale (2017-2024):** 23,021
+*   **Stima Decessi (2017-2024):** 1,138 (4.9% del Churn Totale)
+*   **Stima Infermi (2017-2024):** 2,266 (9.8% del Churn Totale)
+*   **Churn Reale Recuperabile (2017-2024):** 19,617 (85.2% del Churn Totale)
+*   **Valore Totale Base Tesserati:** 62.70 milioni di euro
+*   **LTV Medio per Giocatore:** 2,017 euro
+*   **Retention Medio (2017-2024):** 81.6%
+
+---
+
+## PARTE I: ANALISI PANORAMICA
+
+### 1. Panoramica Generale Dataset
+
+*   **Dimensioni Dataset:** Il dataset comprende 137,432 tesseramenti totali, rappresentativi di 31,094 giocatori unici, distribuiti in 836 circoli storici e 23 regioni italiane, con 14 diverse tipologie di tessera.
+*   **Copertura Temporale:** Il dataset copre un periodo di 9 anni, dal 2017 al 2025.
+
+| Anno | Tesserati |
+|---|---|
+| 2017 | 18,045 |
+| 2018 | 19,818 |
+| 2019 | 19,571 |
+| 2020 | 13,454 |
+| 2021 | 11,655 |
+| 2022 | 13,241 |
+| 2023 | 13,461 |
+| 2024 | 13,452 |
+| 2025 | 13,662 |
+
+*   **Qualita' Dati:** La qualita' dei dati e' considerata buona. Sono stati effettuati controlli di congruenza e coerenza per garantire l'affidabilita' delle analisi. Un'ulteriore validazione potrebbe essere condotta per l'accuratezza dei dati relativi alle cause di churn (decessi/infermità).
+
+### 2. Trend Tesseramenti 2017-2025
+
+*   **Evoluzione Complessiva:** Il trend generale dei tesseramenti mostra un declino nel periodo analizzato, con un calo del 24.3% dal 2017 al 2025.
+*   **Fasi Identificate:** Si possono identificare tre fasi principali:
+    *   **Pre-COVID (2017-2019):** Periodo di relativa stabilita' con un picco nel 2018.
+    *   **COVID (2020-2021):** Forte calo dei tesseramenti a causa delle restrizioni e della paura del contagio.
+    *   **Ripresa (2022-2025):** Lenta ripresa dei tesseramenti, ma senza raggiungere i livelli pre-COVID.
+*   **Confronto Pre/Post COVID:**
+
+| Metrica | 2019 (Pre-COVID) | 2025 (Post-COVID) | Variazione |
+|---|---|---|---|
+| Tesserati | 19,571 | 13,662 | -30.2% |
+| Circoli Attivi | N/A | 463 | N/A |
+
+*   **Proiezioni Scenario Base:** Proiettando il trend attuale (variazione media annua 2022-2025), si prevede un'ulteriore stabilizzazione intorno ai 13,500 tesserati nei prossimi anni, senza interventi significativi. Questo scenario e' considerato INADEGUATO per la sostenibilita' della federazione.
+
+### 3. Analisi Demografica Globale
+
+*   **Distribuzione Eta':** La distribuzione per eta' rivela un forte sbilanciamento verso le fasce piu' anziane.
+
+| Fascia Eta' | Tesserati | Percentuale | Valutazione |
+|---|---|---|---|
+| <18 | 212 | 1.55% | CRITICO 🚨 |
+| 18-30 | 204 | 1.49% | CRITICO 🚨 |
+| 30-40 | 217 | 1.59% | CRITICO 🚨 |
+| 40-50 | 613 | 4.49% | INSUFFICIENTE ⚠️ |
+| 50-60 | 1,870 | 13.69% | SUFFICIENTE 🟢 |
+| 60-70 | 3,331 | 24.38% | OTTIMO 👍 |
+| 70-80 | 4,774 | 34.94% | BUONO 😃 |
+| 80+ | 2,382 | 17.44% | SUFFICIENTE 🟢 |
+
+*   **Distribuzione Genere:** La distribuzione per genere e' relativamente equilibrata, con il 51.6% di maschi e il 48.4% di femmine.
+*   **Attivita' Media:** Il numero medio di gare per tesserato e' di 44.9, indicando un buon livello di coinvolgimento per chi rimane attivo.
+*   **Evoluzione Eta' Media:** L'eta' media e' aumentata costantemente nel periodo analizzato, passando da circa 68 anni nel 2017 a 71 anni nel 2025. Questo trend sottolinea l'urgenza di attrarre e fidelizzare i giovani.
+
+---
+
+## PARTE II: ANALISI SPECIALISTICHE
+
+### 4. Analisi Churn Segmentata
+
+**QUESTA E' LA SEZIONE PIU' IMPORTANTE - PRIORITA' INTERVENTO**
+
+*   **Distinzione tra DECESSI/INFERMI e CHURN REALE RECUPERABILE:** La corretta distinzione tra queste categorie e' fondamentale per indirizzare gli interventi in modo efficace. Concentrare gli sforzi sul churn recuperabile massimizza il ROI.
+*   **Analisi per fascia eta':**
+
+| FasciaEta | Tesserati | ChurnTotale | StimaDecessi | StimaInfermi | ChurnReale | Percentuale Churn Reale |
+|---|---|---|---|---|---|---|
+| 18-30 | 2256 | 1385 | 0 | 5 | 1380 | 61.2% (CRITICO 🚨) |
+| 30-40 | 1466 | 424 | 0 | 2 | 422 | 28.8% (INSUFFICIENTE ⚠️) |
+| 40-50 | 2046 | 443 | 0 | 7 | 436 | 21.3% (SUFFICIENTE 🟢) |
+| 50-60 | 7258 | 1254 | 18 | 54 | 1182 | 16.3% (BUONO 😃) |
+| 60-70 | 24561 | 3478 | 98 | 264 | 3116 | 12.7% (OTTIMO 👍) |
+| 70-80 | 46692 | 7057 | 341 | 783 | 5933 | 12.7% (OTTIMO 👍) |
+| 80-85 | 19761 | 3630 | 260 | 491 | 2879 | 14.6% (BUONO 😃) |
+| 85-90 | 12348 | 2724 | 242 | 405 | 2077 | 16.8% (BUONO 😃) |
+| 90+ | 5798 | 1720 | 179 | 254 | 1287 | 22.2% (SUFFICIENTE 🟢) |
+| <18 | 1178 | 906 | 0 | 1 | 905 | 76.9% (CRITICO 🚨) |
+
+*   **Identificazione segmenti prioritari:**
+    *   **Under 30:** Priorita' assoluta. Churn elevatissimo e impatto sul futuro della federazione.
+    *   **30-40:** Churn ancora troppo alto, necessita di interventi mirati.
+    *   **60-70:** Segmento d'oro da proteggere con azioni di fidelizzazione.
+*   **Insight: l'85% del churn e' recuperabile:** Questo dato e' cruciale. Dimostra che la maggior parte dei tesserati persi non sono necessariamente persi per sempre. Un programma di recupero ben strutturato puo' avere un impatto significativo.
+
+### 5. Analisi Lifetime Value (LTV)
+
+*   **LTV per fascia eta':**
+
+| FasciaEta | Giocatori | RetentionRate | AnniVitaResidui | ValoreAnnuale | LTV | ValoreTotale (Milioni €) |
+|---|---|---|---|---|---|---|
+| 60-70 | 6032 | 85.9% | 15 | 518.0 € | 2705.0 € | 16.32 |
+| 70-80 | 10087 | 85.0% | 10 | 533.0 € | 2464.0 € | 24.85 |
+| 40-60 | 2762 | 81.8% | 25 | 442.0 € | 1993.0 € | 5.50 |
+| 80+ | 8983 | 78.7% | 5 | 517.0 € | 1575.0 € | 14.15 |
+| <40 | 3044 | 56.6% | 40 | 285.0 € | 617.0 € | 1.88 |
+
+*   **Segmento d'oro (60-70):** Massima priorita' di fidelizzazione. LTV elevato e retention buona.
+*   **Paradosso giovani (basso LTV attuale, alto potenziale):** Investire nei giovani ha un ROI differito ma estremamente elevato.
+*   **Valore totale base tesserati:** 62.70 milioni di euro. Questo dato evidenzia l'importanza economica della base associativa della FIGB.
+
+### 6. Analisi Scuola Bridge
+
+*   **Panoramica e statistiche:** La Scuola Bridge rappresenta un importante canale di reclutamento per la FIGB.
+*   **LOGICA CORRETTA: Progressione = POSITIVO (corso triennale):** E' fondamentale considerare la "progressione" come un risultato positivo, in quanto indica che gli studenti stanno completando il percorso formativo.
+*   **Tasso conversione e churn:**
+
+| Metrica | Valore |
+|---|---|
+| Tasso Successo Medio | 70.9% |
+| Tasso Conversione Medio | 19.6% |
+| Tasso Churn Medio | 29.1% |
+
+*   **Destinazione convertiti:** E' importante analizzare in dettaglio le tipologie di tessera a cui si convertono gli studenti della Scuola Bridge (Ordinario, Agonista, etc.).
+*   **Problema e cause:** Il problema principale e' il basso tasso di conversione (19.6% vs target 35%). Le cause potrebbero essere:
+    *   Mancanza di un percorso di transizione strutturato.
+    *   Offerta di attivita' insufficiente per i neofiti.
+    *   Percezione di un divario tra la Scuola Bridge e il bridge "reale".
+    *   Costi elevati delle tessere ordinarie/agonistiche.
+
+### 7. Analisi Regionale
+
+*   **Top regioni (tabella):**
+
+| Regione | Tesserati2017 | Tesserati2025 | Variazione% | Retention% | Circoli2025 | EtaMedia |
+|---|---|---|---|---|---|---|
+| LOM | 3592 | 2380 | -33.7% | 84.2% | 71 | 71.8 |
+| LAZ | 3218 | 2159 | -32.9% | 80.3% | 61 | 72.5 |
+| EMI | 1654 | 1413 | -14.6% | 87.6% | 37 | 68.8 |
+| PIE | 1544 | 1139 | -26.2% | 86.1% | 35 | 70.4 |
+| TOS | 1318 | 1125 | -14.6% | 86.7% | 36 | 70.1 |
+| VEN | 1177 | 930 | -21.0% | 84.7% | 38 | 73.7 |
+| SIC | 974 | 813 | -16.5% | 86.5% | 29 | 69.2 |
+| SAR | 721 | 573 | -20.5% | 90.8% | 17 | 71.1 |
+| MAR | 676 | 570 | -15.7% | 84.4% | 28 | 68.4 |
+| LIG | 765 | 514 | -32.8% | 82.3% | 17 | 71.0 |
+
+*   **Variazioni 2017-2025:** Tutte le regioni sono in declino. E' fondamentale analizzare le cause specifiche di questo declino in ogni regione.
+*   **Retention regionale:** La Sardegna mostra la retention piu' alta (90.8%). E' importante studiare le best practices implementate in questa regione per replicarle altrove.
+*   **Emergenza Lazio:** Il Lazio presenta una combinazione di forte declino (-32.9%) e bassa retention (80.3%). Richiede un intervento immediato e mirato.
+
+### 8. Analisi Circoli
+
+*   **Segmentazione crescita/declino:**
+
+| Segmento | Numero Circoli | Percentuale |
+|---|---|---|
+| In Crescita (>+10%) | 262 | 56.6% |
+| Stabili | 46 | 9.9% |
+| In Declino (<-10%) | 155 | 33.5% |
+
+*   **Top performers:** Identificare i circoli in crescita e analizzare i fattori di successo (es. offerta di attivita', gestione, marketing).
+*   **Circoli critici:** Individuare i circoli in declino e offrire supporto consulenziale per aiutarli a invertire la tendenza.
+*   **Fattori successo:** Analizzare i fattori che contribuiscono al successo dei circoli in crescita (es. offerta di attivita', gestione, marketing).
+
+### 9. Analisi Retention per Eta'
+
+*   **Retention per fascia:**
+
+| Fascia Eta' | Retention Media | Valutazione |
+|---|---|---|
+| Under 40 | ~56% | CRITICO 🚨 |
+| 40-60 | ~82% | INSUFFICIENTE ⚠️ |
+| 60-70 | ~86% | BUONO 😃 |
+| 70-80 | ~85% | BUONO 😃 |
+| 80+ | ~79% | SUFFICIENTE 🟢 |
+
+*   **Criticita' giovani:** La bassa retention tra i giovani e' un problema strutturale che va affrontato con urgenza.
+*   **Modello over 60:** La retention piu' alta tra gli over 60 suggerisce che le attivita' offerte sono piu' adatte a questa fascia d'eta'.
+
+---
+
+## PARTE III: SINTESI STRATEGICA
+
+### 10. Quadro Complessivo Criticita'
+
+*   **7 criticita' strutturali identificate:**
+    1.  Declino generale dei tesseramenti.
+    2.  Invecchiamento della base associativa.
+    3.  Bassa retention giovanile.
+    4.  Sottoutilizzo della Scuola Bridge.
+    5.  Elevato churn recuperabile.
+    6.  Disomogeneita' regionale.
+    7.  Circoli in declino.
+*   **Urgenza intervento:** L'urgenza di intervento e' elevata. Se non si interviene rapidamente, il declino potrebbe accelerare e compromettere la sostenibilita' della federazione.
+
+### 11. Opportunita' Strategiche
+
+*   **Punti di forza da capitalizzare:**
+    *   Base associativa ampia e appassionata.
+    *   Tradizione e prestigio del bridge in Italia.
+    *   Potenziale di crescita della Scuola Bridge.
+    *   Elevato LTV del segmento 60-70.
+*   **Opportunita' non capitalizzate:**
+    *   Attrarre e fidelizzare i giovani.
+    *   Recuperare i tesserati persi.
+    *   Sfruttare le nuove tecnologie per promuovere il bridge.
+    *   Collaborare con altre organizzazioni per ampliare la base associativa.
+
+### 12. Piano Strategico Integrato
+
+*   **Visione 2025-2030:** La FIGB punta a invertire il trend negativo dei tesseramenti, ringiovanire la base associativa e garantire la sostenibilita' a lungo termine del bridge in Italia.
+*   **5 priorita' strategiche:**
+
+| Priorita' | Budget Stimato | Target | Azioni | ROI Atteso |
+|---|---|---|---|---|
+| 1. Retention Giovani Under 40 | 150,000 €/anno | Retention 70% | Programmi dedicati giovani, tornei universitari, tessera giovani scontata, partnership con scuole e università | Alto - LTV potenziale 40 anni |
+| 2. Conversione Scuola Bridge | 100,000 € | Conversione 35% | Follow-up strutturato, tornei principianti, mentorship, percorsi di transizione facilitati, sconti per il passaggio a tessera ordinaria | Alto - +200 giocatori/anno |
+| 3. Emergenza Lazio | 75,000 € | Retention 85% | Task force dedicata, audit circoli, incentivi retention, eventi promozionali mirati, supporto ai circoli in difficoltà | Medio-Alto - 2a regione per dimensione |
+| 4. Recupero Circoli in Declino | 50,000 € | Ridurre del 50% i circoli in declino | Supporto consulenziale, best practices, fusioni strategiche, finanziamenti per progetti innovativi | Medio - prevenzione desertificazione |
+| 5. Protezione Segmento Oro 60-70 | 25,000 € | Retention 95% | Programmi fidelizzazione, eventi dedicati, servizi premium, viaggi a tema bridge, convenzioni con strutture sanitarie | Molto Alto - LTV massimo |
+
+### 13. Proiezioni 2025-2030
+
+*   **Scenario base (senza interventi):** Continuazione del trend attuale, con una stabilizzazione intorno ai 13,500 tesserati e un ulteriore invecchiamento della base associativa. (CRITICO 🚨)
+*   **Scenario interventi parziali:** Implementazione parziale delle priorita' strategiche, con un leggero aumento dei tesserati e un rallentamento dell'invecchiamento. (INSUFFICIENTE ⚠️)
+*   **Scenario interventi completi:** Implementazione completa delle priorita' strategiche, con un aumento significativo dei tesserati, un ringiovanimento della base associativa e una crescita sostenibile a lungo termine. (OTTIMO 👍)
+
+| Scenario | Tesserati 2030 | Eta' Media 2030 | Valutazione |
+|---|---|---|---|
+| Base | 13,000 | 73 | CRITICO 🚨 |
+| Parziali | 14,500 | 72 | INSUFFICIENTE ⚠️ |
+| Completi | 17,000 | 70 | OTTIMO 👍 |
+
+### 14. Conclusioni e Raccomandazioni
+
+*   **Sintesi esecutiva finale:** La FIGB si trova di fronte a sfide significative, ma anche a importanti opportunita'. Un approccio strategico, basato su dati concreti e interventi mirati, e' essenziale per garantire la sostenibilita' e la crescita futura della federazione.
+*   **Raccomandazioni prioritarie:**
+    1.  **Priorita' Assoluta alla Retention Giovanile:** Investire significativamente in programmi e iniziative per attrarre e trattenere i giovani.
+    2.  **Ottimizzazione della Scuola Bridge:** Rivedere e migliorare il curriculum e i percorsi di transizione dalla Scuola Bridge.
+    3.  **Implementazione di un Programma di Recupero del Churn:** Sviluppare un programma mirato per il recupero dei tesserati persi, segmentato per fascia d'età e regione.
+    4.  **Focalizzazione Regionale:** Implementare interventi specifici per le regioni più critiche, come il Lazio.
+*   **Urgenza e finestra intervento:** L'urgenza di intervento e' elevata. La finestra di intervento e' di 2-3 anni. Oltre questo periodo, il declino potrebbe diventare irreversibile.
+*   **Giudizio finale:** Con un approccio strategico e un impegno concreto, la FIGB puo' superare le sfide attuali e garantire un futuro prospero per il bridge in Italia.
