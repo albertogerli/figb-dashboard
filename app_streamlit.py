@@ -13,6 +13,20 @@ from plotly.subplots import make_subplots
 import json
 from pathlib import Path
 
+# Import mapping province (per analisi territoriale)
+try:
+    from province_mapping import (
+        PROVINCE_POPOLAZIONE, REGIONE_POPOLAZIONE, CITTA_METROPOLITANE,
+        PROVINCIA_TO_REGIONE
+    )
+    PROVINCE_MAPPING_AVAILABLE = True
+except ImportError:
+    PROVINCE_MAPPING_AVAILABLE = False
+    PROVINCE_POPOLAZIONE = {}
+    REGIONE_POPOLAZIONE = {}
+    CITTA_METROPOLITANE = []
+    PROVINCIA_TO_REGIONE = {}
+
 # Configurazione pagina
 st.set_page_config(
     page_title="FIGB Dashboard",
@@ -495,14 +509,11 @@ elif pagina == "📍 Analisi Territoriale":
     st.title("📍 Analisi Territoriale Dettagliata")
     st.markdown("Analisi per **province** e **città metropolitane** con tassi di penetrazione sulla popolazione")
 
-    # Import dati province
-    from province_mapping import (
-        PROVINCE_POPOLAZIONE, REGIONE_POPOLAZIONE, CITTA_METROPOLITANE,
-        PROVINCIA_TO_REGIONE, NOMI_REGIONI_COMPLETI as NOMI_REG_PROV
-    )
-
+    # Verifica disponibilità mapping province
+    if not PROVINCE_MAPPING_AVAILABLE:
+        st.error("⚠️ Modulo province_mapping non trovato. Verifica che il file province_mapping.py sia presente.")
     # Verifica se colonna Provincia esiste
-    if 'Provincia' not in df_filtered.columns:
+    elif 'Provincia' not in df_filtered.columns:
         st.error("⚠️ Colonna 'Provincia' non trovata. Esegui prima `python 03_arricchisci_province.py`")
     else:
         # Filtra dati con provincia
