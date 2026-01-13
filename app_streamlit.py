@@ -1363,49 +1363,133 @@ elif pagina == "🏆 Mappa Agonismo":
 elif pagina == "🏢 Analisi Associazioni":
     st.title("🏢 Analisi Associazioni")
 
-    col1, col2 = st.columns(2)
+    # Mostra filtri attivi
+    if len(regioni_selezionate) < len(df['GrpArea'].unique()) or anni_range != (anni_min, anni_max):
+        st.info(f"🔍 Filtri attivi: {len(regioni_selezionate)} regioni, anni {anni_range[0]}-{anni_range[1]}")
 
-    with col1:
-        st.subheader("🏆 Top 15 Associazioni Virtuose")
-        associazioni_v = data['associazioni_v'].head(15)
-        fig = px.bar(associazioni_v, x='TassoSuccesso', y='NomeCircolo',
-                     orientation='h', color='TassoSuccesso',
-                     color_continuous_scale='Greens',
-                     hover_data=['Regione', 'AllievoSB'],
-                     labels={'NomeCircolo': 'Associazione'})
-        fig.update_layout(height=500, yaxis={'categoryorder':'total ascending'})
-        st.plotly_chart(fig, use_container_width=True)
+    # =========================================================================
+    # CALCOLO METRICHE ASSOCIAZIONI DAI DATI FILTRATI
+    # =========================================================================
+    col_assoc = 'Associazione' if 'Associazione' in df_filtered.columns else 'GrpName'
 
-    with col2:
-        st.subheader("⚠️ Top 15 Associazioni Critiche")
-        associazioni_c = data['associazioni_c'].head(15)
-        fig = px.bar(associazioni_c, x='TassoChurn', y='NomeCircolo',
-                     orientation='h', color='TassoChurn',
-                     color_continuous_scale='Reds',
-                     hover_data=['Regione', 'AllievoSB'],
-                     labels={'NomeCircolo': 'Associazione'})
-        fig.update_layout(height=500, yaxis={'categoryorder':'total ascending'})
-        st.plotly_chart(fig, use_container_width=True)
+    # Calcola retention/churn per associazione
+    if len(df_filtered) > 0 and len(anni_selezionati) >= 2:
+        # Calcola retention anno su anno
+        retention_data = []
+        for anno in anni_selezionati[:-1]:
+            anno_succ = anno + 1
+            if anno_succ in anni_selezionati:
+                # Tesserati anno corrente per associazione
+                tess_anno = df_filtered[df_filtered['Anno'] == anno].groupby(col_assoc)['MmbCode'].apply(set).to_dict()
+                # Tesserati anno successivo
+                tess_succ = df_filtered[df_filtered['Anno'] == anno_succ].groupby(col_assoc)['MmbCode'].apply(set).to_dict()
 
-    # Analisi associazioni con filtri
+                for assoc in tess_anno:
+                    if assoc in tess_succ:
+                        ritesserati = len(tess_anno[assoc] & tess_succ[assoc])
+                        totale = len(tess_anno[assoc])
+                        if totale >= 5:
+                            retention_data.append({
+                                'Associazione': assoc,
+                                'Anno': anno,
+                                'Tesserati': totale,
+                                'Ritesserati': ritesserati,
+                                'TassoRetention': ritesserati / totale * 100
+                            })
+
+        if retention_data:
+            retention_df = pd.DataFrame(retention_data)
+
+            # Aggrega per associazione (media retention)
+            assoc_retention = retention_df.groupby('Associazione').agg({
+                'Tesserati': 'mean',
+                'TassoRetention': 'mean'
+            }).reset_index()
+            assoc_retention.columns = ['Associazione', 'TesseratiMedi', 'TassoRetention']
+            assoc_retention['TassoChurn'] = 100 - assoc_retention['TassoRetention']
+            assoc_retention['TassoRetention'] = assoc_retention['TassoRetention'].round(1)
+            assoc_retention['TassoChurn'] = assoc_retention['TassoChurn'].round(1)
+            assoc_retention['TesseratiMedi'] = assoc_retention['TesseratiMedi'].round(0).astype(int)
+
+            # Aggiungi regione
+            regione_map = df_filtered.groupby(col_assoc)['GrpArea'].first().to_dict()
+            assoc_retention['Regione'] = assoc_retention['Associazione'].map(regione_map)
+
+            # Filtra associazioni con almeno 10 tesserati medi
+            assoc_retention_filt = assoc_retention[assoc_retention['TesseratiMedi'] >= 10]
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.subheader("🏆 Top 15 - Migliore Retention")
+                top_retention = assoc_retention_filt.nlargest(15, 'TassoRetention')
+                if len(top_retention) > 0:
+                    fig = px.bar(top_retention.sort_values('TassoRetention'),
+                                x='TassoRetention', y='Associazione',
+                                orientation='h', color='TassoRetention',
+                                color_continuous_scale='Greens',
+                                hover_data=['Regione', 'TesseratiMedi'],
+                                text='TassoRetention')
+                    fig.update_traces(texttemplate='%{text:.0f}%', textposition='auto', cliponaxis=False)
+                    fig.update_layout(height=500, yaxis={'categoryorder':'total ascending'},
+                                     xaxis_title="% Retention", margin=dict(r=60))
+                    st.plotly_chart(fig, use_container_width=True)
+                else:
+                    st.info("Non ci sono abbastanza dati.")
+
+            with col2:
+                st.subheader("⚠️ Top 15 - Maggiore Churn")
+                top_churn = assoc_retention_filt.nlargest(15, 'TassoChurn')
+                if len(top_churn) > 0:
+                    fig = px.bar(top_churn.sort_values('TassoChurn'),
+                                x='TassoChurn', y='Associazione',
+                                orientation='h', color='TassoChurn',
+                                color_continuous_scale='Reds',
+                                hover_data=['Regione', 'TesseratiMedi'],
+                                text='TassoChurn')
+                    fig.update_traces(texttemplate='%{text:.0f}%', textposition='auto', cliponaxis=False)
+                    fig.update_layout(height=500, yaxis={'categoryorder':'total ascending'},
+                                     xaxis_title="% Churn", margin=dict(r=60))
+                    st.plotly_chart(fig, use_container_width=True)
+                else:
+                    st.info("Non ci sono abbastanza dati.")
+
+            # Tabella completa retention
+            st.markdown("---")
+            st.subheader("📊 Retention/Churn Tutte le Associazioni")
+            st.dataframe(
+                assoc_retention_filt[['Associazione', 'Regione', 'TesseratiMedi', 'TassoRetention', 'TassoChurn']]
+                .sort_values('TassoRetention', ascending=False)
+                .head(50),
+                use_container_width=True, hide_index=True
+            )
+        else:
+            st.warning("Non ci sono abbastanza dati per calcolare retention/churn.")
+    else:
+        st.warning("Seleziona almeno 2 anni consecutivi per vedere retention/churn.")
+
+    # =========================================================================
+    # ESPLORA ASSOCIAZIONI
+    # =========================================================================
     st.markdown("---")
     st.subheader("🔍 Esplora Associazioni")
 
-    col_assoc = 'Associazione' if 'Associazione' in df_filtered.columns else 'GrpName'
     associazioni_df = df_filtered.groupby([col_assoc, 'GrpArea']).agg({
         'MmbCode': 'nunique',
         'GareGiocate': 'mean',
         'Anni': 'mean'
     }).reset_index()
     associazioni_df.columns = ['Associazione', 'Regione', 'Tesserati', 'Gare Medie', 'Età Media']
+    associazioni_df['Gare Medie'] = associazioni_df['Gare Medie'].round(1)
+    associazioni_df['Età Media'] = associazioni_df['Età Media'].round(1)
     associazioni_df = associazioni_df.sort_values('Tesserati', ascending=False)
 
     # Filtro per nome associazione
-    search = st.text_input("🔍 Cerca associazione:", "")
+    search = st.text_input("🔍 Cerca associazione:", "", key="search_assoc_main")
     if search:
-        associazioni_df = associazioni_df[associazioni_df['Associazione'].str.contains(search, case=False)]
+        associazioni_df = associazioni_df[associazioni_df['Associazione'].str.contains(search, case=False, na=False)]
 
-    st.dataframe(associazioni_df.head(50), use_container_width=True)
+    st.dataframe(associazioni_df.head(100), use_container_width=True, hide_index=True)
 
 # ============================================================================
 # PAGINA: BRIDGE A SCUOLA
