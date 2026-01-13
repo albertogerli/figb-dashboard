@@ -85,8 +85,8 @@ st.sidebar.markdown("---")
 pagina = st.sidebar.selectbox(
     "📊 Sezione",
     ["🏠 Overview", "📈 Trend Temporale", "🗺️ Analisi Regionale",
-     "🏆 Mappa Agonismo", "🏢 Analisi Associazioni", "⚠️ Giocatori a Rischio",
-     "🔮 Modello Predittivo", "🔍 Esplora Dati"]
+     "📍 Analisi Territoriale", "🏆 Mappa Agonismo", "🏢 Analisi Associazioni",
+     "⚠️ Giocatori a Rischio", "🔮 Modello Predittivo", "🔍 Esplora Dati"]
 )
 
 st.sidebar.markdown("---")
@@ -486,6 +486,407 @@ elif pagina == "🗺️ Analisi Regionale":
         .format({'Gare Medie': '{:.1f}', 'Età Media': '{:.1f}'}),
         use_container_width=True
     )
+
+# ============================================================================
+# PAGINA: ANALISI TERRITORIALE (Province e Città Metropolitane)
+# ============================================================================
+elif pagina == "📍 Analisi Territoriale":
+    st.title("📍 Analisi Territoriale Dettagliata")
+    st.markdown("Analisi per **province** e **città metropolitane** con tassi di penetrazione sulla popolazione")
+
+    # Import dati province
+    from province_mapping import (
+        PROVINCE_POPOLAZIONE, REGIONE_POPOLAZIONE, CITTA_METROPOLITANE,
+        PROVINCIA_TO_REGIONE, NOMI_REGIONI_COMPLETI as NOMI_REG_PROV
+    )
+
+    # Verifica se colonna Provincia esiste
+    if 'Provincia' not in df_filtered.columns:
+        st.error("⚠️ Colonna 'Provincia' non trovata. Esegui prima `python 03_arricchisci_province.py`")
+    else:
+        # Filtra dati con provincia
+        df_prov = df_filtered[df_filtered['Provincia'].notna()].copy()
+        ultimo_anno = df_prov['Anno'].max()
+        df_ultimo = df_prov[df_prov['Anno'] == ultimo_anno]
+
+        # === METRICHE PRINCIPALI ===
+        col1, col2, col3, col4 = st.columns(4)
+
+        n_province = df_ultimo['Provincia'].nunique()
+        tesserati_cm = df_ultimo[df_ultimo['IsCittaMetropolitana'] == True]['MmbCode'].nunique()
+        tesserati_altre = df_ultimo[df_ultimo['IsCittaMetropolitana'] == False]['MmbCode'].nunique()
+
+        # Calcola penetrazione media
+        prov_stats = df_ultimo.groupby('Provincia')['MmbCode'].nunique().reset_index()
+        prov_stats.columns = ['Provincia', 'Tesserati']
+        prov_stats['Popolazione'] = prov_stats['Provincia'].map(PROVINCE_POPOLAZIONE)
+        prov_stats['TesseratiPer100k'] = prov_stats.apply(
+            lambda r: (r['Tesserati'] / r['Popolazione'] * 100000) if r['Popolazione'] > 0 else 0, axis=1
+        )
+        penetrazione_media = prov_stats['TesseratiPer100k'].mean()
+
+        with col1:
+            st.metric("Province Attive", f"{n_province}")
+        with col2:
+            st.metric("In Città Metropolitane", f"{tesserati_cm:,}", delta=f"{tesserati_cm/(tesserati_cm+tesserati_altre)*100:.0f}%")
+        with col3:
+            st.metric("Altre Province", f"{tesserati_altre:,}")
+        with col4:
+            st.metric("Penetrazione Media", f"{penetrazione_media:.1f}/100k")
+
+        st.markdown("---")
+
+        # === TAB LAYOUT ===
+        tab1, tab2, tab3, tab4 = st.tabs(["🏙️ Province", "🌆 Città Metropolitane", "📈 Trend", "🗺️ Mappa Penetrazione"])
+
+        # ========== TAB 1: PROVINCE ==========
+        with tab1:
+            st.subheader("📊 Classifica Province per Tesserati e Penetrazione")
+
+            col1, col2 = st.columns(2)
+
+            # Prepara dati completi province
+            prov_full = df_ultimo.groupby('Provincia').agg({
+                'MmbCode': 'nunique',
+                'GareGiocate': 'mean',
+                'Anni': 'mean',
+                'IsAgonista': 'sum'
+            }).reset_index()
+            prov_full.columns = ['Provincia', 'Tesserati', 'GareMedie', 'EtaMedia', 'Agonisti']
+            prov_full['Popolazione'] = prov_full['Provincia'].map(PROVINCE_POPOLAZIONE)
+            prov_full['TesseratiPer100k'] = prov_full.apply(
+                lambda r: (r['Tesserati'] / r['Popolazione'] * 100000) if r['Popolazione'] > 0 else 0, axis=1
+            )
+            prov_full['IsCittaMetro'] = prov_full['Provincia'].apply(lambda x: x in CITTA_METROPOLITANE)
+            prov_full['Regione'] = prov_full['Provincia'].map(PROVINCIA_TO_REGIONE)
+
+            with col1:
+                st.markdown("##### 🏆 Top 20 Province per Tesserati")
+                top_tess = prov_full.nlargest(20, 'Tesserati')
+                fig = px.bar(
+                    top_tess.sort_values('Tesserati', ascending=True),
+                    x='Tesserati', y='Provincia', orientation='h',
+                    color='IsCittaMetro',
+                    color_discrete_map={True: '#1E88E5', False: '#43A047'},
+                    hover_data=['TesseratiPer100k', 'EtaMedia', 'GareMedie']
+                )
+                fig.update_layout(height=600, showlegend=True,
+                                  legend_title="Città Metropolitana")
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col2:
+                st.markdown("##### 📈 Top 20 Province per Penetrazione (tesserati/100k ab.)")
+                # Filtra province con almeno 20 tesserati per significatività
+                prov_sig = prov_full[prov_full['Tesserati'] >= 20]
+                top_pen = prov_sig.nlargest(20, 'TesseratiPer100k')
+                fig = px.bar(
+                    top_pen.sort_values('TesseratiPer100k', ascending=True),
+                    x='TesseratiPer100k', y='Provincia', orientation='h',
+                    color='IsCittaMetro',
+                    color_discrete_map={True: '#1E88E5', False: '#43A047'},
+                    hover_data=['Tesserati', 'Popolazione']
+                )
+                fig.update_layout(height=600, showlegend=True,
+                                  legend_title="Città Metropolitana")
+                fig.update_xaxes(title="Tesserati per 100.000 abitanti")
+                st.plotly_chart(fig, use_container_width=True)
+
+            # Tabella completa
+            st.markdown("---")
+            st.subheader("📋 Tabella Completa Province")
+
+            # Selettore ordinamento
+            col_ord1, col_ord2 = st.columns([1, 3])
+            with col_ord1:
+                ordina_per = st.selectbox("Ordina per:", ["Tesserati", "TesseratiPer100k", "EtaMedia", "GareMedie"])
+
+            prov_display = prov_full.sort_values(ordina_per, ascending=False).copy()
+            prov_display['Tipo'] = prov_display['IsCittaMetro'].map({True: '🏙️ Città Metro', False: '📍 Provincia'})
+
+            st.dataframe(
+                prov_display[['Provincia', 'Tipo', 'Tesserati', 'TesseratiPer100k', 'Popolazione', 'EtaMedia', 'GareMedie', 'Agonisti']]
+                .style.background_gradient(subset=['Tesserati'], cmap='Blues')
+                .background_gradient(subset=['TesseratiPer100k'], cmap='Greens')
+                .format({
+                    'TesseratiPer100k': '{:.1f}',
+                    'EtaMedia': '{:.1f}',
+                    'GareMedie': '{:.1f}',
+                    'Popolazione': '{:,.0f}'
+                }),
+                use_container_width=True,
+                height=500
+            )
+
+        # ========== TAB 2: CITTÀ METROPOLITANE ==========
+        with tab2:
+            st.subheader("🌆 Focus Città Metropolitane")
+            st.markdown("Le 14 città metropolitane italiane a confronto")
+
+            # Filtra solo città metropolitane
+            cm_df = prov_full[prov_full['IsCittaMetro']].copy()
+            cm_df = cm_df.sort_values('Tesserati', ascending=False)
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.markdown("##### Tesserati per Città Metropolitana")
+                fig = px.bar(
+                    cm_df.sort_values('Tesserati', ascending=True),
+                    x='Tesserati', y='Provincia', orientation='h',
+                    color='TesseratiPer100k',
+                    color_continuous_scale='Viridis'
+                )
+                fig.update_layout(height=500)
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col2:
+                st.markdown("##### Penetrazione nelle Città Metropolitane")
+                fig = px.bar(
+                    cm_df.sort_values('TesseratiPer100k', ascending=True),
+                    x='TesseratiPer100k', y='Provincia', orientation='h',
+                    color='Tesserati',
+                    color_continuous_scale='Blues'
+                )
+                fig.update_layout(height=500)
+                fig.update_xaxes(title="Tesserati per 100.000 abitanti")
+                st.plotly_chart(fig, use_container_width=True)
+
+            # Confronto CM vs Altre
+            st.markdown("---")
+            st.subheader("📊 Confronto: Città Metropolitane vs Altre Province")
+
+            col1, col2, col3 = st.columns(3)
+
+            with col1:
+                # Distribuzione tesserati
+                pie_data = pd.DataFrame({
+                    'Tipo': ['Città Metropolitane', 'Altre Province'],
+                    'Tesserati': [tesserati_cm, tesserati_altre]
+                })
+                fig = px.pie(pie_data, values='Tesserati', names='Tipo',
+                            color_discrete_sequence=['#1E88E5', '#43A047'],
+                            title="Distribuzione Tesserati")
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col2:
+                # Confronto età media
+                eta_cm = df_ultimo[df_ultimo['IsCittaMetropolitana'] == True]['Anni'].mean()
+                eta_altre = df_ultimo[df_ultimo['IsCittaMetropolitana'] == False]['Anni'].mean()
+                bar_data = pd.DataFrame({
+                    'Tipo': ['Città Metropolitane', 'Altre Province'],
+                    'Età Media': [eta_cm, eta_altre]
+                })
+                fig = px.bar(bar_data, x='Tipo', y='Età Media',
+                            color='Tipo', color_discrete_sequence=['#1E88E5', '#43A047'],
+                            title="Età Media")
+                fig.update_layout(showlegend=False)
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col3:
+                # Confronto gare medie
+                gare_cm = df_ultimo[df_ultimo['IsCittaMetropolitana'] == True]['GareGiocate'].mean()
+                gare_altre = df_ultimo[df_ultimo['IsCittaMetropolitana'] == False]['GareGiocate'].mean()
+                bar_data = pd.DataFrame({
+                    'Tipo': ['Città Metropolitane', 'Altre Province'],
+                    'Gare Medie': [gare_cm, gare_altre]
+                })
+                fig = px.bar(bar_data, x='Tipo', y='Gare Medie',
+                            color='Tipo', color_discrete_sequence=['#1E88E5', '#43A047'],
+                            title="Gare Medie")
+                fig.update_layout(showlegend=False)
+                st.plotly_chart(fig, use_container_width=True)
+
+            # Dettaglio città metropolitane
+            st.markdown("---")
+            st.subheader("📋 Dettaglio Città Metropolitane")
+            st.dataframe(
+                cm_df[['Provincia', 'Tesserati', 'TesseratiPer100k', 'Popolazione', 'EtaMedia', 'GareMedie', 'Agonisti']]
+                .style.background_gradient(subset=['TesseratiPer100k'], cmap='Greens')
+                .format({
+                    'TesseratiPer100k': '{:.1f}',
+                    'EtaMedia': '{:.1f}',
+                    'GareMedie': '{:.1f}',
+                    'Popolazione': '{:,.0f}'
+                }),
+                use_container_width=True
+            )
+
+        # ========== TAB 3: TREND TEMPORALE ==========
+        with tab3:
+            st.subheader("📈 Evoluzione Territoriale nel Tempo")
+
+            # Trend per provincia (top 10)
+            st.markdown("##### Trend Top 10 Province")
+
+            # Calcola top 10 province per tesserati ultimo anno
+            top10_prov = prov_full.nlargest(10, 'Tesserati')['Provincia'].tolist()
+
+            # Trend storico
+            trend_prov = df_prov[df_prov['Provincia'].isin(top10_prov)].groupby(
+                ['Anno', 'Provincia']
+            )['MmbCode'].nunique().reset_index()
+            trend_prov.columns = ['Anno', 'Provincia', 'Tesserati']
+
+            fig = px.line(trend_prov, x='Anno', y='Tesserati', color='Provincia',
+                         markers=True, title="Evoluzione Tesserati - Top 10 Province")
+            fig.add_vline(x=2020, line_dash="dash", line_color="red",
+                         annotation_text="COVID-19")
+            fig.update_layout(height=500)
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Variazione % per provincia
+            st.markdown("---")
+            st.markdown("##### Variazione % Tesserati (primo anno disponibile vs ultimo)")
+
+            # Calcola variazione per tutte le province con dati sufficienti
+            var_prov = df_prov.groupby(['Provincia', 'Anno'])['MmbCode'].nunique().reset_index()
+            var_prov.columns = ['Provincia', 'Anno', 'Tesserati']
+
+            # Pivot per calcolare variazione
+            var_pivot = var_prov.pivot(index='Provincia', columns='Anno', values='Tesserati')
+
+            # Prendi primo e ultimo anno disponibile per ogni provincia
+            primo_anno = var_pivot.columns.min()
+            ultimo_anno_var = var_pivot.columns.max()
+
+            var_calc = pd.DataFrame({
+                'Provincia': var_pivot.index,
+                'Tess_Inizio': var_pivot[primo_anno].values,
+                'Tess_Fine': var_pivot[ultimo_anno_var].values
+            })
+            var_calc['Variazione_Pct'] = ((var_calc['Tess_Fine'] - var_calc['Tess_Inizio']) / var_calc['Tess_Inizio'] * 100).round(1)
+            var_calc = var_calc.dropna()
+            var_calc = var_calc[var_calc['Tess_Inizio'] >= 10]  # Minimo 10 tesserati iniziali
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.markdown("**🟢 Top 10 Province in Crescita**")
+                top_crescita = var_calc.nlargest(10, 'Variazione_Pct')
+                fig = px.bar(
+                    top_crescita.sort_values('Variazione_Pct', ascending=True),
+                    x='Variazione_Pct', y='Provincia', orientation='h',
+                    color='Variazione_Pct', color_continuous_scale='Greens',
+                    text='Variazione_Pct'
+                )
+                fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+                fig.update_layout(height=400, showlegend=False)
+                fig.update_xaxes(title=f"Variazione % ({primo_anno} → {ultimo_anno_var})")
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col2:
+                st.markdown("**🔴 Top 10 Province in Calo**")
+                top_calo = var_calc.nsmallest(10, 'Variazione_Pct')
+                fig = px.bar(
+                    top_calo.sort_values('Variazione_Pct', ascending=False),
+                    x='Variazione_Pct', y='Provincia', orientation='h',
+                    color='Variazione_Pct', color_continuous_scale='Reds_r',
+                    text='Variazione_Pct'
+                )
+                fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+                fig.update_layout(height=400, showlegend=False)
+                fig.update_xaxes(title=f"Variazione % ({primo_anno} → {ultimo_anno_var})")
+                st.plotly_chart(fig, use_container_width=True)
+
+        # ========== TAB 4: MAPPA PENETRAZIONE ==========
+        with tab4:
+            st.subheader("🗺️ Mappa Penetrazione per Regione")
+            st.markdown("Tesserati per 100.000 abitanti a livello regionale")
+
+            # Calcola penetrazione per regione
+            reg_stats = df_ultimo.groupby('GrpArea')['MmbCode'].nunique().reset_index()
+            reg_stats.columns = ['Regione', 'Tesserati']
+            reg_stats['Popolazione'] = reg_stats['Regione'].map(REGIONE_POPOLAZIONE)
+            reg_stats['TesseratiPer100k'] = reg_stats.apply(
+                lambda r: (r['Tesserati'] / r['Popolazione'] * 100000) if r['Popolazione'] > 0 else 0, axis=1
+            )
+            reg_stats['NomeRegione'] = reg_stats['Regione'].map(NOMI_REGIONI_COMPLETI)
+
+            # Coordinate centroidi regioni
+            COORD_REGIONI_MAP = {
+                'Piemonte': (45.0522, 7.5155), "Valle d'Aosta": (45.7370, 7.3205),
+                'Lombardia': (45.4791, 9.8452), 'Trentino': (46.0679, 11.1211),
+                'Alto Adige': (46.7, 11.35), 'Veneto': (45.4414, 12.3155),
+                'Friuli V.G.': (46.0711, 13.2346), 'Liguria': (44.4112, 8.9327),
+                'Emilia-Romagna': (44.4949, 11.3426), 'Toscana': (43.7711, 11.2486),
+                'Umbria': (42.9384, 12.6218), 'Marche': (43.6168, 13.5188),
+                'Lazio': (41.8931, 12.4831), 'Abruzzo': (42.1920, 13.7289),
+                'Molise': (41.6738, 14.7520), 'Campania': (40.8394, 14.2528),
+                'Puglia': (41.1259, 16.8670), 'Basilicata': (40.6396, 15.8056),
+                'Calabria': (38.9060, 16.5943), 'Sicilia': (37.5994, 14.0154),
+                'Sardegna': (40.1209, 9.0129)
+            }
+
+            reg_stats['lat'] = reg_stats['NomeRegione'].map(lambda x: COORD_REGIONI_MAP.get(x, (0,0))[0])
+            reg_stats['lon'] = reg_stats['NomeRegione'].map(lambda x: COORD_REGIONI_MAP.get(x, (0,0))[1])
+            reg_stats = reg_stats.dropna(subset=['NomeRegione'])
+
+            # Mappa
+            col1, col2 = st.columns([3, 1])
+
+            with col1:
+                metrica_mappa = st.radio("Visualizza:", ["Tesserati per 100k abitanti", "Tesserati Totali"], horizontal=True)
+
+                if metrica_mappa == "Tesserati per 100k abitanti":
+                    size_col = 'TesseratiPer100k'
+                    color_col = 'TesseratiPer100k'
+                    title = f"Penetrazione Bridge per Regione - {ultimo_anno}"
+                else:
+                    size_col = 'Tesserati'
+                    color_col = 'Tesserati'
+                    title = f"Tesserati per Regione - {ultimo_anno}"
+
+                fig = px.scatter_geo(
+                    reg_stats,
+                    lat='lat', lon='lon',
+                    size=size_col, color=color_col,
+                    hover_name='NomeRegione',
+                    hover_data={
+                        'Tesserati': True,
+                        'TesseratiPer100k': ':.1f',
+                        'Popolazione': ':,.0f',
+                        'lat': False, 'lon': False
+                    },
+                    color_continuous_scale='YlOrRd',
+                    size_max=50,
+                    title=title
+                )
+
+                fig.update_geos(
+                    scope='europe',
+                    center=dict(lat=42.5, lon=12.5),
+                    projection_scale=6,
+                    showland=True,
+                    landcolor='rgb(243, 243, 243)',
+                    countrycolor='rgb(204, 204, 204)',
+                    showcoastlines=True
+                )
+                fig.update_layout(height=600, margin=dict(l=0, r=0, t=40, b=0))
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col2:
+                st.markdown("**🏆 Top 5 Penetrazione**")
+                for _, row in reg_stats.nlargest(5, 'TesseratiPer100k').iterrows():
+                    st.markdown(f"**{row['NomeRegione']}**: {row['TesseratiPer100k']:.1f}/100k")
+
+                st.markdown("---")
+                st.markdown("**⚠️ Bottom 5 Penetrazione**")
+                for _, row in reg_stats.nsmallest(5, 'TesseratiPer100k').iterrows():
+                    st.markdown(f"**{row['NomeRegione']}**: {row['TesseratiPer100k']:.1f}/100k")
+
+            # Tabella regioni con popolazione
+            st.markdown("---")
+            st.subheader("📋 Dettaglio Regioni")
+            st.dataframe(
+                reg_stats[['NomeRegione', 'Tesserati', 'Popolazione', 'TesseratiPer100k']]
+                .sort_values('TesseratiPer100k', ascending=False)
+                .style.background_gradient(subset=['TesseratiPer100k'], cmap='YlOrRd')
+                .format({
+                    'TesseratiPer100k': '{:.1f}',
+                    'Popolazione': '{:,.0f}'
+                }),
+                use_container_width=True
+            )
 
 # ============================================================================
 # PAGINA: MAPPA AGONISMO
