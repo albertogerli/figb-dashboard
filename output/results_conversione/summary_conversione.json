@@ -1,0 +1,16 @@
+{
+  "totale_corsisti_maturi": 4957,
+  "convertiti": 2519,
+  "persi": 2438,
+  "tasso_conversione": 50.8,
+  "gare_medie_convertiti": 81.0,
+  "gare_medie_persi": 15.5,
+  "durata_media_convertiti": 2.4,
+  "durata_media_persi": 1.63,
+  "insight_chiave": {
+    "conv_1_anno": 32.7,
+    "conv_3_anni": 69.6,
+    "conv_0_5_gare": 14.8,
+    "conv_100_gare": 91.9
+  }
+}
