@@ -475,7 +475,7 @@ elif pagina == "🗺️ Analisi Regionale":
                      x='Macroregione', y='ChurnRate',
                      color='ChurnRate', color_continuous_scale='RdYlGn_r',
                      text='ChurnRate')
-        fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+        fig.update_traces(texttemplate='%{text:.1f}%', textposition='auto', cliponaxis=False)
         fig.update_layout(height=400)
         st.plotly_chart(fig, use_container_width=True)
 
@@ -721,7 +721,7 @@ elif pagina == "📍 Analisi Territoriale":
                     text='IndiceVitalita',
                     hover_data=['Tesserati', 'Penetrazione', 'GareMedie', 'PctUnder60']
                 )
-                fig.update_traces(texttemplate='%{text:.0f}', textposition='outside')
+                fig.update_traces(texttemplate='%{text:.0f}', textposition='auto', cliponaxis=False)
                 fig.update_layout(height=700, showlegend=False)
                 fig.add_vline(x=70, line_dash="dash", line_color="green", annotation_text="Eccellente")
                 fig.add_vline(x=50, line_dash="dash", line_color="orange", annotation_text="Buono")
@@ -800,7 +800,7 @@ elif pagina == "📍 Analisi Territoriale":
                     text='IndiceVitalita',
                     title="Indice Vitalità per Regione"
                 )
-                fig.update_traces(texttemplate='%{text:.0f}', textposition='outside')
+                fig.update_traces(texttemplate='%{text:.0f}', textposition='auto', cliponaxis=False)
                 fig.update_layout(height=550, showlegend=False)
                 st.plotly_chart(fig, use_container_width=True)
 
@@ -1055,7 +1055,7 @@ elif pagina == "📍 Analisi Territoriale":
                     color='Variazione_Pct', color_continuous_scale='Greens',
                     text='Variazione_Pct'
                 )
-                fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+                fig.update_traces(texttemplate='%{text:.1f}%', textposition='auto', cliponaxis=False)
                 fig.update_layout(height=400, showlegend=False)
                 fig.update_xaxes(title=f"Variazione % ({primo_anno} → {ultimo_anno_var})")
                 st.plotly_chart(fig, use_container_width=True)
@@ -1069,7 +1069,7 @@ elif pagina == "📍 Analisi Territoriale":
                     color='Variazione_Pct', color_continuous_scale='Reds_r',
                     text='Variazione_Pct'
                 )
-                fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+                fig.update_traces(texttemplate='%{text:.1f}%', textposition='auto', cliponaxis=False)
                 fig.update_layout(height=400, showlegend=False)
                 fig.update_xaxes(title=f"Variazione % ({primo_anno} → {ultimo_anno_var})")
                 st.plotly_chart(fig, use_container_width=True)
@@ -1579,7 +1579,7 @@ elif pagina == "🎓 Bridge a Scuola":
                         marker_color=['#dc2626', '#059669'],
                         text=[f"{conv_0_5[0]:.0f}%" if len(conv_0_5) > 0 else "N/A",
                               f"{conv_100[0]:.0f}%" if len(conv_100) > 0 else "N/A"],
-                        textposition='outside'
+                        textposition='auto', cliponaxis=False
                     ))
                     fig_gare.update_layout(
                         title="Conversione per Gare Giocate",
@@ -1598,7 +1598,7 @@ elif pagina == "🎓 Bridge a Scuola":
                         marker_color=['#f97316', '#2563eb'],
                         text=[f"{conv_1_anno[0]:.0f}%" if len(conv_1_anno) > 0 else "N/A",
                               f"{conv_3_anni[0]:.0f}%" if len(conv_3_anni) > 0 else "N/A"],
-                        textposition='outside'
+                        textposition='auto', cliponaxis=False
                     ))
                     fig_durata.update_layout(
                         title="Conversione per Durata Corso",
@@ -1631,7 +1631,7 @@ elif pagina == "🎓 Bridge a Scuola":
                     text='TassoConv',
                     labels={'FasciaGare': 'Gare Giocate', 'TassoConv': '% Conversione'}
                 )
-                fig_gare_det.update_traces(texttemplate='%{text:.0f}%', textposition='outside')
+                fig_gare_det.update_traces(texttemplate='%{text:.0f}%', textposition='auto', cliponaxis=False)
                 fig_gare_det.update_layout(height=350)
                 st.plotly_chart(fig_gare_det, use_container_width=True)
 
@@ -1643,7 +1643,7 @@ elif pagina == "🎓 Bridge a Scuola":
                     text='TassoConv',
                     labels={'AnniCorso': 'Anni di Corso', 'TassoConv': '% Conversione'}
                 )
-                fig_durata_det.update_traces(texttemplate='%{text:.0f}%', textposition='outside')
+                fig_durata_det.update_traces(texttemplate='%{text:.0f}%', textposition='auto', cliponaxis=False)
                 fig_durata_det.update_layout(height=350)
                 st.plotly_chart(fig_durata_det, use_container_width=True)
 
@@ -1678,8 +1678,9 @@ elif pagina == "🎓 Bridge a Scuola":
                     text='TassoConv',
                     hover_data=['Corsisti', 'Convertiti', 'Persi', 'GareMedie']
                 )
-                fig_reg.update_traces(texttemplate='%{text:.0f}%', textposition='outside')
-                fig_reg.update_layout(height=max(400, len(conv_regione) * 25), yaxis_title="", xaxis_title="% Conversione")
+                fig_reg.update_traces(texttemplate='%{text:.0f}%', textposition='auto', cliponaxis=False)
+                fig_reg.update_layout(height=max(400, len(conv_regione) * 25), yaxis_title="", xaxis_title="% Conversione",
+                                     margin=dict(r=60))
                 st.plotly_chart(fig_reg, use_container_width=True)
 
                 col1, col2 = st.columns(2)
@@ -1714,8 +1715,8 @@ elif pagina == "🎓 Bridge a Scuola":
                     text='TassoConv',
                     hover_data=['Corsisti', 'GareMedie', 'Regione']
                 )
-                fig_top.update_traces(texttemplate='%{text:.0f}%', textposition='outside')
-                fig_top.update_layout(height=450, yaxis_title="")
+                fig_top.update_traces(texttemplate='%{text:.0f}%', textposition='auto', cliponaxis=False)
+                fig_top.update_layout(height=450, yaxis_title="", margin=dict(r=60))
                 st.plotly_chart(fig_top, use_container_width=True)
 
                 st.markdown("### ⚠️ Associazioni da Monitorare")
@@ -1730,8 +1731,8 @@ elif pagina == "🎓 Bridge a Scuola":
                     text='TassoConv',
                     hover_data=['Corsisti', 'GareMedie', 'Regione']
                 )
-                fig_bottom.update_traces(texttemplate='%{text:.0f}%', textposition='outside')
-                fig_bottom.update_layout(height=450, yaxis_title="")
+                fig_bottom.update_traces(texttemplate='%{text:.0f}%', textposition='auto', cliponaxis=False)
+                fig_bottom.update_layout(height=450, yaxis_title="", margin=dict(r=60))
                 st.plotly_chart(fig_bottom, use_container_width=True)
 
                 # Tabella completa
