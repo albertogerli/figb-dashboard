@@ -101,7 +101,7 @@ pagina = st.sidebar.selectbox(
     ["🏠 Overview", "📈 Trend Temporale", "🗺️ Analisi Regionale",
      "📍 Analisi Territoriale", "🏆 Mappa Agonismo", "🏢 Analisi Associazioni",
      "🎓 Bridge a Scuola", "⚠️ Giocatori a Rischio", "🔄 Bridgisti Recuperabili",
-     "🔮 Modello Predittivo", "🌱 Opportunità Crescita", "🔍 Esplora Dati"]
+     "🔮 Modello Predittivo", "🌱 Opportunità Crescita", "🔬 Analisi Avanzate", "🔍 Esplora Dati"]
 )
 
 st.sidebar.markdown("---")
@@ -2864,6 +2864,329 @@ elif pagina == "🌱 Opportunità Crescita":
 
     else:
         st.warning("Dati opportunità non disponibili. Esegui prima `08_analisi_opportunita_crescita.py`")
+
+# ============================================================================
+# PAGINA: ANALISI AVANZATE
+# ============================================================================
+elif pagina == "🔬 Analisi Avanzate":
+    st.title("🔬 Analisi Avanzate Innovative")
+
+    st.markdown("""
+    Analisi comportamentali e predittive per insight strategici.
+    """)
+
+    RESULTS_AVZ = OUTPUT_DIR / 'results_avanzate'
+
+    if RESULTS_AVZ.exists():
+        # Carica dati
+        with open(RESULTS_AVZ / 'summary_avanzate.json', 'r') as f:
+            summary_avz = json.load(f)
+
+        curva = pd.read_csv(RESULTS_AVZ / 'curva_apprendimento.csv')
+        curva_confronto = pd.read_csv(RESULTS_AVZ / 'curva_confronto_attivi_persi.csv')
+        early_warning = pd.read_csv(RESULTS_AVZ / 'early_warning_circoli.csv')
+        effetto_maestro = pd.read_csv(RESULTS_AVZ / 'effetto_maestro.csv')
+        profilo_migrazione = pd.read_csv(RESULTS_AVZ / 'profilo_migrazione.csv')
+
+        # Overview KPI
+        st.markdown("### 📊 Insight Chiave")
+
+        col1, col2, col3, col4 = st.columns(4)
+
+        with col1:
+            st.metric(
+                "Soglia Gare Anno 1",
+                f"{summary_avz['curva_apprendimento']['gare_anno1_attivi']:.0f}",
+                f"vs {summary_avz['curva_apprendimento']['gare_anno1_persi']:.0f} chi abbandona",
+                help="Chi resta gioca più gare il primo anno"
+            )
+        with col2:
+            st.metric(
+                "Circoli a Rischio",
+                f"{summary_avz['early_warning']['circoli_critici'] + summary_avz['early_warning']['circoli_alto_rischio']}",
+                help="Critici + Alto rischio"
+            )
+        with col3:
+            st.metric(
+                "Effetto Corsi",
+                f"+{summary_avz['effetto_maestro']['differenza_pp']:.0f}pp",
+                help="Retention con corsi vs senza"
+            )
+        with col4:
+            st.metric(
+                "Giocatori Fedeli",
+                f"{summary_avz['migrazione']['pct_fedeli']:.0f}%",
+                help="1 solo circolo nella carriera"
+            )
+
+        st.markdown("---")
+
+        # Tabs
+        tab1, tab2, tab3, tab4, tab5 = st.tabs([
+            "📈 Curva Apprendimento",
+            "⚠️ Early Warning Circoli",
+            "🎓 Effetto Maestro",
+            "🔄 Migrazione",
+            "👫 Gender Gap"
+        ])
+
+        # TAB 1: Curva Apprendimento
+        with tab1:
+            st.subheader("📈 Curva di Apprendimento")
+            st.markdown("""
+            Come progrediscono i giocatori nei primi anni di carriera?
+            Confronto tra chi resta e chi abbandona.
+            """)
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                # Curva gare
+                fig = px.line(curva, x='AnnoCarriera', y='GareMedie',
+                             title="Gare Medie per Anno di Carriera",
+                             markers=True)
+                fig.update_layout(xaxis_title="Anno di Carriera", yaxis_title="Gare Medie")
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col2:
+                # Curva punti
+                fig = px.line(curva, x='AnnoCarriera', y='PuntiMedi',
+                             title="Punti Medi per Anno di Carriera",
+                             markers=True)
+                fig.update_layout(xaxis_title="Anno di Carriera", yaxis_title="Punti Medi")
+                st.plotly_chart(fig, use_container_width=True)
+
+            # Confronto attivi vs persi
+            st.markdown("### 🎯 Confronto: Chi Resta vs Chi Abbandona")
+
+            fig = px.line(curva_confronto, x='AnnoCarriera', y='GareMedie',
+                         color='AncoraAttivo',
+                         title="Gare Medie: Attivi vs Abbandonati",
+                         markers=True,
+                         labels={'AncoraAttivo': 'Ancora Attivo'})
+            fig.update_layout(xaxis_title="Anno di Carriera", yaxis_title="Gare Medie")
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Insight box
+            st.success(f"""
+            💡 **Insight Chiave:** Il primo anno è decisivo!
+            - Chi resta gioca **{summary_avz['curva_apprendimento']['gare_anno1_attivi']:.0f} gare**
+            - Chi abbandona ne gioca solo **{summary_avz['curva_apprendimento']['gare_anno1_persi']:.0f}**
+            - **Soglia critica: ~{(summary_avz['curva_apprendimento']['gare_anno1_attivi'] + summary_avz['curva_apprendimento']['gare_anno1_persi'])/2:.0f} gare/anno**
+
+            → Bisogna far giocare i nuovi iscritti il prima possibile!
+            """)
+
+        # TAB 2: Early Warning
+        with tab2:
+            st.subheader("⚠️ Early Warning Circoli")
+            st.markdown("""
+            Identificazione precoce dei circoli a rischio chiusura basata su:
+            trend tesserati, età media, attività, numero iscritti.
+            """)
+
+            # Distribuzione rischio
+            col1, col2 = st.columns(2)
+
+            with col1:
+                rischio_dist = early_warning['LivelioRischio'].value_counts().reset_index()
+                rischio_dist.columns = ['Livello', 'Numero']
+
+                # Ordina
+                ordine = ['CRITICO', 'ALTO', 'MEDIO', 'BASSO']
+                rischio_dist['Ordine'] = rischio_dist['Livello'].map({v: i for i, v in enumerate(ordine)})
+                rischio_dist = rischio_dist.sort_values('Ordine')
+
+                fig = px.pie(rischio_dist, values='Numero', names='Livello',
+                            title="Distribuzione Livelli di Rischio",
+                            color='Livello',
+                            color_discrete_map={'CRITICO': 'red', 'ALTO': 'orange',
+                                               'MEDIO': 'yellow', 'BASSO': 'green'})
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col2:
+                # Rischio per regione
+                if 'Regione' in early_warning.columns:
+                    rischio_reg = early_warning.groupby('Regione').agg({
+                        'RiskScore': 'mean',
+                        'Circolo': 'count'
+                    }).reset_index()
+                    rischio_reg.columns = ['Regione', 'RischioMedio', 'NumCircoli']
+                    rischio_reg = rischio_reg.sort_values('RischioMedio', ascending=True).tail(15)
+
+                    fig = px.bar(rischio_reg, y='Regione', x='RischioMedio', orientation='h',
+                                title="Rischio Medio per Regione",
+                                text='RischioMedio',
+                                color='RischioMedio',
+                                color_continuous_scale='RdYlGn_r')
+                    fig.update_traces(textposition='auto', cliponaxis=False, texttemplate='%{text:.1f}')
+                    fig.update_layout(margin=dict(r=60))
+                    st.plotly_chart(fig, use_container_width=True)
+
+            # Lista circoli critici
+            st.markdown("### 🚨 Circoli a Rischio Critico/Alto")
+
+            critici = early_warning[early_warning['LivelioRischio'].isin(['CRITICO', 'ALTO'])].sort_values('RiskScore', ascending=False)
+
+            if len(critici) > 0:
+                # Seleziona colonne da mostrare
+                cols_show = ['Circolo', 'Tess_2022', 'Tess_2025', 'TrendPct', 'EtaMedia', 'LivelioRischio', 'Regione']
+                cols_show = [c for c in cols_show if c in critici.columns]
+                st.dataframe(critici[cols_show].head(30), use_container_width=True)
+
+                st.warning(f"""
+                ⚠️ **{len(critici)} circoli richiedono attenzione immediata!**
+
+                Azioni suggerite:
+                1. Contattare i responsabili per capire le cause
+                2. Supportare con eventi o risorse
+                3. Valutare fusioni con circoli vicini
+                """)
+            else:
+                st.success("Nessun circolo a rischio critico!")
+
+        # TAB 3: Effetto Maestro
+        with tab3:
+            st.subheader("🎓 Effetto Maestro")
+            st.markdown("""
+            I circoli che organizzano corsi (Scuola Bridge) hanno retention migliore?
+            """)
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                # Confronto retention
+                confronto_ret = pd.DataFrame({
+                    'Tipo': ['Con Corsi', 'Senza Corsi'],
+                    'Retention': [summary_avz['effetto_maestro']['retention_con_corsi'],
+                                 summary_avz['effetto_maestro']['retention_senza_corsi']]
+                })
+
+                fig = px.bar(confronto_ret, x='Tipo', y='Retention',
+                            title="Retention Media: Con vs Senza Corsi",
+                            text='Retention',
+                            color='Tipo',
+                            color_discrete_map={'Con Corsi': 'green', 'Senza Corsi': 'gray'})
+                fig.update_traces(textposition='auto', cliponaxis=False, texttemplate='%{text:.1f}%')
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col2:
+                # Per fascia corsisti
+                fig = px.bar(effetto_maestro, x='FasciaCorsisti', y='RetentionMedia',
+                            title="Retention per Numero di Corsisti Formati",
+                            text='RetentionMedia',
+                            color='RetentionMedia',
+                            color_continuous_scale='Greens')
+                fig.update_traces(textposition='auto', cliponaxis=False, texttemplate='%{text:.1f}%')
+                st.plotly_chart(fig, use_container_width=True)
+
+            st.success(f"""
+            💡 **Insight:** I corsi aumentano la retention di **+{summary_avz['effetto_maestro']['differenza_pp']:.1f} punti percentuali**!
+
+            - Circoli CON corsi: {summary_avz['effetto_maestro']['retention_con_corsi']:.1f}% retention
+            - Circoli SENZA corsi: {summary_avz['effetto_maestro']['retention_senza_corsi']:.1f}% retention
+
+            → **Ogni circolo dovrebbe avere un programma di formazione!**
+            """)
+
+        # TAB 4: Migrazione
+        with tab4:
+            st.subheader("🔄 Migrazione Giocatori")
+            st.markdown("""
+            Analisi dei giocatori che cambiano circolo durante la carriera.
+            """)
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                # Pie fedeli vs migranti
+                mig_data = pd.DataFrame({
+                    'Tipo': ['Fedeli (1 circolo)', 'Migranti (2+ circoli)'],
+                    'Numero': [summary_avz['migrazione']['giocatori_fedeli'],
+                              summary_avz['migrazione']['giocatori_migranti']]
+                })
+
+                fig = px.pie(mig_data, values='Numero', names='Tipo',
+                            title="Fedeltà al Circolo",
+                            color_discrete_sequence=['#2ecc71', '#3498db'])
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col2:
+                # Profilo comparativo
+                st.markdown("#### Profilo Comparativo")
+                st.dataframe(profilo_migrazione, use_container_width=True)
+
+            st.info(f"""
+            💡 **Insight:**
+            - **{summary_avz['migrazione']['pct_fedeli']:.0f}%** dei giocatori resta sempre nello stesso circolo
+            - I "migranti" giocano **più gare** e accumulano **più punti**
+            - La migrazione non è negativa: indica giocatori più attivi!
+            """)
+
+        # TAB 5: Gender Gap
+        with tab5:
+            st.subheader("👫 Gender Gap per Livello")
+            st.markdown("""
+            Le donne abbandonano più degli uomini? A quali livelli?
+            """)
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                gender_data = pd.DataFrame({
+                    'Sesso': ['Uomini', 'Donne'],
+                    'Retention': [summary_avz['gender_gap']['retention_uomini'],
+                                 summary_avz['gender_gap']['retention_donne']]
+                })
+
+                fig = px.bar(gender_data, x='Sesso', y='Retention',
+                            title="Retention Globale per Sesso",
+                            text='Retention',
+                            color='Sesso',
+                            color_discrete_map={'Uomini': '#3498db', 'Donne': '#e74c3c'})
+                fig.update_traces(textposition='auto', cliponaxis=False, texttemplate='%{text:.1f}%')
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col2:
+                # Gender gap per categoria
+                if (RESULTS_AVZ / 'gender_gap_categoria.csv').exists():
+                    gender_cat = pd.read_csv(RESULTS_AVZ / 'gender_gap_categoria.csv')
+
+                    # Pivot per visualizzazione
+                    gender_pivot = gender_cat.pivot(index='Categoria', columns='Sesso', values='Retention')
+                    if 'M' in gender_pivot.columns and 'F' in gender_pivot.columns:
+                        gender_pivot['Gap'] = gender_pivot['M'] - gender_pivot['F']
+                        gender_pivot = gender_pivot.reset_index()
+
+                        # Top gap positivi (uomini meglio)
+                        top_gap = gender_pivot.sort_values('Gap', ascending=False).head(10)
+
+                        fig = px.bar(top_gap, y='Categoria', x='Gap', orientation='h',
+                                    title="Gap Retention (M-F) per Categoria",
+                                    text='Gap',
+                                    color='Gap',
+                                    color_continuous_scale='RdBu_r')
+                        fig.update_traces(textposition='auto', cliponaxis=False, texttemplate='%{text:.1f}')
+                        fig.update_layout(margin=dict(r=60))
+                        st.plotly_chart(fig, use_container_width=True)
+
+            gap = summary_avz['gender_gap']['gap_pp']
+            if abs(gap) < 2:
+                st.success(f"""
+                ✅ **Buona notizia:** Il gender gap è minimo ({gap:+.1f} punti)!
+
+                Uomini e donne hanno retention molto simile.
+                """)
+            else:
+                st.warning(f"""
+                ⚠️ **Attenzione:** Gender gap di {gap:+.1f} punti
+
+                {'Gli uomini' if gap > 0 else 'Le donne'} hanno retention maggiore.
+                Analizzare le cause per categoria.
+                """)
+
+    else:
+        st.warning("Dati analisi avanzate non disponibili. Esegui prima `09_analisi_avanzate_innovative.py`")
 
 # ============================================================================
 # PAGINA: ESPLORA DATI

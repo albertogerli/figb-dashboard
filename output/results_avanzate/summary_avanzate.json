@@ -1,0 +1,29 @@
+{
+  "curva_apprendimento": {
+    "gare_anno1_attivi": 50.671207992733876,
+    "gare_anno1_persi": 23.31744072750893,
+    "differenza_predittiva": 27.353767265224946
+  },
+  "early_warning": {
+    "circoli_critici": 9,
+    "circoli_alto_rischio": 21,
+    "circoli_medio_rischio": 32,
+    "circoli_analizzati": 206
+  },
+  "effetto_maestro": {
+    "retention_con_corsi": 75.15383498079362,
+    "retention_senza_corsi": 49.008397488721826,
+    "differenza_pp": 26.145437492071792,
+    "circoli_con_corsi": 215
+  },
+  "migrazione": {
+    "giocatori_fedeli": 22703,
+    "giocatori_migranti": 8391,
+    "pct_fedeli": 73.01408631890396
+  },
+  "gender_gap": {
+    "retention_uomini": 81.92236041684244,
+    "retention_donne": 81.28332423760821,
+    "gap_pp": 0.6390361792342247
+  }
+}
