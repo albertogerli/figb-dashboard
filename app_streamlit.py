@@ -1417,20 +1417,111 @@ elif pagina == "🎓 Bridge a Scuola":
     Il tasso di conversione ideale dovrebbe essere >80%.
     """)
 
-    # Carica dati conversione
-    RESULTS_CONV = OUTPUT_DIR / 'results_conversione'
-    RESULTS_SCUOLA = OUTPUT_DIR / 'results_scuola'
+    # =========================================================================
+    # CALCOLO ON-THE-FLY DAI DATI FILTRATI
+    # =========================================================================
 
-    if RESULTS_CONV.exists():
-        with open(RESULTS_CONV / 'summary_conversione.json', 'r') as f:
-            summary_conv = json.load(f)
+    # Corsisti Scuola Bridge (filtrati per regione selezionata)
+    corsi_filtered = df[
+        (df['MbtDesc'] == 'Scuola Bridge') &
+        (df['GrpArea'].isin(regioni_selezionate))
+    ].copy()
 
-        conv_durata = pd.read_csv(RESULTS_CONV / 'conversione_per_durata.csv')
-        conv_gare = pd.read_csv(RESULTS_CONV / 'conversione_per_gare.csv')
-        conv_regione = pd.read_csv(RESULTS_CONV / 'conversione_per_regione.csv')
-        conv_ass = pd.read_csv(RESULTS_CONV / 'conversione_per_associazione.csv')
+    if len(corsi_filtered) == 0:
+        st.warning("Nessun dato per i filtri selezionati.")
+    else:
+        # Storia di ogni corsista
+        corsisti = corsi_filtered.groupby('MmbCode').agg({
+            'Anno': ['min', 'max', 'count'],
+            'Associazione': 'first',
+            'GrpArea': 'first',
+            'Anni': 'first',
+            'GareGiocate': 'sum'
+        }).reset_index()
+        corsisti.columns = ['MmbCode', 'AnnoInizio', 'AnnoFine', 'AnniCorso',
+                            'Associazione', 'Regione', 'Eta', 'GareTotali']
 
-        # Tab
+        # Filtra per anno inizio (se l'utente ha filtrato per anni)
+        corsisti = corsisti[
+            (corsisti['AnnoInizio'] >= anni_range[0]) &
+            (corsisti['AnnoInizio'] <= anni_range[1])
+        ]
+
+        # Solo corsisti "maturi" (iniziati almeno 2 anni fa)
+        anno_max_maturo = min(anni_range[1], 2023)  # Devono aver avuto tempo di convertire
+        corsisti_maturi = corsisti[corsisti['AnnoInizio'] <= anno_max_maturo].copy()
+
+        # Identifica chi è diventato tesserato regolare (in tutto il dataset, non filtrato)
+        tessere_regolari = ['Ordinario Sportivo', 'Agonista', 'Ordinario Amatoriale', 'Non Agonista']
+        regolari_members = set(df[df['MbtDesc'].isin(tessere_regolari)]['MmbCode'].unique())
+        corsisti_maturi['Convertito'] = corsisti_maturi['MmbCode'].isin(regolari_members)
+
+        # Calcola metriche
+        n_corsisti = len(corsisti_maturi)
+        n_convertiti = corsisti_maturi['Convertito'].sum()
+        n_persi = n_corsisti - n_convertiti
+        tasso_conv = 100 * n_convertiti / n_corsisti if n_corsisti > 0 else 0
+
+        convertiti_df = corsisti_maturi[corsisti_maturi['Convertito']]
+        persi_df = corsisti_maturi[~corsisti_maturi['Convertito']]
+
+        gare_medie_conv = convertiti_df['GareTotali'].mean() if len(convertiti_df) > 0 else 0
+        gare_medie_persi = persi_df['GareTotali'].mean() if len(persi_df) > 0 else 0
+        durata_media_conv = convertiti_df['AnniCorso'].mean() if len(convertiti_df) > 0 else 0
+        durata_media_persi = persi_df['AnniCorso'].mean() if len(persi_df) > 0 else 0
+
+        # Conversione per durata
+        conv_durata = corsisti_maturi.groupby('AnniCorso').agg({
+            'MmbCode': 'count',
+            'Convertito': ['sum', 'mean']
+        })
+        conv_durata.columns = ['Totale', 'Convertiti', 'TassoConv']
+        conv_durata['TassoConv'] = (conv_durata['TassoConv'] * 100).round(1)
+        conv_durata['Persi'] = conv_durata['Totale'] - conv_durata['Convertiti']
+        conv_durata = conv_durata.reset_index()
+
+        # Conversione per gare
+        corsisti_maturi['FasciaGare'] = pd.cut(
+            corsisti_maturi['GareTotali'],
+            bins=[-1, 5, 15, 30, 60, 100, 10000],
+            labels=['0-5', '6-15', '16-30', '31-60', '61-100', '100+']
+        )
+        conv_gare = corsisti_maturi.groupby('FasciaGare', observed=True).agg({
+            'MmbCode': 'count',
+            'Convertito': ['sum', 'mean']
+        })
+        conv_gare.columns = ['Totale', 'Convertiti', 'TassoConv']
+        conv_gare['TassoConv'] = (conv_gare['TassoConv'] * 100).round(1)
+        conv_gare = conv_gare.reset_index()
+
+        # Conversione per regione
+        conv_regione = corsisti_maturi.groupby('Regione').agg({
+            'MmbCode': 'count',
+            'Convertito': ['sum', 'mean'],
+            'GareTotali': 'mean'
+        })
+        conv_regione.columns = ['Corsisti', 'Convertiti', 'TassoConv', 'GareMedie']
+        conv_regione['TassoConv'] = (conv_regione['TassoConv'] * 100).round(1)
+        conv_regione['GareMedie'] = conv_regione['GareMedie'].round(1)
+        conv_regione['Persi'] = conv_regione['Corsisti'] - conv_regione['Convertiti']
+        conv_regione = conv_regione[conv_regione['Corsisti'] >= 10].reset_index()
+
+        # Conversione per associazione
+        conv_ass = corsisti_maturi.groupby('Associazione').agg({
+            'MmbCode': 'count',
+            'Convertito': ['sum', 'mean'],
+            'GareTotali': 'mean',
+            'Regione': 'first'
+        })
+        conv_ass.columns = ['Corsisti', 'Convertiti', 'TassoConv', 'GareMedie', 'Regione']
+        conv_ass['TassoConv'] = (conv_ass['TassoConv'] * 100).round(1)
+        conv_ass['GareMedie'] = conv_ass['GareMedie'].round(1)
+        conv_ass['Persi'] = conv_ass['Corsisti'] - conv_ass['Convertiti']
+        conv_ass = conv_ass.reset_index()
+
+        # =====================================================================
+        # TAB
+        # =====================================================================
         tab1, tab2, tab3, tab4, tab5 = st.tabs([
             "📊 Overview", "🎯 Fattori Conversione", "🗺️ Per Regione",
             "🏢 Per Associazione", "🎒 Studenti Scuole"
@@ -1440,251 +1531,259 @@ elif pagina == "🎓 Bridge a Scuola":
         with tab1:
             st.subheader("Panoramica Conversione Corsi")
 
+            # Mostra filtri attivi
+            if len(regioni_selezionate) < len(df['GrpArea'].unique()):
+                st.info(f"🔍 Filtro attivo: {len(regioni_selezionate)} regioni selezionate")
+
             # Alert principale
-            st.error(f"""
-            **🚨 PROBLEMA: Perdiamo il {100 - summary_conv['tasso_conversione']:.0f}% dei corsisti!**
+            if n_corsisti > 0:
+                st.error(f"""
+                **🚨 PROBLEMA: Perdiamo il {100 - tasso_conv:.0f}% dei corsisti!**
 
-            Su {summary_conv['totale_corsisti_maturi']:,} persone che hanno fatto il corso,
-            solo {summary_conv['convertiti']:,} sono diventati tesserati regolari.
-            **{summary_conv['persi']:,} persone perse.**
-            """)
+                Su {n_corsisti:,} persone che hanno fatto il corso,
+                solo {n_convertiti:,} sono diventati tesserati regolari.
+                **{n_persi:,} persone perse.**
+                """)
 
-            # KPI principali
-            col1, col2, col3, col4 = st.columns(4)
-            with col1:
-                st.metric("Corsisti Maturi", f"{summary_conv['totale_corsisti_maturi']:,}",
-                         help="Iniziati entro 2022, hanno avuto tempo di decidere")
-            with col2:
-                st.metric("Convertiti", f"{summary_conv['convertiti']:,}",
-                         delta=f"{summary_conv['tasso_conversione']}%")
-            with col3:
-                st.metric("Persi", f"{summary_conv['persi']:,}",
-                         delta=f"-{100-summary_conv['tasso_conversione']:.0f}%", delta_color="inverse")
-            with col4:
-                st.metric("Gare Medie Convertiti", f"{summary_conv['gare_medie_convertiti']:.0f}",
-                         help="vs 16 gare dei persi")
+                # KPI principali
+                col1, col2, col3, col4 = st.columns(4)
+                with col1:
+                    st.metric("Corsisti Analizzati", f"{n_corsisti:,}",
+                             help="Corsisti nelle regioni selezionate")
+                with col2:
+                    st.metric("Convertiti", f"{n_convertiti:,}",
+                             delta=f"{tasso_conv:.1f}%")
+                with col3:
+                    st.metric("Persi", f"{n_persi:,}",
+                             delta=f"-{100-tasso_conv:.0f}%", delta_color="inverse")
+                with col4:
+                    st.metric("Gare Medie Convertiti", f"{gare_medie_conv:.0f}",
+                             help=f"vs {gare_medie_persi:.0f} gare dei persi")
 
-            # Insight chiave
-            st.markdown("### 🔑 La Chiave: FAR GIOCARE GARE")
-            insight = summary_conv['insight_chiave']
+                # Insight chiave
+                st.markdown("### 🔑 La Chiave: FAR GIOCARE GARE")
 
-            col1, col2 = st.columns(2)
-            with col1:
-                fig_gare = go.Figure()
-                fig_gare.add_trace(go.Bar(
-                    x=['0-5 gare', '100+ gare'],
-                    y=[insight['conv_0_5_gare'], insight['conv_100_gare']],
-                    marker_color=['#dc2626', '#059669'],
-                    text=[f"{insight['conv_0_5_gare']:.0f}%", f"{insight['conv_100_gare']:.0f}%"],
-                    textposition='outside'
-                ))
-                fig_gare.update_layout(
-                    title="Conversione per Gare Giocate",
-                    yaxis_title="% Conversione",
-                    height=300,
-                    showlegend=False
-                )
-                st.plotly_chart(fig_gare, use_container_width=True)
+                # Calcola insight
+                conv_0_5 = conv_gare[conv_gare['FasciaGare'] == '0-5']['TassoConv'].values
+                conv_100 = conv_gare[conv_gare['FasciaGare'] == '100+']['TassoConv'].values
+                conv_1_anno = conv_durata[conv_durata['AnniCorso'] == 1]['TassoConv'].values
+                conv_3_anni = conv_durata[conv_durata['AnniCorso'] == 3]['TassoConv'].values
 
-            with col2:
-                fig_durata = go.Figure()
-                fig_durata.add_trace(go.Bar(
-                    x=['1 anno', '3 anni'],
-                    y=[insight['conv_1_anno'], insight['conv_3_anni']],
-                    marker_color=['#f97316', '#2563eb'],
-                    text=[f"{insight['conv_1_anno']:.0f}%", f"{insight['conv_3_anni']:.0f}%"],
-                    textposition='outside'
-                ))
-                fig_durata.update_layout(
-                    title="Conversione per Durata Corso",
-                    yaxis_title="% Conversione",
-                    height=300,
-                    showlegend=False
-                )
-                st.plotly_chart(fig_durata, use_container_width=True)
+                col1, col2 = st.columns(2)
+                with col1:
+                    fig_gare = go.Figure()
+                    fig_gare.add_trace(go.Bar(
+                        x=['0-5 gare', '100+ gare'],
+                        y=[conv_0_5[0] if len(conv_0_5) > 0 else 0,
+                           conv_100[0] if len(conv_100) > 0 else 0],
+                        marker_color=['#dc2626', '#059669'],
+                        text=[f"{conv_0_5[0]:.0f}%" if len(conv_0_5) > 0 else "N/A",
+                              f"{conv_100[0]:.0f}%" if len(conv_100) > 0 else "N/A"],
+                        textposition='outside'
+                    ))
+                    fig_gare.update_layout(
+                        title="Conversione per Gare Giocate",
+                        yaxis_title="% Conversione",
+                        height=300,
+                        showlegend=False
+                    )
+                    st.plotly_chart(fig_gare, use_container_width=True)
 
-            st.success(f"""
-            **PROFILO COMPARATIVO:**
+                with col2:
+                    fig_durata = go.Figure()
+                    fig_durata.add_trace(go.Bar(
+                        x=['1 anno', '3 anni'],
+                        y=[conv_1_anno[0] if len(conv_1_anno) > 0 else 0,
+                           conv_3_anni[0] if len(conv_3_anni) > 0 else 0],
+                        marker_color=['#f97316', '#2563eb'],
+                        text=[f"{conv_1_anno[0]:.0f}%" if len(conv_1_anno) > 0 else "N/A",
+                              f"{conv_3_anni[0]:.0f}%" if len(conv_3_anni) > 0 else "N/A"],
+                        textposition='outside'
+                    ))
+                    fig_durata.update_layout(
+                        title="Conversione per Durata Corso",
+                        yaxis_title="% Conversione",
+                        height=300,
+                        showlegend=False
+                    )
+                    st.plotly_chart(fig_durata, use_container_width=True)
 
-            |  | Convertiti | Persi |
-            |--|------------|-------|
-            | Gare medie | **{summary_conv['gare_medie_convertiti']:.0f}** | {summary_conv['gare_medie_persi']:.0f} |
-            | Durata corso | {summary_conv['durata_media_convertiti']:.1f} anni | {summary_conv['durata_media_persi']:.1f} anni |
+                st.success(f"""
+                **PROFILO COMPARATIVO:**
 
-            **→ Chi gioca 81 gare converte, chi gioca 16 gare abbandona!**
-            """)
+                |  | Convertiti | Persi |
+                |--|------------|-------|
+                | Gare medie | **{gare_medie_conv:.0f}** | {gare_medie_persi:.0f} |
+                | Durata corso | {durata_media_conv:.1f} anni | {durata_media_persi:.1f} anni |
+
+                **→ Chi gioca tante gare converte, chi gioca poche abbandona!**
+                """)
 
         # TAB 2: FATTORI CONVERSIONE
         with tab2:
             st.subheader("🎯 Fattori che Influenzano la Conversione")
 
-            # Gare giocate - IL FATTORE CHIAVE
-            st.markdown("### 1. Gare Giocate (FATTORE #1)")
-            fig_gare_det = px.bar(
-                conv_gare, x='FasciaGare', y='TassoConv',
-                color='TassoConv', color_continuous_scale='RdYlGn',
-                text='TassoConv',
-                labels={'FasciaGare': 'Gare Giocate', 'TassoConv': '% Conversione'}
-            )
-            fig_gare_det.update_traces(texttemplate='%{text:.0f}%', textposition='outside')
-            fig_gare_det.update_layout(height=350)
-            st.plotly_chart(fig_gare_det, use_container_width=True)
+            if len(conv_gare) > 0:
+                st.markdown("### 1. Gare Giocate (FATTORE #1)")
+                fig_gare_det = px.bar(
+                    conv_gare, x='FasciaGare', y='TassoConv',
+                    color='TassoConv', color_continuous_scale='RdYlGn',
+                    text='TassoConv',
+                    labels={'FasciaGare': 'Gare Giocate', 'TassoConv': '% Conversione'}
+                )
+                fig_gare_det.update_traces(texttemplate='%{text:.0f}%', textposition='outside')
+                fig_gare_det.update_layout(height=350)
+                st.plotly_chart(fig_gare_det, use_container_width=True)
 
-            st.info("""
-            **💡 Insight:** C'è una correlazione fortissima tra gare giocate e conversione.
-            - **0-5 gare**: solo 15% converte → questi non hanno mai "provato" il bridge competitivo
-            - **100+ gare**: 92% converte → chi gioca tanto si appassiona
+            if len(conv_durata) > 0:
+                st.markdown("### 2. Durata del Corso")
+                fig_durata_det = px.bar(
+                    conv_durata, x='AnniCorso', y='TassoConv',
+                    color='TassoConv', color_continuous_scale='Blues',
+                    text='TassoConv',
+                    labels={'AnniCorso': 'Anni di Corso', 'TassoConv': '% Conversione'}
+                )
+                fig_durata_det.update_traces(texttemplate='%{text:.0f}%', textposition='outside')
+                fig_durata_det.update_layout(height=350)
+                st.plotly_chart(fig_durata_det, use_container_width=True)
 
-            **Raccomandazione:** Obiettivo minimo 30 gare/anno per ogni corsista.
-            """)
+                # Chi abbandona quando
+                st.markdown("### 📉 Quando Abbandonano")
+                churn_timing = conv_durata[['AnniCorso', 'Persi']].copy()
+                churn_timing['Persi'] = churn_timing['Persi'].astype(int)
+                tot_persi_chart = churn_timing['Persi'].sum()
 
-            # Durata corso
-            st.markdown("### 2. Durata del Corso")
-            fig_durata_det = px.bar(
-                conv_durata, x='AnniCorso', y='TassoConv',
-                color='TassoConv', color_continuous_scale='Blues',
-                text='TassoConv',
-                labels={'AnniCorso': 'Anni di Corso', 'TassoConv': '% Conversione'}
-            )
-            fig_durata_det.update_traces(texttemplate='%{text:.0f}%', textposition='outside')
-            fig_durata_det.update_layout(height=350)
-            st.plotly_chart(fig_durata_det, use_container_width=True)
-
-            # Mostra anche chi abbandona quando
-            st.markdown("### 📉 Quando Abbandonano")
-            churn_timing = conv_durata[['AnniCorso', 'Persi']].copy()
-            churn_timing['Persi'] = churn_timing['Persi'].astype(int)
-            tot_persi = churn_timing['Persi'].sum()
-            churn_timing['%'] = (churn_timing['Persi'] / tot_persi * 100).round(1)
-
-            fig_churn = px.pie(
-                churn_timing, values='Persi', names='AnniCorso',
-                title=f"Quando abbandonano i {tot_persi:,} corsisti persi",
-                color_discrete_sequence=px.colors.sequential.Reds_r
-            )
-            fig_churn.update_layout(height=350)
-            st.plotly_chart(fig_churn, use_container_width=True)
-
-            st.warning("""
-            **⚠️ Il 58% abbandona dopo solo 1 anno!**
-
-            Il primo anno è critico: bisogna coinvolgerli subito in gare e attività sociali.
-            """)
+                if tot_persi_chart > 0:
+                    fig_churn = px.pie(
+                        churn_timing, values='Persi', names='AnniCorso',
+                        title=f"Quando abbandonano i {tot_persi_chart:,} corsisti persi",
+                        color_discrete_sequence=px.colors.sequential.Reds_r
+                    )
+                    fig_churn.update_layout(height=350)
+                    st.plotly_chart(fig_churn, use_container_width=True)
 
         # TAB 3: PER REGIONE
         with tab3:
             st.subheader("🗺️ Conversione per Regione")
 
-            # Ordina per tasso conversione
-            conv_regione_sorted = conv_regione.sort_values('TassoConv', ascending=True)
+            if len(conv_regione) > 0:
+                conv_regione_sorted = conv_regione.sort_values('TassoConv', ascending=True)
 
-            fig_reg = px.bar(
-                conv_regione_sorted,
-                x='TassoConv', y='Regione',
-                orientation='h',
-                color='TassoConv',
-                color_continuous_scale='RdYlGn',
-                text='TassoConv',
-                hover_data=['Corsisti', 'Convertiti', 'Persi', 'GareMedie']
-            )
-            fig_reg.update_traces(texttemplate='%{text:.0f}%', textposition='outside')
-            fig_reg.update_layout(height=500, yaxis_title="", xaxis_title="% Conversione")
-            st.plotly_chart(fig_reg, use_container_width=True)
+                fig_reg = px.bar(
+                    conv_regione_sorted,
+                    x='TassoConv', y='Regione',
+                    orientation='h',
+                    color='TassoConv',
+                    color_continuous_scale='RdYlGn',
+                    text='TassoConv',
+                    hover_data=['Corsisti', 'Convertiti', 'Persi', 'GareMedie']
+                )
+                fig_reg.update_traces(texttemplate='%{text:.0f}%', textposition='outside')
+                fig_reg.update_layout(height=max(400, len(conv_regione) * 25), yaxis_title="", xaxis_title="% Conversione")
+                st.plotly_chart(fig_reg, use_container_width=True)
 
-            # Top e Bottom
-            col1, col2 = st.columns(2)
-            with col1:
-                st.markdown("### ✅ Migliori Regioni")
-                top_reg = conv_regione.nlargest(5, 'TassoConv')[['Regione', 'TassoConv', 'GareMedie', 'Corsisti']]
-                st.dataframe(top_reg, hide_index=True, use_container_width=True)
-
-            with col2:
-                st.markdown("### ❌ Peggiori Regioni")
-                bottom_reg = conv_regione.nsmallest(5, 'TassoConv')[['Regione', 'TassoConv', 'GareMedie', 'Corsisti']]
-                st.dataframe(bottom_reg, hide_index=True, use_container_width=True)
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.markdown("### ✅ Migliori Regioni")
+                    st.dataframe(conv_regione.nlargest(5, 'TassoConv')[['Regione', 'TassoConv', 'GareMedie', 'Corsisti']],
+                                hide_index=True, use_container_width=True)
+                with col2:
+                    st.markdown("### ❌ Peggiori Regioni")
+                    st.dataframe(conv_regione.nsmallest(5, 'TassoConv')[['Regione', 'TassoConv', 'GareMedie', 'Corsisti']],
+                                hide_index=True, use_container_width=True)
+            else:
+                st.info("Non ci sono abbastanza dati per questa vista.")
 
         # TAB 4: PER ASSOCIAZIONE
         with tab4:
             st.subheader("🏢 Conversione per Associazione")
 
-            # Filtro minimo corsisti
-            min_corsisti = st.slider("Minimo corsisti", 10, 50, 20)
+            min_corsisti = st.slider("Minimo corsisti", 5, 50, 15)
             conv_ass_filt = conv_ass[conv_ass['Corsisti'] >= min_corsisti].copy()
 
-            st.markdown(f"### 🏆 Top Associazioni (≥{min_corsisti} corsisti)")
-            top_ass = conv_ass_filt.nlargest(15, 'TassoConv')
+            if len(conv_ass_filt) > 0:
+                st.markdown(f"### 🏆 Top Associazioni (≥{min_corsisti} corsisti)")
+                top_ass = conv_ass_filt.nlargest(15, 'TassoConv')
 
-            fig_top = px.bar(
-                top_ass.sort_values('TassoConv', ascending=True),
-                x='TassoConv', y='Associazione',
-                orientation='h',
-                color='TassoConv',
-                color_continuous_scale='Greens',
-                text='TassoConv',
-                hover_data=['Corsisti', 'GareMedie', 'Regione']
-            )
-            fig_top.update_traces(texttemplate='%{text:.0f}%', textposition='outside')
-            fig_top.update_layout(height=450, yaxis_title="")
-            st.plotly_chart(fig_top, use_container_width=True)
+                fig_top = px.bar(
+                    top_ass.sort_values('TassoConv', ascending=True),
+                    x='TassoConv', y='Associazione',
+                    orientation='h',
+                    color='TassoConv',
+                    color_continuous_scale='Greens',
+                    text='TassoConv',
+                    hover_data=['Corsisti', 'GareMedie', 'Regione']
+                )
+                fig_top.update_traces(texttemplate='%{text:.0f}%', textposition='outside')
+                fig_top.update_layout(height=450, yaxis_title="")
+                st.plotly_chart(fig_top, use_container_width=True)
 
-            st.markdown("### ⚠️ Associazioni da Monitorare")
-            bottom_ass = conv_ass_filt.nsmallest(15, 'TassoConv')
+                st.markdown("### ⚠️ Associazioni da Monitorare")
+                bottom_ass = conv_ass_filt.nsmallest(15, 'TassoConv')
 
-            fig_bottom = px.bar(
-                bottom_ass.sort_values('TassoConv', ascending=False),
-                x='TassoConv', y='Associazione',
-                orientation='h',
-                color='TassoConv',
-                color_continuous_scale='Reds_r',
-                text='TassoConv',
-                hover_data=['Corsisti', 'GareMedie', 'Regione']
-            )
-            fig_bottom.update_traces(texttemplate='%{text:.0f}%', textposition='outside')
-            fig_bottom.update_layout(height=450, yaxis_title="")
-            st.plotly_chart(fig_bottom, use_container_width=True)
+                fig_bottom = px.bar(
+                    bottom_ass.sort_values('TassoConv', ascending=False),
+                    x='TassoConv', y='Associazione',
+                    orientation='h',
+                    color='TassoConv',
+                    color_continuous_scale='Reds_r',
+                    text='TassoConv',
+                    hover_data=['Corsisti', 'GareMedie', 'Regione']
+                )
+                fig_bottom.update_traces(texttemplate='%{text:.0f}%', textposition='outside')
+                fig_bottom.update_layout(height=450, yaxis_title="")
+                st.plotly_chart(fig_bottom, use_container_width=True)
 
-            # Tabella completa
-            st.markdown("### 📋 Tabella Completa")
-            search_ass = st.text_input("🔍 Cerca associazione:", "")
-            if search_ass:
-                conv_ass_filt = conv_ass_filt[conv_ass_filt['Associazione'].str.contains(search_ass, case=False)]
+                # Tabella completa
+                st.markdown("### 📋 Tabella Completa")
+                search_ass = st.text_input("🔍 Cerca associazione:", "", key="search_ass_conv")
+                if search_ass:
+                    conv_ass_filt = conv_ass_filt[conv_ass_filt['Associazione'].str.contains(search_ass, case=False, na=False)]
 
-            st.dataframe(
-                conv_ass_filt[['Associazione', 'Regione', 'Corsisti', 'Convertiti', 'Persi', 'TassoConv', 'GareMedie']]
-                .sort_values('TassoConv', ascending=False),
-                use_container_width=True,
-                hide_index=True
-            )
+                st.dataframe(
+                    conv_ass_filt[['Associazione', 'Regione', 'Corsisti', 'Convertiti', 'Persi', 'TassoConv', 'GareMedie']]
+                    .sort_values('TassoConv', ascending=False),
+                    use_container_width=True,
+                    hide_index=True
+                )
+            else:
+                st.info(f"Nessuna associazione con almeno {min_corsisti} corsisti.")
 
         # TAB 5: STUDENTI SCUOLE
         with tab5:
             st.subheader("🎒 Bridge nelle Scuole")
 
-            if RESULTS_SCUOLA.exists():
-                with open(RESULTS_SCUOLA / 'summary_scuola.json', 'r') as f:
-                    summary_scuola = json.load(f)
+            # Studenti (filtrati per regione)
+            studenti_filtered = df[
+                (df['MbtDesc'].isin(['Ist.Scolastici', 'Studente CAS', 'CAS Giovanile'])) &
+                (df['GrpArea'].isin(regioni_selezionate)) &
+                (df['Anno'].isin(anni_selezionati))
+            ]
 
-                trend_studenti = pd.read_csv(RESULTS_SCUOLA / 'trend_studenti.csv')
-                studenti_regione = pd.read_csv(RESULTS_SCUOLA / 'studenti_per_regione.csv')
-                scuole_attive = pd.read_csv(RESULTS_SCUOLA / 'scuole_attive.csv')
+            if len(studenti_filtered) > 0:
+                n_studenti = studenti_filtered['MmbCode'].nunique()
+                studenti_set = set(studenti_filtered['MmbCode'].unique())
+                conv_studenti = studenti_set & regolari_members
+                tasso_conv_stud = 100 * len(conv_studenti) / len(studenti_set) if len(studenti_set) > 0 else 0
 
-                st_ = summary_scuola['studenti']
+                # Trend per anno
+                trend_stud = studenti_filtered.groupby('Anno')['MmbCode'].nunique().reset_index()
+                trend_stud.columns = ['Anno', 'Iscritti']
 
                 st.error(f"""
-                **🚨 PROGRAMMA SCOLASTICO IN CRISI**
+                **🚨 PROGRAMMA SCOLASTICO**
 
-                - Pre-COVID: ~1,087 studenti/anno
-                - 2024: solo {st_['recupero_2024']} studenti ({st_['recupero_percentuale']}% del pre-COVID)
-                - Tasso conversione a tesserati: solo **{st_['tasso_conversione']}%**
+                - Studenti nel periodo selezionato: **{n_studenti:,}**
+                - Tasso conversione a tesserati: solo **{tasso_conv_stud:.1f}%**
                 """)
 
                 col1, col2 = st.columns(2)
                 with col1:
                     fig_stud = go.Figure()
                     fig_stud.add_trace(go.Bar(
-                        x=trend_studenti['Anno'],
-                        y=trend_studenti['Iscritti'],
-                        marker_color=['#dc2626' if y < 200 else '#059669' for y in trend_studenti['Iscritti']]
+                        x=trend_stud['Anno'],
+                        y=trend_stud['Iscritti'],
+                        marker_color=['#dc2626' if y < 200 else '#059669' for y in trend_stud['Iscritti']]
                     ))
                     fig_stud.add_vline(x=2020, line_dash="dash", line_color="red", opacity=0.5)
                     fig_stud.update_layout(title="Studenti per Anno", height=350)
@@ -1692,30 +1791,32 @@ elif pagina == "🎓 Bridge a Scuola":
 
                 with col2:
                     fig_conv_stud = go.Figure(go.Pie(
-                        values=[st_['convertiti'], st_['persone_uniche'] - st_['convertiti']],
+                        values=[len(conv_studenti), n_studenti - len(conv_studenti)],
                         labels=['Convertiti', 'Non Convertiti'],
                         hole=0.6,
                         marker_colors=['#059669', '#e5e7eb']
                     ))
                     fig_conv_stud.add_annotation(
-                        text=f"<b>{st_['tasso_conversione']}%</b>",
+                        text=f"<b>{tasso_conv_stud:.1f}%</b>",
                         x=0.5, y=0.5, font_size=24, showarrow=False
                     )
                     fig_conv_stud.update_layout(title="Conversione Studenti", height=350, showlegend=False)
                     st.plotly_chart(fig_conv_stud, use_container_width=True)
 
+                # Scuole attive
                 st.markdown("### 🏫 Scuole Attive")
-                st.dataframe(
-                    scuole_attive.head(15)[['Associazione', 'Studenti', 'EtaMedia', 'Regione']].rename(
-                        columns={'Associazione': 'Scuola', 'Studenti': 'N.', 'EtaMedia': 'Età'}
-                    ),
-                    use_container_width=True, hide_index=True
-                )
-            else:
-                st.warning("Esegui `06_analisi_bridge_scuola.py` per i dati studenti.")
+                scuole = studenti_filtered.groupby('Associazione').agg({
+                    'MmbCode': 'nunique',
+                    'GrpArea': 'first',
+                    'Anni': 'mean'
+                }).reset_index()
+                scuole.columns = ['Scuola', 'Studenti', 'Regione', 'EtàMedia']
+                scuole['EtàMedia'] = scuole['EtàMedia'].round(1)
+                scuole = scuole.sort_values('Studenti', ascending=False)
 
-    else:
-        st.warning("Esegui prima `07_analisi_conversione_corsi.py` per generare i dati.")
+                st.dataframe(scuole.head(15), use_container_width=True, hide_index=True)
+            else:
+                st.info("Nessun dato studenti per i filtri selezionati.")
 
 # ============================================================================
 # PAGINA: GIOCATORI A RISCHIO
