@@ -86,7 +86,8 @@ pagina = st.sidebar.selectbox(
     "📊 Sezione",
     ["🏠 Overview", "📈 Trend Temporale", "🗺️ Analisi Regionale",
      "📍 Analisi Territoriale", "🏆 Mappa Agonismo", "🏢 Analisi Associazioni",
-     "⚠️ Giocatori a Rischio", "🔮 Modello Predittivo", "🔍 Esplora Dati"]
+     "⚠️ Giocatori a Rischio", "🔄 Bridgisti Recuperabili",
+     "🔮 Modello Predittivo", "🔍 Esplora Dati"]
 )
 
 st.sidebar.markdown("---")
@@ -1223,6 +1224,397 @@ elif pagina == "⚠️ Giocatori a Rischio":
         )
     else:
         st.warning("Dati rischio non disponibili. Esegui prima analisi_rischio_v2.py")
+
+# ============================================================================
+# PAGINA: BRIDGISTI RECUPERABILI
+# ============================================================================
+elif pagina == "🔄 Bridgisti Recuperabili":
+    st.title("🔄 Bridgisti Recuperabili")
+    st.markdown("""
+    Modello predittivo multi-fattoriale per identificare i bridgisti che hanno abbandonato
+    e sono **più facilmente recuperabili**, considerando rischio salute/età.
+    """)
+
+    # Carica dati recuperabilità
+    RESULTS_REC = OUTPUT_DIR / 'results_recuperabilita'
+
+    if not RESULTS_REC.exists():
+        st.error("⚠️ Dati non trovati. Esegui prima `python 04_modello_recuperabilita.py`")
+    else:
+        # Carica dati
+        df_rec = pd.read_csv(RESULTS_REC / 'bridgisti_recuperabili_completo.csv')
+        df_prov_rec = pd.read_csv(RESULTS_REC / 'recuperabili_per_provincia.csv')
+        df_reg_rec = pd.read_csv(RESULTS_REC / 'recuperabili_per_regione.csv')
+
+        with open(RESULTS_REC / 'summary_recuperabilita.json', 'r') as f:
+            summary_rec = json.load(f)
+
+        # === METRICHE PRINCIPALI ===
+        col1, col2, col3, col4, col5 = st.columns(5)
+
+        with col1:
+            st.metric("Totale Churned", f"{summary_rec['totale_churned']:,}")
+        with col2:
+            urgenti = summary_rec['urgenti']
+            st.metric("🔴 Urgenti", f"{urgenti:,}",
+                     delta=f"{urgenti/summary_rec['totale_churned']*100:.1f}%")
+        with col3:
+            alta = summary_rec['alta_priorita']
+            st.metric("🟠 Alta Priorità", f"{alta:,}",
+                     delta=f"{alta/summary_rec['totale_churned']*100:.1f}%")
+        with col4:
+            st.metric("Score Medio", f"{summary_rec['score_medio']:.1f}/100")
+        with col5:
+            st.metric("Età Media", f"{summary_rec['eta_media']:.1f} anni")
+
+        st.markdown("---")
+
+        # === TAB LAYOUT ===
+        tab1, tab2, tab3, tab4 = st.tabs(["📋 Lista Recuperabili", "🗺️ Mappa", "📊 Analisi", "📈 Dettaglio Score"])
+
+        # ========== TAB 1: LISTA ==========
+        with tab1:
+            st.subheader("📋 Lista Bridgisti Recuperabili")
+
+            # Filtri
+            col1, col2, col3, col4 = st.columns(4)
+
+            with col1:
+                priorita_filter = st.multiselect(
+                    "Priorità",
+                    df_rec['Priorita'].unique(),
+                    default=['1-URGENTE', '2-ALTA']
+                )
+
+            with col2:
+                eta_range_rec = st.slider(
+                    "Età attuale",
+                    int(df_rec['EtaAttuale'].min()),
+                    int(df_rec['EtaAttuale'].max()),
+                    (20, 80)
+                )
+
+            with col3:
+                score_min = st.slider("Score minimo", 0, 100, 40)
+
+            with col4:
+                anni_assenza = st.slider("Max anni assenza", 1, 8, 5)
+
+            # Applica filtri
+            df_filtered_rec = df_rec[
+                (df_rec['Priorita'].isin(priorita_filter)) &
+                (df_rec['EtaAttuale'] >= eta_range_rec[0]) &
+                (df_rec['EtaAttuale'] <= eta_range_rec[1]) &
+                (df_rec['RecoverabilityScore'] >= score_min) &
+                (df_rec['AnniDaChurn'] <= anni_assenza)
+            ]
+
+            st.markdown(f"**Risultati: {len(df_filtered_rec):,} bridgisti**")
+
+            # Tabella
+            cols_display = ['Nome', 'Priorita', 'RecoverabilityScore', 'EtaAttuale',
+                           'Citta', 'Regione', 'GareMedie', 'AnniDaChurn',
+                           'RischioMorte', 'RischioMalattia']
+            cols_available = [c for c in cols_display if c in df_filtered_rec.columns]
+
+            st.dataframe(
+                df_filtered_rec[cols_available].head(500)
+                .rename(columns={
+                    'RecoverabilityScore': 'Score',
+                    'EtaAttuale': 'Età',
+                    'GareMedie': 'Gare/Anno',
+                    'AnniDaChurn': 'Anni Assente',
+                    'RischioMorte': 'Rischio Morte %',
+                    'RischioMalattia': 'Rischio Malattia %'
+                })
+                .style.background_gradient(subset=['Score'], cmap='RdYlGn')
+                .format({
+                    'Score': '{:.1f}',
+                    'Gare/Anno': '{:.1f}',
+                    'Rischio Morte %': '{:.1f}',
+                    'Rischio Malattia %': '{:.1f}'
+                }),
+                use_container_width=True,
+                height=500
+            )
+
+            # Download
+            csv_rec = df_filtered_rec[cols_available].to_csv(index=False)
+            st.download_button(
+                "📥 Scarica Lista Filtrata (CSV)",
+                csv_rec,
+                "bridgisti_recuperabili.csv",
+                "text/csv"
+            )
+
+        # ========== TAB 2: MAPPA ==========
+        with tab2:
+            st.subheader("🗺️ Mappa Bridgisti Recuperabili")
+
+            # Coordinate regioni
+            COORD_REGIONI_REC = {
+                'PIE': (45.0522, 7.5155), 'VDA': (45.7370, 7.3205),
+                'LOM': (45.4791, 9.8452), 'TRT': (46.0679, 11.1211),
+                'TRB': (46.7, 11.35), 'VEN': (45.4414, 12.3155),
+                'FRI': (46.0711, 13.2346), 'LIG': (44.4112, 8.9327),
+                'EMI': (44.4949, 11.3426), 'TOS': (43.7711, 11.2486),
+                'UMB': (42.9384, 12.6218), 'MAR': (43.6168, 13.5188),
+                'LAZ': (41.8931, 12.4831), 'ABR': (42.1920, 13.7289),
+                'MOL': (41.6738, 14.7520), 'CAM': (40.8394, 14.2528),
+                'PUG': (41.1259, 16.8670), 'BAS': (40.6396, 15.8056),
+                'CAB': (38.9060, 16.5943), 'SIC': (37.5994, 14.0154),
+                'SAR': (40.1209, 9.0129)
+            }
+
+            # Aggiungi coordinate
+            df_reg_rec['lat'] = df_reg_rec['Regione'].map(lambda x: COORD_REGIONI_REC.get(x, (0,0))[0])
+            df_reg_rec['lon'] = df_reg_rec['Regione'].map(lambda x: COORD_REGIONI_REC.get(x, (0,0))[1])
+
+            col1, col2 = st.columns([3, 1])
+
+            with col1:
+                # Selezione metrica
+                metrica_mappa_rec = st.radio(
+                    "Visualizza:",
+                    ["Numero Recuperabili", "Alta Priorità", "Score Medio"],
+                    horizontal=True
+                )
+
+                if metrica_mappa_rec == "Numero Recuperabili":
+                    size_col = 'NumRecuperabili'
+                    color_col = 'NumRecuperabili'
+                    title = "Bridgisti Recuperabili per Regione"
+                elif metrica_mappa_rec == "Alta Priorità":
+                    size_col = 'AltaPriorita'
+                    color_col = 'AltaPriorita'
+                    title = "Bridgisti Alta Priorità per Regione"
+                else:
+                    size_col = 'ScoreMedio'
+                    color_col = 'ScoreMedio'
+                    title = "Score Medio Recuperabilità per Regione"
+
+                fig = px.scatter_geo(
+                    df_reg_rec,
+                    lat='lat', lon='lon',
+                    size=size_col, color=color_col,
+                    hover_name='Regione',
+                    hover_data={
+                        'NumRecuperabili': True,
+                        'AltaPriorita': True,
+                        'ScoreMedio': ':.1f',
+                        'EtaMedia': ':.1f',
+                        'RischioSaluteMedio': ':.1f',
+                        'lat': False, 'lon': False
+                    },
+                    color_continuous_scale='YlOrRd',
+                    size_max=50,
+                    title=title
+                )
+
+                fig.update_geos(
+                    scope='europe',
+                    center=dict(lat=42.5, lon=12.5),
+                    projection_scale=6,
+                    showland=True,
+                    landcolor='rgb(243, 243, 243)',
+                    countrycolor='rgb(204, 204, 204)',
+                    showcoastlines=True
+                )
+                fig.update_layout(height=550, margin=dict(l=0, r=0, t=40, b=0))
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col2:
+                st.markdown("**🎯 Top Regioni**")
+                for _, row in df_reg_rec.nlargest(5, 'AltaPriorita').iterrows():
+                    st.markdown(f"**{row['Regione']}**: {row['AltaPriorita']:.0f} alta priorità")
+
+                st.markdown("---")
+                st.markdown("**📊 Totali**")
+                st.metric("Recuperabili", f"{df_reg_rec['NumRecuperabili'].sum():,}")
+                st.metric("Alta Priorità", f"{df_reg_rec['AltaPriorita'].sum():.0f}")
+
+            # Dettaglio province
+            st.markdown("---")
+            st.subheader("📍 Dettaglio per Provincia")
+
+            # Top 20 province
+            top_prov = df_prov_rec.nlargest(20, 'NumRecuperabili')
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.markdown("##### Top 20 Province per Numero Recuperabili")
+                fig = px.bar(
+                    top_prov.sort_values('NumRecuperabili', ascending=True),
+                    x='NumRecuperabili', y='Provincia', orientation='h',
+                    color='ScoreMedio', color_continuous_scale='RdYlGn'
+                )
+                fig.update_layout(height=500)
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col2:
+                st.markdown("##### Tabella Province")
+                st.dataframe(
+                    df_prov_rec[['Provincia', 'NumRecuperabili', 'ScoreMedio', 'EtaMedia', 'RischioSaluteMedio']]
+                    .sort_values('NumRecuperabili', ascending=False)
+                    .head(30)
+                    .style.background_gradient(subset=['NumRecuperabili'], cmap='Blues')
+                    .format({
+                        'ScoreMedio': '{:.1f}',
+                        'EtaMedia': '{:.1f}',
+                        'RischioSaluteMedio': '{:.1f}'
+                    }),
+                    use_container_width=True,
+                    height=450
+                )
+
+        # ========== TAB 3: ANALISI ==========
+        with tab3:
+            st.subheader("📊 Analisi Recuperabilità")
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.markdown("##### Distribuzione per Priorità")
+                prio_counts = df_rec['Priorita'].value_counts().sort_index()
+                colors_prio = {
+                    '1-URGENTE': '#d62728',
+                    '2-ALTA': '#ff7f0e',
+                    '3-MEDIA': '#2ca02c',
+                    '4-BASSA': '#1f77b4',
+                    '4-DIFFICILE': '#7f7f7f',
+                    '5-NON_RECUPERABILE': '#bcbd22'
+                }
+                fig = px.pie(
+                    values=prio_counts.values,
+                    names=prio_counts.index,
+                    color=prio_counts.index,
+                    color_discrete_map=colors_prio
+                )
+                fig.update_layout(height=400)
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col2:
+                st.markdown("##### Score vs Età")
+                # Sample per performance
+                sample_size = min(2000, len(df_rec))
+                df_sample = df_rec.sample(sample_size)
+                fig = px.scatter(
+                    df_sample,
+                    x='EtaAttuale', y='RecoverabilityScore',
+                    color='Priorita',
+                    color_discrete_map=colors_prio,
+                    opacity=0.6,
+                    title="Score Recuperabilità vs Età"
+                )
+                fig.add_hline(y=50, line_dash="dash", line_color="orange",
+                             annotation_text="Soglia Alta Priorità")
+                fig.update_layout(height=400)
+                st.plotly_chart(fig, use_container_width=True)
+
+            # Rischio salute per età
+            st.markdown("---")
+            st.markdown("##### Rischio Salute per Fascia d'Età")
+
+            df_rec['FasciaEtaRec'] = pd.cut(
+                df_rec['EtaAttuale'],
+                bins=[0, 50, 60, 70, 75, 80, 85, 90, 120],
+                labels=['<50', '50-60', '60-70', '70-75', '75-80', '80-85', '85-90', '90+']
+            )
+
+            rischio_eta = df_rec.groupby('FasciaEtaRec').agg({
+                'MmbCode': 'count',
+                'RischioMorte': 'mean',
+                'RischioMalattia': 'mean',
+                'RecoverabilityScore': 'mean'
+            }).reset_index()
+            rischio_eta.columns = ['Fascia Età', 'N Giocatori', 'Rischio Morte %',
+                                  'Rischio Malattia %', 'Score Medio']
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                fig = px.bar(
+                    rischio_eta,
+                    x='Fascia Età', y=['Rischio Morte %', 'Rischio Malattia %'],
+                    barmode='group',
+                    title="Rischio Salute per Età",
+                    color_discrete_sequence=['#d62728', '#ff7f0e']
+                )
+                fig.update_layout(height=350)
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col2:
+                fig = px.bar(
+                    rischio_eta,
+                    x='Fascia Età', y='N Giocatori',
+                    color='Score Medio',
+                    color_continuous_scale='RdYlGn',
+                    title="Distribuzione Churned per Età"
+                )
+                fig.update_layout(height=350)
+                st.plotly_chart(fig, use_container_width=True)
+
+            # Tabella riepilogativa
+            st.markdown("---")
+            st.dataframe(
+                rischio_eta.style.background_gradient(subset=['Rischio Morte %'], cmap='Reds')
+                .background_gradient(subset=['Score Medio'], cmap='Greens')
+                .format({
+                    'Rischio Morte %': '{:.1f}',
+                    'Rischio Malattia %': '{:.1f}',
+                    'Score Medio': '{:.1f}'
+                }),
+                use_container_width=True
+            )
+
+        # ========== TAB 4: DETTAGLIO SCORE ==========
+        with tab4:
+            st.subheader("📈 Componenti dello Score di Recuperabilità")
+
+            st.markdown("""
+            Il **RecoverabilityScore** (0-100) è calcolato combinando:
+            - **Engagement Score** (25%): Gare giocate, punti, agonismo
+            - **Loyalty Score** (20%): Anni di presenza, progressione categoria
+            - **Recency Score** (20%): Quanto recente è l'abbandono
+            - **Geographic Score** (10%): Retention storica della zona
+            - **Social Score** (10%): Connessioni nel circolo
+            - **Health Penalty** (15%): Rischio mortalità/malattia per età
+            """)
+
+            # Medie componenti per priorità
+            st.markdown("##### Media Componenti per Priorità")
+
+            components = ['EngagementScore', 'LoyaltyScore', 'RecencyScore',
+                         'GeographicScore', 'SocialScore', 'HealthPenalty']
+            components_available = [c for c in components if c in df_rec.columns]
+
+            if components_available:
+                comp_by_prio = df_rec.groupby('Priorita')[components_available].mean().reset_index()
+
+                fig = px.bar(
+                    comp_by_prio.melt(id_vars='Priorita', var_name='Componente', value_name='Valore'),
+                    x='Priorita', y='Valore', color='Componente',
+                    barmode='group',
+                    title="Confronto Componenti Score per Priorità"
+                )
+                fig.update_layout(height=450)
+                st.plotly_chart(fig, use_container_width=True)
+
+            # Correlazioni
+            st.markdown("---")
+            st.markdown("##### Correlazione tra Componenti")
+
+            if len(components_available) > 1:
+                corr_matrix = df_rec[components_available + ['RecoverabilityScore']].corr()
+                fig = px.imshow(
+                    corr_matrix,
+                    text_auto='.2f',
+                    color_continuous_scale='RdBu_r',
+                    title="Matrice Correlazioni"
+                )
+                fig.update_layout(height=450)
+                st.plotly_chart(fig, use_container_width=True)
 
 # ============================================================================
 # PAGINA: MODELLO PREDITTIVO

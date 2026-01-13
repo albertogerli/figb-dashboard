@@ -1,0 +1,12 @@
+{
+  "totale_churned": 17433,
+  "urgenti": 159,
+  "alta_priorita": 1373,
+  "media_priorita": 2466,
+  "bassa_priorita": 2799,
+  "non_recuperabili": 10636,
+  "score_medio": 30.315541314583474,
+  "eta_media": 73.82156284342646,
+  "rischio_salute_medio": 59.07325075593875,
+  "anni_assenza_media": 4.8472437331497735
+}
