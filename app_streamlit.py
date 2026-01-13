@@ -549,10 +549,284 @@ elif pagina == "📍 Analisi Territoriale":
         st.markdown("---")
 
         # === TAB LAYOUT ===
-        tab1, tab2, tab3, tab4 = st.tabs(["🏙️ Province", "🌆 Città Metropolitane", "📈 Trend", "🗺️ Mappa Penetrazione"])
+        tab1, tab2, tab3, tab4, tab5 = st.tabs(["💚 Vitalità Bridge", "🏙️ Province", "🌆 Città Metropolitane", "📈 Trend", "🗺️ Mappa Penetrazione"])
 
-        # ========== TAB 1: PROVINCE ==========
+        # ========== TAB 0: VITALITÀ BRIDGE ==========
         with tab1:
+            st.subheader("💚 Indice di Vitalità del Bridge")
+            st.markdown("""
+            **A colpo d'occhio**: dove il bridge è più vivo? L'indice combina:
+            - 🎯 **Penetrazione** (tesserati per 100k abitanti)
+            - 🎮 **Attività** (gare medie giocate)
+            - 👶 **Giovinezza** (% under 60 anni)
+            - 🏆 **Agonismo** (% giocatori agonisti)
+            """)
+
+            # Calcola indice vitalità per provincia
+            vit_prov = df_ultimo.groupby('Provincia').agg({
+                'MmbCode': 'nunique',
+                'GareGiocate': 'mean',
+                'Anni': 'mean',
+                'IsAgonista': 'mean'
+            }).reset_index()
+            vit_prov.columns = ['Provincia', 'Tesserati', 'GareMedie', 'EtaMedia', 'PctAgonisti']
+
+            # Aggiungi popolazione e calcola metriche
+            vit_prov['Popolazione'] = vit_prov['Provincia'].map(PROVINCE_POPOLAZIONE)
+            vit_prov['Penetrazione'] = vit_prov.apply(
+                lambda r: (r['Tesserati'] / r['Popolazione'] * 100000) if r['Popolazione'] and r['Popolazione'] > 0 else 0, axis=1
+            )
+            vit_prov['IsCittaMetro'] = vit_prov['Provincia'].apply(lambda x: x in CITTA_METROPOLITANE)
+            vit_prov['Regione'] = vit_prov['Provincia'].map(PROVINCIA_TO_REGIONE)
+
+            # Calcola % under 60
+            under60_prov = df_ultimo[df_ultimo['Anni'] < 60].groupby('Provincia')['MmbCode'].nunique().reset_index()
+            under60_prov.columns = ['Provincia', 'Under60']
+            vit_prov = vit_prov.merge(under60_prov, on='Provincia', how='left')
+            vit_prov['Under60'] = vit_prov['Under60'].fillna(0)
+            vit_prov['PctUnder60'] = (vit_prov['Under60'] / vit_prov['Tesserati'] * 100).fillna(0)
+
+            # Filtra province con almeno 15 tesserati
+            vit_prov = vit_prov[vit_prov['Tesserati'] >= 15].copy()
+
+            # CALCOLO INDICE VITALITÀ (0-100)
+            # Normalizza ogni componente 0-100 e poi media pesata
+            vit_prov['Score_Penetrazione'] = (vit_prov['Penetrazione'] / vit_prov['Penetrazione'].max() * 100).clip(0, 100)
+            vit_prov['Score_Attivita'] = (vit_prov['GareMedie'] / 50 * 100).clip(0, 100)  # 50 gare = 100
+            vit_prov['Score_Giovinezza'] = (vit_prov['PctUnder60'] / 30 * 100).clip(0, 100)  # 30% under60 = 100
+            vit_prov['Score_Agonismo'] = (vit_prov['PctAgonisti'] * 100 / 0.5 * 100).clip(0, 100)  # 50% agonisti = 100
+
+            # Indice finale pesato
+            vit_prov['IndiceVitalita'] = (
+                vit_prov['Score_Penetrazione'] * 0.35 +
+                vit_prov['Score_Attivita'] * 0.30 +
+                vit_prov['Score_Giovinezza'] * 0.20 +
+                vit_prov['Score_Agonismo'] * 0.15
+            ).round(1)
+
+            # Classifica vitalità
+            def classifica_vitalita(score):
+                if score >= 70: return '🟢 Eccellente'
+                elif score >= 50: return '🟡 Buono'
+                elif score >= 30: return '🟠 Medio'
+                else: return '🔴 Critico'
+
+            vit_prov['Stato'] = vit_prov['IndiceVitalita'].apply(classifica_vitalita)
+
+            # Ordina per indice
+            vit_prov = vit_prov.sort_values('IndiceVitalita', ascending=False)
+
+            # === VISUALIZZAZIONE PRINCIPALE ===
+            col1, col2 = st.columns([2, 1])
+
+            with col1:
+                st.markdown("##### 🗺️ Mappa Vitalità Bridge")
+
+                # Coordinate province principali (approssimate al centroide regionale)
+                COORD_PROV = {
+                    'Roma': (41.89, 12.48), 'Milano': (45.46, 9.19), 'Torino': (45.07, 7.69),
+                    'Napoli': (40.85, 14.27), 'Bologna': (44.49, 11.34), 'Firenze': (43.77, 11.25),
+                    'Genova': (44.41, 8.93), 'Venezia': (45.44, 12.32), 'Palermo': (38.12, 13.36),
+                    'Bari': (41.13, 16.87), 'Catania': (37.50, 15.09), 'Cagliari': (39.22, 9.12),
+                    'Trieste': (45.65, 13.78), 'Padova': (45.41, 11.88), 'Verona': (45.44, 10.99),
+                    'Brescia': (45.54, 10.21), 'Bergamo': (45.70, 9.67), 'Modena': (44.65, 10.92),
+                    'Parma': (44.80, 10.33), 'Reggio Emilia': (44.70, 10.63), 'Livorno': (43.55, 10.31),
+                    'Pisa': (43.72, 10.40), 'Lucca': (43.84, 10.50), 'Ancona': (43.62, 13.52),
+                    'Perugia': (43.11, 12.39), 'Pescara': (42.46, 14.21), 'Salerno': (40.68, 14.77),
+                    'Lecce': (40.35, 18.17), 'Messina': (38.19, 15.55), 'Sassari': (40.73, 8.56),
+                    'Trento': (46.07, 11.12), 'Bolzano': (46.50, 11.35), 'Udine': (46.06, 13.24),
+                    'Ravenna': (44.42, 12.20), 'Rimini': (44.06, 12.57), 'Ferrara': (44.84, 11.62),
+                    'Piacenza': (45.05, 9.69), 'La Spezia': (44.10, 9.82), 'Savona': (44.31, 8.48),
+                    'Imperia': (43.89, 8.03), 'Arezzo': (43.46, 11.88), 'Siena': (43.32, 11.33),
+                    'Grosseto': (42.76, 11.11), 'Terni': (42.56, 12.64), 'Macerata': (43.30, 13.45),
+                    'Ascoli Piceno': (42.85, 13.57), 'Foggia': (41.46, 15.54), 'Taranto': (40.48, 17.23),
+                    'Cosenza': (39.30, 16.25), 'Reggio Calabria': (38.11, 15.65), 'Catanzaro': (38.91, 16.59),
+                    'Potenza': (40.64, 15.80), 'Matera': (40.67, 16.60), 'Siracusa': (37.07, 15.29),
+                    'Ragusa': (36.93, 14.73), 'Trapani': (38.02, 12.51), 'Agrigento': (37.31, 13.58),
+                    'Nuoro': (40.32, 9.33), 'Oristano': (39.90, 8.59)
+                }
+
+                # Aggiungi coordinate
+                vit_prov['lat'] = vit_prov['Provincia'].map(lambda x: COORD_PROV.get(x, (None, None))[0])
+                vit_prov['lon'] = vit_prov['Provincia'].map(lambda x: COORD_PROV.get(x, (None, None))[1])
+
+                # Filtra solo province con coordinate
+                vit_map = vit_prov.dropna(subset=['lat', 'lon'])
+
+                fig = px.scatter_geo(
+                    vit_map,
+                    lat='lat', lon='lon',
+                    size='Tesserati',
+                    color='IndiceVitalita',
+                    hover_name='Provincia',
+                    hover_data={
+                        'IndiceVitalita': ':.1f',
+                        'Tesserati': True,
+                        'Penetrazione': ':.1f',
+                        'GareMedie': ':.1f',
+                        'PctUnder60': ':.1f',
+                        'Stato': True,
+                        'lat': False, 'lon': False
+                    },
+                    color_continuous_scale='RdYlGn',
+                    size_max=40,
+                    title="Indice Vitalità Bridge per Provincia"
+                )
+                fig.update_coloraxes(colorbar_title="Vitalità")
+                fig.update_geos(
+                    scope='europe',
+                    center=dict(lat=42.5, lon=12.5),
+                    projection_scale=6,
+                    showland=True, landcolor='rgb(243, 243, 243)',
+                    showcoastlines=True
+                )
+                fig.update_layout(height=500, margin=dict(l=0, r=0, t=40, b=0))
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col2:
+                st.markdown("##### 📊 Classifica Vitalità")
+
+                # Conteggio per stato
+                stato_counts = vit_prov['Stato'].value_counts()
+                for stato in ['🟢 Eccellente', '🟡 Buono', '🟠 Medio', '🔴 Critico']:
+                    count = stato_counts.get(stato, 0)
+                    st.markdown(f"{stato}: **{count}** province")
+
+                st.markdown("---")
+                st.markdown("**🏆 Top 5 Vitalità**")
+                for _, row in vit_prov.head(5).iterrows():
+                    cm = "🏙️" if row['IsCittaMetro'] else ""
+                    st.markdown(f"**{row['Provincia']}** {cm}: {row['IndiceVitalita']:.0f}")
+
+                st.markdown("---")
+                st.markdown("**⚠️ Bottom 5 Vitalità**")
+                for _, row in vit_prov.tail(5).iterrows():
+                    cm = "🏙️" if row['IsCittaMetro'] else ""
+                    st.markdown(f"**{row['Provincia']}** {cm}: {row['IndiceVitalita']:.0f}")
+
+            # === CLASSIFICA COMPLETA ===
+            st.markdown("---")
+            st.markdown("##### 📋 Classifica Completa Province")
+
+            # Grafico a barre orizzontali con colori per vitalità
+            col1, col2 = st.columns([3, 2])
+
+            with col1:
+                top30 = vit_prov.head(30)
+                fig = px.bar(
+                    top30.sort_values('IndiceVitalita', ascending=True),
+                    x='IndiceVitalita', y='Provincia', orientation='h',
+                    color='IndiceVitalita',
+                    color_continuous_scale='RdYlGn',
+                    text='IndiceVitalita',
+                    hover_data=['Tesserati', 'Penetrazione', 'GareMedie', 'PctUnder60']
+                )
+                fig.update_traces(texttemplate='%{text:.0f}', textposition='outside')
+                fig.update_layout(height=700, showlegend=False)
+                fig.add_vline(x=70, line_dash="dash", line_color="green", annotation_text="Eccellente")
+                fig.add_vline(x=50, line_dash="dash", line_color="orange", annotation_text="Buono")
+                fig.add_vline(x=30, line_dash="dash", line_color="red", annotation_text="Medio")
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col2:
+                st.markdown("**Tabella Dettaglio**")
+                st.dataframe(
+                    vit_prov[['Provincia', 'Stato', 'IndiceVitalita', 'Tesserati', 'Penetrazione', 'GareMedie', 'PctUnder60', 'PctAgonisti']]
+                    .rename(columns={
+                        'IndiceVitalita': 'Vitalità',
+                        'Penetrazione': 'Tess/100k',
+                        'GareMedie': 'Gare',
+                        'PctUnder60': '%<60',
+                        'PctAgonisti': '%Agon'
+                    })
+                    .style.background_gradient(subset=['Vitalità'], cmap='RdYlGn')
+                    .format({
+                        'Vitalità': '{:.0f}',
+                        'Tess/100k': '{:.1f}',
+                        'Gare': '{:.1f}',
+                        '%<60': '{:.1f}%',
+                        '%Agon': '{:.1%}'
+                    }),
+                    use_container_width=True,
+                    height=650
+                )
+
+            # === VITALITÀ PER REGIONE ===
+            st.markdown("---")
+            st.markdown("##### 🗺️ Vitalità per Regione")
+
+            vit_reg = df_ultimo.groupby('GrpArea').agg({
+                'MmbCode': 'nunique',
+                'GareGiocate': 'mean',
+                'Anni': 'mean',
+                'IsAgonista': 'mean'
+            }).reset_index()
+            vit_reg.columns = ['Regione', 'Tesserati', 'GareMedie', 'EtaMedia', 'PctAgonisti']
+            vit_reg['Popolazione'] = vit_reg['Regione'].map(REGIONE_POPOLAZIONE)
+            vit_reg['Penetrazione'] = vit_reg.apply(
+                lambda r: (r['Tesserati'] / r['Popolazione'] * 100000) if r['Popolazione'] and r['Popolazione'] > 0 else 0, axis=1
+            )
+
+            # % under 60 per regione
+            under60_reg = df_ultimo[df_ultimo['Anni'] < 60].groupby('GrpArea')['MmbCode'].nunique().reset_index()
+            under60_reg.columns = ['Regione', 'Under60']
+            vit_reg = vit_reg.merge(under60_reg, on='Regione', how='left')
+            vit_reg['PctUnder60'] = (vit_reg['Under60'].fillna(0) / vit_reg['Tesserati'] * 100)
+
+            # Indice vitalità regionale
+            vit_reg['Score_Pen'] = (vit_reg['Penetrazione'] / vit_reg['Penetrazione'].max() * 100).clip(0, 100)
+            vit_reg['Score_Att'] = (vit_reg['GareMedie'] / 50 * 100).clip(0, 100)
+            vit_reg['Score_Gio'] = (vit_reg['PctUnder60'] / 30 * 100).clip(0, 100)
+            vit_reg['Score_Ago'] = (vit_reg['PctAgonisti'] * 100 / 0.5 * 100).clip(0, 100)
+
+            vit_reg['IndiceVitalita'] = (
+                vit_reg['Score_Pen'] * 0.35 +
+                vit_reg['Score_Att'] * 0.30 +
+                vit_reg['Score_Gio'] * 0.20 +
+                vit_reg['Score_Ago'] * 0.15
+            ).round(1)
+
+            vit_reg['NomeRegione'] = vit_reg['Regione'].map(NOMI_REGIONI_COMPLETI)
+            vit_reg = vit_reg.sort_values('IndiceVitalita', ascending=False)
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                fig = px.bar(
+                    vit_reg.sort_values('IndiceVitalita', ascending=True),
+                    x='IndiceVitalita', y='NomeRegione', orientation='h',
+                    color='IndiceVitalita',
+                    color_continuous_scale='RdYlGn',
+                    text='IndiceVitalita',
+                    title="Indice Vitalità per Regione"
+                )
+                fig.update_traces(texttemplate='%{text:.0f}', textposition='outside')
+                fig.update_layout(height=550, showlegend=False)
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col2:
+                st.dataframe(
+                    vit_reg[['NomeRegione', 'IndiceVitalita', 'Tesserati', 'Penetrazione', 'GareMedie', 'PctUnder60']]
+                    .rename(columns={
+                        'NomeRegione': 'Regione',
+                        'IndiceVitalita': 'Vitalità',
+                        'Penetrazione': 'Tess/100k',
+                        'GareMedie': 'Gare',
+                        'PctUnder60': '%<60'
+                    })
+                    .style.background_gradient(subset=['Vitalità'], cmap='RdYlGn')
+                    .format({
+                        'Vitalità': '{:.0f}',
+                        'Tess/100k': '{:.1f}',
+                        'Gare': '{:.1f}',
+                        '%<60': '{:.1f}%'
+                    }),
+                    use_container_width=True,
+                    height=500
+                )
+
+        # ========== TAB 2: PROVINCE ==========
+        with tab2:
             st.subheader("📊 Classifica Province per Tesserati e Penetrazione")
 
             col1, col2 = st.columns(2)
@@ -629,8 +903,8 @@ elif pagina == "📍 Analisi Territoriale":
                 height=500
             )
 
-        # ========== TAB 2: CITTÀ METROPOLITANE ==========
-        with tab2:
+        # ========== TAB 3: CITTÀ METROPOLITANE ==========
+        with tab3:
             st.subheader("🌆 Focus Città Metropolitane")
             st.markdown("Le 14 città metropolitane italiane a confronto")
 
@@ -723,8 +997,8 @@ elif pagina == "📍 Analisi Territoriale":
                 use_container_width=True
             )
 
-        # ========== TAB 3: TREND TEMPORALE ==========
-        with tab3:
+        # ========== TAB 4: TREND TEMPORALE ==========
+        with tab4:
             st.subheader("📈 Evoluzione Territoriale nel Tempo")
 
             # Trend per provincia (top 10)
@@ -800,8 +1074,8 @@ elif pagina == "📍 Analisi Territoriale":
                 fig.update_xaxes(title=f"Variazione % ({primo_anno} → {ultimo_anno_var})")
                 st.plotly_chart(fig, use_container_width=True)
 
-        # ========== TAB 4: MAPPA PENETRAZIONE ==========
-        with tab4:
+        # ========== TAB 5: MAPPA PENETRAZIONE ==========
+        with tab5:
             st.subheader("🗺️ Mappa Penetrazione per Regione")
             st.markdown("Tesserati per 100.000 abitanti a livello regionale")
 
