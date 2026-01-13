@@ -101,7 +101,7 @@ pagina = st.sidebar.selectbox(
     ["🏠 Overview", "📈 Trend Temporale", "🗺️ Analisi Regionale",
      "📍 Analisi Territoriale", "🏆 Mappa Agonismo", "🏢 Analisi Associazioni",
      "🎓 Bridge a Scuola", "⚠️ Giocatori a Rischio", "🔄 Bridgisti Recuperabili",
-     "🔮 Modello Predittivo", "🔍 Esplora Dati"]
+     "🔮 Modello Predittivo", "🌱 Opportunità Crescita", "🔍 Esplora Dati"]
 )
 
 st.sidebar.markdown("---")
@@ -2532,6 +2532,338 @@ elif pagina == "🔮 Modello Predittivo":
 
     else:
         st.warning("Dati predittivi non disponibili. Esegui prima modello_predittivo.py")
+
+# ============================================================================
+# PAGINA: OPPORTUNITA' CRESCITA
+# ============================================================================
+elif pagina == "🌱 Opportunità Crescita":
+    st.title("🌱 Opportunità di Crescita")
+
+    st.markdown("""
+    Analisi delle opportunità per aumentare il numero di bridgisti,
+    categorizzate per facilità di "attacco".
+    """)
+
+    RESULTS_OPP = OUTPUT_DIR / 'results_opportunita'
+
+    if RESULTS_OPP.exists():
+        # Carica dati
+        with open(RESULTS_OPP / 'summary_opportunita.json', 'r') as f:
+            summary_opp = json.load(f)
+
+        quasi_agganciati = pd.read_csv(RESULTS_OPP / 'quasi_agganciati.csv')
+        dormienti = pd.read_csv(RESULTS_OPP / 'dormienti.csv')
+        gap_demo = pd.read_csv(RESULTS_OPP / 'gap_demografico.csv')
+        opp_geo = pd.read_csv(RESULTS_OPP / 'opportunita_geografiche.csv')
+        persi_covid = pd.read_csv(RESULTS_OPP / 'persi_covid.csv')
+
+        # Overview KPI
+        st.markdown("### 📊 Riepilogo Opportunità")
+
+        col1, col2, col3, col4 = st.columns(4)
+
+        with col1:
+            st.metric(
+                "Quasi Agganciati",
+                f"{summary_opp['quasi_agganciati']['totale']:,}",
+                help="Hanno provato 1-2 anni, poche gare, poi spariti"
+            )
+        with col2:
+            st.metric(
+                "Dormienti",
+                f"{summary_opp['dormienti']['totale']:,}",
+                help="Tesserati attivi che non giocano gare"
+            )
+        with col3:
+            st.metric(
+                "Gap 60-70 anni",
+                f"{summary_opp['gap_demografico']['gap_60_70']:,}",
+                help="Bridgisti potenziali nella fascia 60-70"
+            )
+        with col4:
+            st.metric(
+                "Persi COVID",
+                f"{summary_opp['persi_covid']['totale']:,}",
+                help="Non tornati dopo il 2020"
+            )
+
+        st.markdown("---")
+
+        # Tabs per sezioni
+        tab1, tab2, tab3, tab4, tab5 = st.tabs([
+            "🎯 Quasi Agganciati",
+            "😴 Dormienti",
+            "📊 Gap Demografico",
+            "🗺️ Opportunità Geo",
+            "😷 Effetto COVID"
+        ])
+
+        # TAB 1: Quasi Agganciati
+        with tab1:
+            st.subheader("🎯 Quasi Agganciati")
+            st.markdown("""
+            **Chi sono:** Persone che hanno fatto 1-2 anni di tessera, giocato poche gare,
+            e poi sono sparite. Hanno "assaggiato" il bridge ma non si sono agganciati.
+
+            **Perché sono un'opportunità:** Conoscono già il gioco, potrebbero essere
+            ricontattati con offerte mirate.
+            """)
+
+            if len(quasi_agganciati) > 0:
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    # Per regione
+                    qa_reg = quasi_agganciati.groupby('Regione').agg({
+                        'MmbCode': 'count',
+                        'GareTotali': 'mean',
+                        'Eta': 'mean'
+                    }).reset_index()
+                    qa_reg.columns = ['Regione', 'Numero', 'GareMedie', 'EtàMedia']
+                    qa_reg = qa_reg.sort_values('Numero', ascending=True).tail(15)
+
+                    fig = px.bar(qa_reg, y='Regione', x='Numero', orientation='h',
+                                title="Top 15 Regioni con Quasi Agganciati",
+                                text='Numero')
+                    fig.update_traces(textposition='auto', cliponaxis=False)
+                    fig.update_layout(margin=dict(r=60))
+                    st.plotly_chart(fig, use_container_width=True)
+
+                with col2:
+                    # Per anno di abbandono
+                    qa_anno = quasi_agganciati.groupby('AnnoFine').size().reset_index(name='Numero')
+                    fig = px.bar(qa_anno, x='AnnoFine', y='Numero',
+                                title="Quando hanno abbandonato",
+                                text='Numero')
+                    fig.update_traces(textposition='auto', cliponaxis=False)
+                    st.plotly_chart(fig, use_container_width=True)
+
+                # Profilo
+                st.markdown("#### Profilo Tipo")
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Età Media", f"{quasi_agganciati['Eta'].mean():.0f} anni")
+                with col2:
+                    st.metric("Gare Totali Medie", f"{quasi_agganciati['GareTotali'].mean():.1f}")
+                with col3:
+                    st.metric("Anni Assenza Media", f"{quasi_agganciati['AnniAssenza'].mean():.1f}")
+
+                # Top associazioni
+                qa_ass = quasi_agganciati.groupby('Associazione').size().reset_index(name='Numero')
+                qa_ass = qa_ass.sort_values('Numero', ascending=False).head(20)
+
+                with st.expander("🏢 Top 20 Associazioni con Quasi Agganciati"):
+                    st.dataframe(qa_ass, use_container_width=True)
+            else:
+                st.info("Nessun quasi agganciato identificato")
+
+        # TAB 2: Dormienti
+        with tab2:
+            st.subheader("😴 Dormienti")
+            st.markdown("""
+            **Chi sono:** Persone attualmente tesserate che non giocano nessuna gara.
+
+            **Perché sono un'opportunità:** Sono già dentro la federazione!
+            Basta attivarli con eventi dedicati.
+            """)
+
+            if len(dormienti) > 0:
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    dorm_cat = dormienti.groupby('MbtDesc').size().reset_index(name='Numero')
+                    dorm_cat = dorm_cat.sort_values('Numero', ascending=True)
+
+                    fig = px.bar(dorm_cat, y='MbtDesc', x='Numero', orientation='h',
+                                title="Dormienti per Tipo Tessera",
+                                text='Numero')
+                    fig.update_traces(textposition='auto', cliponaxis=False)
+                    fig.update_layout(margin=dict(r=60))
+                    st.plotly_chart(fig, use_container_width=True)
+
+                with col2:
+                    dorm_reg = dormienti.groupby('Regione').size().reset_index(name='Numero')
+                    dorm_reg = dorm_reg.sort_values('Numero', ascending=True).tail(15)
+
+                    fig = px.bar(dorm_reg, y='Regione', x='Numero', orientation='h',
+                                title="Top 15 Regioni con Dormienti",
+                                text='Numero')
+                    fig.update_traces(textposition='auto', cliponaxis=False)
+                    fig.update_layout(margin=dict(r=60))
+                    st.plotly_chart(fig, use_container_width=True)
+
+                st.metric("Età Media Dormienti", f"{dormienti['Anni'].mean():.0f} anni")
+            else:
+                st.success("✅ Ottimo! Nessun dormiente nel dataset - tutti i tesserati giocano!")
+
+        # TAB 3: Gap Demografico
+        with tab3:
+            st.subheader("📊 Gap Demografico")
+            st.markdown("""
+            **Cos'è:** Confronto tra la penetrazione del bridge nelle diverse fasce d'età
+            rispetto alla popolazione italiana.
+
+            **Insight chiave:** La fascia 60-70 anni ha una penetrazione molto più bassa
+            della fascia 70-80 (benchmark). C'è un gap di ~3.600 potenziali bridgisti!
+            """)
+
+            # Grafico penetrazione
+            fig = px.bar(gap_demo, x='FasciaEta', y='Per100k',
+                        title="Penetrazione Bridge per 100k abitanti",
+                        text='Per100k',
+                        color='Per100k',
+                        color_continuous_scale='Blues')
+            fig.update_traces(textposition='auto', cliponaxis=False, texttemplate='%{text:.1f}')
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Focus 60-70
+            st.markdown("### 🎯 Focus Fascia 60-70")
+            gap_60_70 = gap_demo[gap_demo['FasciaEta'] == '60-70'].iloc[0] if '60-70' in gap_demo['FasciaEta'].values else None
+
+            if gap_60_70 is not None:
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Popolazione", f"{gap_60_70['Popolazione']:,.0f}")
+                with col2:
+                    st.metric("Bridgisti Attuali", f"{gap_60_70['Bridgisti']:,.0f}")
+                with col3:
+                    st.metric("Gap vs Benchmark 70-80", f"{gap_60_70['Gap']:,.0f}",
+                             help="Se avesse la stessa penetrazione della fascia 70-80")
+
+                st.info(f"""
+                💡 **Insight:** La fascia 60-70 ha una penetrazione di {gap_60_70['Per100k']:.1f} per 100k abitanti,
+                mentre la fascia 70-80 ha {gap_demo[gap_demo['FasciaEta']=='70-80']['Per100k'].values[0]:.1f} per 100k.
+
+                Se raggiungessimo la stessa penetrazione, avremmo **{gap_60_70['Gap']:,.0f} bridgisti in più**!
+                """)
+
+            # Tabella completa
+            with st.expander("📋 Dettaglio per fascia d'età"):
+                st.dataframe(gap_demo, use_container_width=True)
+
+        # TAB 4: Opportunità Geografiche
+        with tab4:
+            st.subheader("🗺️ Opportunità Geografiche")
+            st.markdown("""
+            **Cos'è:** Province con alto potenziale inespresso, calcolato confrontando
+            la penetrazione del bridge rispetto alla media nazionale.
+
+            **Come usarlo:** Queste province potrebbero beneficiare di nuove iniziative,
+            apertura di circoli, o campagne promozionali.
+            """)
+
+            # Top 20 province
+            top_province = opp_geo.sort_values('Gap', ascending=False).head(20)
+
+            fig = px.bar(top_province.sort_values('Gap'),
+                        y='Provincia', x='Gap', orientation='h',
+                        title="Top 20 Province con Maggior Potenziale",
+                        text='Gap',
+                        color='Per100k',
+                        color_continuous_scale='RdYlGn')
+            fig.update_traces(textposition='auto', cliponaxis=False)
+            fig.update_layout(margin=dict(r=60))
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Dettagli
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.markdown("#### Province con 0 bridgisti")
+                zero_bridge = opp_geo[opp_geo['Bridgisti'] == 0].sort_values('Popolazione', ascending=False)
+                if len(zero_bridge) > 0:
+                    st.dataframe(zero_bridge[['Provincia', 'Popolazione']], use_container_width=True)
+                else:
+                    st.success("Tutte le province hanno almeno un bridgista!")
+
+            with col2:
+                st.markdown("#### Province più sotto-penetrate")
+                sotto_pen = opp_geo[opp_geo['Bridgisti'] > 0].sort_values('Per100k').head(10)
+                st.dataframe(sotto_pen[['Provincia', 'Bridgisti', 'Per100k']], use_container_width=True)
+
+            with st.expander("📋 Tutte le province"):
+                st.dataframe(opp_geo.sort_values('Gap', ascending=False), use_container_width=True)
+
+        # TAB 5: Effetto COVID
+        with tab5:
+            st.subheader("😷 Effetto COVID Persistente")
+            st.markdown("""
+            **Chi sono:** Bridgisti che erano attivi nel 2019 e non sono mai tornati dopo il COVID.
+
+            **Segmentazione:**
+            - **Alta Priorità:** Under 75, molte gare, potrebbero tornare
+            - **Media Priorità:** 75-85 anni, discretamente attivi
+            - **Difficile:** Over 85 o poche gare storiche
+            """)
+
+            if len(persi_covid) > 0:
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    # Per recuperabilità
+                    rec_count = persi_covid['Recuperabile'].value_counts().reset_index()
+                    rec_count.columns = ['Categoria', 'Numero']
+
+                    fig = px.pie(rec_count, values='Numero', names='Categoria',
+                                title="Segmentazione Recuperabilità",
+                                color_discrete_sequence=px.colors.qualitative.Set2)
+                    st.plotly_chart(fig, use_container_width=True)
+
+                with col2:
+                    # Per regione
+                    covid_reg = persi_covid.groupby('Regione').size().reset_index(name='Numero')
+                    covid_reg = covid_reg.sort_values('Numero', ascending=True).tail(15)
+
+                    fig = px.bar(covid_reg, y='Regione', x='Numero', orientation='h',
+                                title="Top 15 Regioni - Persi COVID",
+                                text='Numero')
+                    fig.update_traces(textposition='auto', cliponaxis=False)
+                    fig.update_layout(margin=dict(r=60))
+                    st.plotly_chart(fig, use_container_width=True)
+
+                # Profilo
+                st.markdown("#### Profilo Persi COVID")
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Età Media Attuale", f"{persi_covid['EtaAttuale'].mean():.0f} anni")
+                with col2:
+                    st.metric("Gare Medie (quando attivi)", f"{persi_covid['GareMedie'].mean():.0f}")
+                with col3:
+                    st.metric("Anni Tessera", f"{persi_covid['AnniTessera'].mean():.1f}")
+
+                # Alta priorità
+                alta_priorita = persi_covid[persi_covid['Recuperabile'] == 'Alta Priorità']
+                if len(alta_priorita) > 0:
+                    st.markdown(f"### 🎯 Alta Priorità: {len(alta_priorita):,} persone")
+                    st.markdown("Under 75, molte gare storiche - i più probabili a tornare")
+
+                    with st.expander("📋 Dettaglio Alta Priorità per Associazione"):
+                        ap_ass = alta_priorita.groupby('Associazione').agg({
+                            'MmbCode': 'count',
+                            'GareMedie': 'mean'
+                        }).reset_index()
+                        ap_ass.columns = ['Associazione', 'Numero', 'GareMedie']
+                        ap_ass = ap_ass.sort_values('Numero', ascending=False).head(30)
+                        st.dataframe(ap_ass, use_container_width=True)
+            else:
+                st.info("Dati COVID non disponibili")
+
+        # Riepilogo finale
+        st.markdown("---")
+        st.markdown("### 📋 Piano d'Azione Suggerito")
+
+        st.markdown("""
+        | Priorità | Target | Azione | Impatto Stimato |
+        |----------|--------|--------|-----------------|
+        | 🟢 Alta | Dormienti | Eventi dedicati, contatto diretto | Immediato |
+        | 🟢 Alta | Quasi Agganciati | Ricontatto, offerte speciali | Medio termine |
+        | 🟡 Media | Persi COVID Alta Priorità | Campagna "Torna al Bridge" | Medio termine |
+        | 🟡 Media | Gap 60-70 | Marketing mirato, corsi senior | Lungo termine |
+        | 🔴 Bassa | Province scoperte | Nuovi circoli, eventi itineranti | Lungo termine |
+        """)
+
+    else:
+        st.warning("Dati opportunità non disponibili. Esegui prima `08_analisi_opportunita_crescita.py`")
 
 # ============================================================================
 # PAGINA: ESPLORA DATI

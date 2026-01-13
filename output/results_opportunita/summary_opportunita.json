@@ -1,0 +1,27 @@
+{
+  "quasi_agganciati": {
+    "totale": 1735,
+    "descrizione": "Tesserati 1-2 anni con poche gare, poi spariti",
+    "effort": "BASSO",
+    "potenziale": "ALTO - Conoscono gi\u00e0 il bridge"
+  },
+  "dormienti": {
+    "totale": 0,
+    "descrizione": "Tesserati 2025 con 0 gare",
+    "effort": "BASSO",
+    "potenziale": "ALTO - Gi\u00e0 pagano la tessera"
+  },
+  "gap_60_70": {
+    "gap": 3610,
+    "descrizione": "Potenziali bridgisti 60-70 non raggiunti",
+    "effort": "MEDIO",
+    "potenziale": "MOLTO ALTO - Fascia et\u00e0 ideale"
+  },
+  "persi_covid": {
+    "totale": 5322,
+    "alta_priorita": 0,
+    "descrizione": "Ex-bridgisti pre-COVID non tornati",
+    "effort": "MEDIO",
+    "potenziale": "ALTO - Esperienza e affetto per il gioco"
+  }
+}
