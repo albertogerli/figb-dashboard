@@ -1,0 +1,20 @@
+{
+  "gare_medie_globali": {
+    "M": 45.2,
+    "F": 44.2,
+    "gap": 1.0
+  },
+  "campionati_medi_globali": {
+    "M": 3582.0,
+    "F": 3098.0,
+    "gap": 484.0
+  },
+  "fascia_piu_attiva": {
+    "fascia": "70-80",
+    "gare_medie": 47.9
+  },
+  "partecipazione_campionati": {
+    "M": 58.1,
+    "F": 51.6
+  }
+}
