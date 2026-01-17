@@ -2660,6 +2660,115 @@ elif pagina == "🎓 Bridge a Scuola":
                 scuole = scuole.sort_values('Studenti', ascending=False)
 
                 st.dataframe(scuole.head(15), use_container_width=True, hide_index=True)
+
+                # ============================================================
+                # ANALISI STUDENTI CON PUNTI CAMPIONATO
+                # ============================================================
+                st.markdown("---")
+                st.markdown("### 🏆 Studenti che Partecipano a Gare con Punti")
+                st.markdown("Analisi degli studenti che, oltre al percorso scolastico, partecipano a tornei con punti campionato.")
+
+                # Studenti con punti campionato
+                stud_con_punti = studenti_filtered[studenti_filtered['PuntiCampionati'] > 0].copy()
+                n_stud_punti = stud_con_punti['MmbCode'].nunique()
+                pct_stud_punti = n_stud_punti / n_studenti * 100 if n_studenti > 0 else 0
+
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Studenti Totali", f"{n_studenti:,}")
+                with col2:
+                    st.metric("Con Punti Campionato", f"{n_stud_punti:,}", f"{pct_stud_punti:.1f}%")
+                with col3:
+                    punti_medi = stud_con_punti['PuntiCampionati'].mean() if len(stud_con_punti) > 0 else 0
+                    st.metric("Punti Medi", f"{punti_medi:.0f}")
+
+                if n_stud_punti > 0:
+                    # Crea fasce età per studenti
+                    stud_con_punti['FasciaEta'] = pd.cut(
+                        stud_con_punti['Anni'],
+                        bins=[0, 12, 15, 18, 25, 100],
+                        labels=['<12', '12-14', '15-17', '18-24', '25+']
+                    )
+
+                    col1, col2 = st.columns(2)
+
+                    with col1:
+                        # Per fascia età
+                        st.markdown("#### Per Classe d'Età")
+                        stud_eta = stud_con_punti.groupby('FasciaEta', observed=True).agg({
+                            'MmbCode': 'nunique',
+                            'PuntiCampionati': 'mean',
+                            'GareGiocate': 'mean'
+                        }).reset_index()
+                        stud_eta.columns = ['Fascia Età', 'Studenti', 'Punti Medi', 'Gare Medie']
+                        stud_eta['Punti Medi'] = stud_eta['Punti Medi'].round(0)
+                        stud_eta['Gare Medie'] = stud_eta['Gare Medie'].round(1)
+
+                        # Calcola % sul totale studenti per fascia
+                        tot_per_fascia = studenti_filtered.copy()
+                        tot_per_fascia['FasciaEta'] = pd.cut(
+                            tot_per_fascia['Anni'],
+                            bins=[0, 12, 15, 18, 25, 100],
+                            labels=['<12', '12-14', '15-17', '18-24', '25+']
+                        )
+                        tot_fascia = tot_per_fascia.groupby('FasciaEta', observed=True)['MmbCode'].nunique()
+                        stud_eta['% Fascia'] = stud_eta.apply(
+                            lambda r: f"{r['Studenti']/tot_fascia.get(r['Fascia Età'], 1)*100:.1f}%" if tot_fascia.get(r['Fascia Età'], 0) > 0 else "0%",
+                            axis=1
+                        )
+
+                        st.dataframe(stud_eta, use_container_width=True, hide_index=True)
+
+                        # Grafico
+                        fig = px.bar(stud_eta, x='Fascia Età', y='Studenti',
+                                    color='Punti Medi', color_continuous_scale='Viridis',
+                                    title="Studenti Agonisti per Età")
+                        fig.update_layout(height=300)
+                        st.plotly_chart(fig, use_container_width=True)
+
+                    with col2:
+                        # Per regione
+                        st.markdown("#### Per Regione")
+                        stud_reg = stud_con_punti.groupby('GrpArea').agg({
+                            'MmbCode': 'nunique',
+                            'PuntiCampionati': 'mean',
+                            'GareGiocate': 'mean'
+                        }).reset_index()
+                        stud_reg.columns = ['Regione', 'Studenti', 'Punti Medi', 'Gare Medie']
+                        stud_reg['Punti Medi'] = stud_reg['Punti Medi'].round(0)
+                        stud_reg['Gare Medie'] = stud_reg['Gare Medie'].round(1)
+                        stud_reg = stud_reg.sort_values('Studenti', ascending=False)
+
+                        # Calcola % sul totale studenti per regione
+                        tot_per_reg = studenti_filtered.groupby('GrpArea')['MmbCode'].nunique()
+                        stud_reg['% Regione'] = stud_reg.apply(
+                            lambda r: f"{r['Studenti']/tot_per_reg.get(r['Regione'], 1)*100:.1f}%" if tot_per_reg.get(r['Regione'], 0) > 0 else "0%",
+                            axis=1
+                        )
+
+                        st.dataframe(stud_reg.head(15), use_container_width=True, hide_index=True)
+
+                        # Grafico
+                        fig = px.bar(stud_reg.head(10), x='Regione', y='Studenti',
+                                    color='Punti Medi', color_continuous_scale='Viridis',
+                                    title="Top 10 Regioni - Studenti Agonisti")
+                        fig.update_layout(height=300)
+                        st.plotly_chart(fig, use_container_width=True)
+
+                    # Insight
+                    if pct_stud_punti < 10:
+                        st.warning(f"""
+                        ⚠️ **Solo il {pct_stud_punti:.1f}% degli studenti partecipa a tornei con punti.**
+
+                        Suggerimenti:
+                        - Organizzare tornei scolastici con punti campionato
+                        - Creare percorsi "dal banco alla gara"
+                        - Incentivare partecipazione con premi/riconoscimenti
+                        """)
+                    else:
+                        st.success(f"✅ Il {pct_stud_punti:.1f}% degli studenti partecipa a tornei agonistici - buon coinvolgimento!")
+                else:
+                    st.info("Nessuno studente con punti campionato nel periodo selezionato.")
             else:
                 st.info("Nessun dato studenti per i filtri selezionati.")
 
