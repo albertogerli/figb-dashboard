@@ -101,7 +101,8 @@ pagina = st.sidebar.selectbox(
     ["🏠 Overview", "📈 Trend Temporale", "🗺️ Analisi Regionale",
      "📍 Analisi Territoriale", "🏆 Mappa Agonismo", "🏢 Analisi Associazioni",
      "🎓 Bridge a Scuola", "⚠️ Giocatori a Rischio", "🔄 Bridgisti Recuperabili",
-     "🔮 Modello Predittivo", "🌱 Opportunità Crescita", "🔬 Analisi Avanzate", "🔍 Esplora Dati"]
+     "🔮 Modello Predittivo", "🌱 Opportunità Crescita", "🔬 Analisi Avanzate",
+     "🎯 Attività per Età/Sesso", "🔍 Esplora Dati"]
 )
 
 st.sidebar.markdown("---")
@@ -3187,6 +3188,209 @@ elif pagina == "🔬 Analisi Avanzate":
 
     else:
         st.warning("Dati analisi avanzate non disponibili. Esegui prima `09_analisi_avanzate_innovative.py`")
+
+# ============================================================================
+# PAGINA: ATTIVITÀ PER ETÀ/SESSO
+# ============================================================================
+elif pagina == "🎯 Attività per Età/Sesso":
+    st.title("🎯 Attività per Età e Sesso")
+
+    st.markdown("""
+    Analisi delle gare e campionati per fascia d'età e sesso.
+    """)
+
+    RESULTS_ATT = OUTPUT_DIR / 'results_attivita'
+
+    if RESULTS_ATT.exists():
+        # Carica dati
+        with open(RESULTS_ATT / 'summary_attivita.json', 'r') as f:
+            summary_att = json.load(f)
+
+        gare_pivot = pd.read_csv(RESULTS_ATT / 'gare_pivot_eta_sesso.csv')
+        camp_pivot = pd.read_csv(RESULTS_ATT / 'campionati_pivot_eta_sesso.csv')
+        part_pivot = pd.read_csv(RESULTS_ATT / 'partecipazione_campionati.csv')
+        gare_eta_sesso = pd.read_csv(RESULTS_ATT / 'gare_per_eta_sesso.csv')
+
+        # KPI
+        st.markdown("### 📊 Riepilogo")
+
+        col1, col2, col3, col4 = st.columns(4)
+
+        with col1:
+            st.metric(
+                "Fascia Più Attiva",
+                summary_att['fascia_piu_attiva']['fascia'],
+                f"{summary_att['fascia_piu_attiva']['gare_medie']} gare/anno"
+            )
+        with col2:
+            st.metric(
+                "Gap Gare M-F",
+                f"{summary_att['gare_medie_globali']['gap']:+.1f}",
+                "gare/anno"
+            )
+        with col3:
+            st.metric(
+                "Gap Campionati M-F",
+                f"{summary_att['campionati_medi_globali']['gap']:+.0f}",
+                "punti"
+            )
+        with col4:
+            st.metric(
+                "% Campionati M/F",
+                f"{summary_att['partecipazione_campionati']['M']:.0f}% / {summary_att['partecipazione_campionati']['F']:.0f}%"
+            )
+
+        st.markdown("---")
+
+        # Tabs
+        tab1, tab2, tab3 = st.tabs([
+            "🎮 Gare per Età/Sesso",
+            "🏆 Campionati per Età/Sesso",
+            "📊 Partecipazione Campionati"
+        ])
+
+        # Ordine fasce età
+        ordine_eta = ['<18', '18-30', '30-40', '40-50', '50-60', '60-70', '70-80', '80-90', '90+']
+
+        # TAB 1: Gare
+        with tab1:
+            st.subheader("🎮 Gare Medie Annuali per Età e Sesso")
+
+            # Prepara dati per grafico
+            gare_long = gare_eta_sesso[gare_eta_sesso['Sesso'].isin(['M', 'F'])].copy()
+            gare_long['FasciaEta'] = pd.Categorical(gare_long['FasciaEta'], categories=ordine_eta, ordered=True)
+            gare_long = gare_long.sort_values('FasciaEta')
+
+            fig = px.bar(gare_long, x='FasciaEta', y='GareMedie', color='Sesso',
+                        barmode='group',
+                        title="Gare Medie Annuali per Fascia d'Età e Sesso",
+                        labels={'GareMedie': 'Gare Medie', 'FasciaEta': "Fascia d'Età"},
+                        color_discrete_map={'M': '#3498db', 'F': '#e74c3c'},
+                        text='GareMedie')
+            fig.update_traces(textposition='auto', cliponaxis=False, texttemplate='%{text:.0f}')
+            fig.update_layout(xaxis_title="Fascia d'Età", yaxis_title="Gare Medie/Anno")
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Gap M-F
+            st.markdown("#### Gap Uomini-Donne per Fascia d'Età")
+
+            gare_pivot_calc = gare_pivot.copy()
+            if 'M' in gare_pivot_calc.columns and 'F' in gare_pivot_calc.columns:
+                gare_pivot_calc['Gap'] = gare_pivot_calc['M'] - gare_pivot_calc['F']
+                gare_pivot_calc['FasciaEta'] = pd.Categorical(gare_pivot_calc['FasciaEta'], categories=ordine_eta, ordered=True)
+                gare_pivot_calc = gare_pivot_calc.sort_values('FasciaEta')
+
+                fig = px.bar(gare_pivot_calc, x='FasciaEta', y='Gap',
+                            title="Gap Gare (M-F) per Fascia d'Età",
+                            text='Gap',
+                            color='Gap',
+                            color_continuous_scale='RdBu_r',
+                            color_continuous_midpoint=0)
+                fig.update_traces(textposition='auto', cliponaxis=False, texttemplate='%{text:+.1f}')
+                fig.update_layout(xaxis_title="Fascia d'Età", yaxis_title="Gap (M-F)")
+                st.plotly_chart(fig, use_container_width=True)
+
+            # Tabella
+            with st.expander("📋 Tabella Dati"):
+                st.dataframe(gare_pivot, use_container_width=True)
+
+            st.info("""
+            💡 **Insight:**
+            - La fascia **70-80** è la più attiva con quasi 48 gare/anno
+            - Il gap M-F è massimo nella fascia **30-40** (+10 gare)
+            - Le donne **90+** giocano PIÙ degli uomini coetanei!
+            """)
+
+        # TAB 2: Campionati
+        with tab2:
+            st.subheader("🏆 Punti Campionati Medi per Età e Sesso")
+
+            # Prepara dati
+            camp_long = gare_eta_sesso[gare_eta_sesso['Sesso'].isin(['M', 'F'])].copy()
+            camp_long['FasciaEta'] = pd.Categorical(camp_long['FasciaEta'], categories=ordine_eta, ordered=True)
+            camp_long = camp_long.sort_values('FasciaEta')
+
+            fig = px.bar(camp_long, x='FasciaEta', y='PuntiCampMedi', color='Sesso',
+                        barmode='group',
+                        title="Punti Campionati Medi per Fascia d'Età e Sesso",
+                        labels={'PuntiCampMedi': 'Punti Medi', 'FasciaEta': "Fascia d'Età"},
+                        color_discrete_map={'M': '#3498db', 'F': '#e74c3c'},
+                        text='PuntiCampMedi')
+            fig.update_traces(textposition='auto', cliponaxis=False, texttemplate='%{text:.0f}')
+            fig.update_layout(xaxis_title="Fascia d'Età", yaxis_title="Punti Campionati Medi")
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Picco per fascia
+            st.markdown("#### Picco Attività Agonistica")
+
+            camp_totale = camp_pivot.copy()
+            camp_totale['FasciaEta'] = pd.Categorical(camp_totale['FasciaEta'], categories=ordine_eta, ordered=True)
+            camp_totale = camp_totale.sort_values('FasciaEta')
+
+            fig = px.line(camp_totale, x='FasciaEta', y='Totale',
+                         title="Punti Campionati Medi per Fascia d'Età (Totale)",
+                         markers=True)
+            fig.update_layout(xaxis_title="Fascia d'Età", yaxis_title="Punti Medi")
+            st.plotly_chart(fig, use_container_width=True)
+
+            with st.expander("📋 Tabella Dati"):
+                st.dataframe(camp_pivot, use_container_width=True)
+
+            st.info("""
+            💡 **Insight:**
+            - Il picco agonistico è nella fascia **40-50** (~6.800 punti)
+            - Le donne **30-40** hanno più punti degli uomini (+822)!
+            - Dopo i 70 anni i punti calano progressivamente
+            """)
+
+        # TAB 3: Partecipazione
+        with tab3:
+            st.subheader("📊 % Partecipazione a Campionati")
+
+            part_long = part_pivot.melt(id_vars='FasciaEta', value_vars=['M', 'F'],
+                                        var_name='Sesso', value_name='Partecipazione')
+            part_long['FasciaEta'] = pd.Categorical(part_long['FasciaEta'], categories=ordine_eta, ordered=True)
+            part_long = part_long.sort_values('FasciaEta')
+
+            fig = px.bar(part_long, x='FasciaEta', y='Partecipazione', color='Sesso',
+                        barmode='group',
+                        title="% Partecipazione a Campionati per Fascia d'Età e Sesso",
+                        labels={'Partecipazione': '% Partecipazione', 'FasciaEta': "Fascia d'Età"},
+                        color_discrete_map={'M': '#3498db', 'F': '#e74c3c'},
+                        text='Partecipazione')
+            fig.update_traces(textposition='auto', cliponaxis=False, texttemplate='%{text:.0f}%')
+            fig.update_layout(xaxis_title="Fascia d'Età", yaxis_title="% Partecipazione")
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Gap partecipazione
+            part_pivot_calc = part_pivot.copy()
+            if 'M' in part_pivot_calc.columns and 'F' in part_pivot_calc.columns:
+                part_pivot_calc['Gap'] = part_pivot_calc['M'] - part_pivot_calc['F']
+                part_pivot_calc['FasciaEta'] = pd.Categorical(part_pivot_calc['FasciaEta'], categories=ordine_eta, ordered=True)
+                part_pivot_calc = part_pivot_calc.sort_values('FasciaEta')
+
+                fig = px.bar(part_pivot_calc, x='FasciaEta', y='Gap',
+                            title="Gap % Partecipazione Campionati (M-F)",
+                            text='Gap',
+                            color='Gap',
+                            color_continuous_scale='RdBu_r',
+                            color_continuous_midpoint=0)
+                fig.update_traces(textposition='auto', cliponaxis=False, texttemplate='%{text:+.1f}pp')
+                fig.update_layout(xaxis_title="Fascia d'Età", yaxis_title="Gap (M-F) punti %")
+                st.plotly_chart(fig, use_container_width=True)
+
+            with st.expander("📋 Tabella Dati"):
+                st.dataframe(part_pivot, use_container_width=True)
+
+            st.info("""
+            💡 **Insight:**
+            - Picco partecipazione: fascia **40-50** (~70%)
+            - Gap M-F costante di **5-7 punti %** (uomini più competitivi)
+            - Unica eccezione: fascia 40-50 dove le donne partecipano di più!
+            """)
+
+    else:
+        st.warning("Dati attività non disponibili. Esegui prima l'analisi.")
 
 # ============================================================================
 # PAGINA: ESPLORA DATI
