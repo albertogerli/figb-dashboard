@@ -2666,6 +2666,111 @@ elif pagina == "🌱 Opportunità Crescita":
 
                 with st.expander("🏢 Top 20 Associazioni con Quasi Agganciati"):
                     st.dataframe(qa_ass, use_container_width=True)
+
+                # MODELLO PREDITTIVO PRIORITÀ INTERVENTO
+                st.markdown("---")
+                st.markdown("### 🎯 Priorità Intervento (Modello Predittivo)")
+                st.markdown("""
+                Il modello calcola uno **Score di Recuperabilità** basato su:
+                - **Età** (40%): Under 70 = alta priorità, 70-80 = media, Over 80 = bassa
+                - **Engagement** (30%): Gare totali giocate (più gare = più attaccati al gioco)
+                - **Recenza** (30%): Anni di assenza (meno anni = più facile recuperare)
+                """)
+
+                # Calcolo score predittivo
+                qa_priority = quasi_agganciati.copy()
+
+                # Score Età (0-100): più giovane = score più alto
+                qa_priority['ScoreEta'] = qa_priority['Eta'].apply(
+                    lambda x: 100 if x < 65 else (80 if x < 70 else (60 if x < 75 else (40 if x < 80 else 20)))
+                )
+
+                # Score Engagement (0-100): normalizzato su max gare
+                max_gare = qa_priority['GareTotali'].max()
+                qa_priority['ScoreEngagement'] = (qa_priority['GareTotali'] / max_gare * 100).clip(0, 100)
+
+                # Score Recenza (0-100): meno anni assenza = score più alto
+                qa_priority['ScoreRecenza'] = qa_priority['AnniAssenza'].apply(
+                    lambda x: 100 if x <= 2 else (80 if x <= 3 else (60 if x <= 4 else (40 if x <= 5 else 20)))
+                )
+
+                # Score Totale pesato
+                qa_priority['ScoreTotale'] = (
+                    qa_priority['ScoreEta'] * 0.4 +
+                    qa_priority['ScoreEngagement'] * 0.3 +
+                    qa_priority['ScoreRecenza'] * 0.3
+                ).round(1)
+
+                # Classificazione priorità
+                qa_priority['Priorità'] = qa_priority['ScoreTotale'].apply(
+                    lambda x: '🔴 ALTA' if x >= 70 else ('🟡 MEDIA' if x >= 50 else '🟢 BASSA')
+                )
+
+                # Ordinamento per score
+                qa_priority = qa_priority.sort_values('ScoreTotale', ascending=False)
+
+                # Metriche riepilogo
+                col1, col2, col3 = st.columns(3)
+                n_alta = len(qa_priority[qa_priority['Priorità'] == '🔴 ALTA'])
+                n_media = len(qa_priority[qa_priority['Priorità'] == '🟡 MEDIA'])
+                n_bassa = len(qa_priority[qa_priority['Priorità'] == '🟢 BASSA'])
+
+                with col1:
+                    st.metric("🔴 Alta Priorità", f"{n_alta:,}", help="Score ≥ 70")
+                with col2:
+                    st.metric("🟡 Media Priorità", f"{n_media:,}", help="Score 50-69")
+                with col3:
+                    st.metric("🟢 Bassa Priorità", f"{n_bassa:,}", help="Score < 50")
+
+                # Tabella top priorità
+                st.markdown("#### 📋 Top 100 Quasi Agganciati da Ricontattare")
+
+                qa_display = qa_priority[['Nome', 'Associazione', 'Regione', 'Eta', 'GareTotali',
+                                          'AnniAssenza', 'ScoreTotale', 'Priorità']].head(100).copy()
+                qa_display.columns = ['Nome', 'Associazione', 'Regione', 'Età', 'Gare Totali',
+                                      'Anni Assenza', 'Score', 'Priorità']
+
+                st.dataframe(
+                    qa_display.style.background_gradient(subset=['Score'], cmap='RdYlGn'),
+                    use_container_width=True,
+                    height=400
+                )
+
+                # Export lista alta priorità
+                alta_priorita_qa = qa_priority[qa_priority['Priorità'] == '🔴 ALTA'][
+                    ['Nome', 'Associazione', 'Regione', 'Eta', 'GareTotali', 'AnniAssenza', 'ScoreTotale']
+                ]
+
+                with st.expander(f"📥 Lista Completa Alta Priorità ({n_alta} persone)"):
+                    st.dataframe(alta_priorita_qa, use_container_width=True)
+
+                    # Download button
+                    csv_alta = alta_priorita_qa.to_csv(index=False).encode('utf-8')
+                    st.download_button(
+                        label="⬇️ Scarica CSV Alta Priorità",
+                        data=csv_alta,
+                        file_name="quasi_agganciati_alta_priorita.csv",
+                        mime="text/csv"
+                    )
+
+                # Analisi per associazione (priorità aggregate)
+                with st.expander("🏢 Priorità per Associazione"):
+                    qa_ass_priority = qa_priority.groupby('Associazione').agg({
+                        'ScoreTotale': 'mean',
+                        'Nome': 'count',
+                        'Eta': 'mean',
+                        'GareTotali': 'mean'
+                    }).reset_index()
+                    qa_ass_priority.columns = ['Associazione', 'Score Medio', 'N. Persone', 'Età Media', 'Gare Medie']
+                    qa_ass_priority = qa_ass_priority.sort_values('N. Persone', ascending=False).head(30)
+                    qa_ass_priority['Score Medio'] = qa_ass_priority['Score Medio'].round(1)
+                    qa_ass_priority['Età Media'] = qa_ass_priority['Età Media'].round(0)
+                    qa_ass_priority['Gare Medie'] = qa_ass_priority['Gare Medie'].round(1)
+
+                    st.dataframe(
+                        qa_ass_priority.style.background_gradient(subset=['Score Medio'], cmap='RdYlGn'),
+                        use_container_width=True
+                    )
             else:
                 st.info("Nessun quasi agganciato identificato")
 
