@@ -332,10 +332,30 @@ if pagina == "🏠 Overview":
             df_2025['FasciaEta'] = pd.cut(df_2025['Anni'],
                                            bins=[0, 30, 40, 50, 60, 70, 80, 100],
                                            labels=['<30', '30-39', '40-49', '50-59', '60-69', '70-79', '80+'])
-            eta_dist = df_2025['FasciaEta'].value_counts().sort_index()
-            fig = px.bar(x=eta_dist.index, y=eta_dist.values,
-                         color=eta_dist.values, color_continuous_scale='RdYlGn_r')
-            fig.update_layout(height=350, showlegend=False)
+
+            # Categorizza per tipo: Scuola Bridge, Bridge a Scuola, Altri
+            def categorizza_tipo(mbt):
+                if mbt == 'Scuola Bridge':
+                    return 'Scuola Bridge'
+                elif mbt in ['Ist.Scolastici', 'Studente CAS', 'CAS Giovanile']:
+                    return 'Bridge a Scuola'
+                else:
+                    return 'Altri'
+
+            df_2025['TipoTessera'] = df_2025['MbtDesc'].apply(categorizza_tipo)
+
+            # Aggrega per fascia età e tipo
+            eta_tipo = df_2025.groupby(['FasciaEta', 'TipoTessera']).size().reset_index(name='Count')
+
+            fig = px.bar(eta_tipo, x='FasciaEta', y='Count', color='TipoTessera',
+                         barmode='stack',
+                         color_discrete_map={
+                             'Scuola Bridge': '#3498db',
+                             'Bridge a Scuola': '#e74c3c',
+                             'Altri': '#95a5a6'
+                         },
+                         category_orders={'TipoTessera': ['Bridge a Scuola', 'Scuola Bridge', 'Altri']})
+            fig.update_layout(height=350, legend=dict(orientation='h', yanchor='bottom', y=1.02))
             st.plotly_chart(fig, use_container_width=True)
         else:
             st.warning("Nessun dato per 2025 con i filtri selezionati")
