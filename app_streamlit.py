@@ -478,6 +478,118 @@ elif pagina == "📈 Trend Temporale":
     fig.update_xaxes(dtick=1)
     st.plotly_chart(fig, use_container_width=True)
 
+    # Piramide categorie per anno
+    st.markdown("---")
+    st.subheader("🏆 Piramide Categorie per Anno")
+    st.markdown("""
+    Distribuzione dei giocatori per categoria tecnica, dalla più bassa (NC) alla più alta (GM).
+    Una vera "piramide" dovrebbe avere molti giocatori alla base e pochi in cima.
+    """)
+
+    # Ordine categorie dal basso verso l'alto
+    ordine_categorie = [
+        'NC',  # Non Classificato
+        '4Q', '4C', '4F', '4P',  # 4a categoria (solo 2017-2018)
+        '3Q', '3C', '3F', '3P',  # 3a categoria
+        '2Q', '2C', '2F', '2P',  # 2a categoria
+        '1Q', '1C', '1F', '1P',  # 1a categoria
+        'HJ',  # Honorary Junior
+        'HA',  # Honorary A
+        'HK',  # Honorary K
+        'HQ',  # Honorary Q
+        'MS',  # Master
+        'LM',  # Life Master
+        'GM'   # Grand Master
+    ]
+
+    # Selettore anno
+    anni_disponibili = sorted(df_filtered['Anno'].unique())
+    anno_sel = st.select_slider("Seleziona anno:", options=anni_disponibili, value=anni_disponibili[-1])
+
+    # Filtra per anno selezionato
+    df_anno = df_filtered[df_filtered['Anno'] == anno_sel]
+
+    # Conta per categoria
+    cat_counts = df_anno['CatLabel'].value_counts()
+
+    # Prepara dati per il grafico
+    piramide_data = []
+    for cat in ordine_categorie:
+        count = cat_counts.get(cat, 0)
+        if count > 0 or cat not in ['4Q', '4C', '4F', '4P']:  # Mostra sempre tranne 4a cat se 0
+            piramide_data.append({'Categoria': cat, 'Giocatori': count})
+
+    # Rimuovi categorie vuote della 4a se non esistono
+    piramide_data = [d for d in piramide_data if d['Giocatori'] > 0 or not d['Categoria'].startswith('4')]
+
+    if piramide_data:
+        piramide_df = pd.DataFrame(piramide_data)
+
+        # Colori per livello
+        def get_color(cat):
+            if cat == 'NC':
+                return '#bdc3c7'
+            elif cat.startswith('4'):
+                return '#e74c3c'
+            elif cat.startswith('3'):
+                return '#9b59b6'
+            elif cat.startswith('2'):
+                return '#3498db'
+            elif cat.startswith('1'):
+                return '#27ae60'
+            elif cat.startswith('H'):
+                return '#f39c12'
+            else:  # MS, LM, GM
+                return '#f1c40f'
+
+        piramide_df['Colore'] = piramide_df['Categoria'].apply(get_color)
+
+        # Grafico orizzontale (piramide)
+        fig = go.Figure()
+
+        fig.add_trace(go.Bar(
+            y=piramide_df['Categoria'],
+            x=piramide_df['Giocatori'],
+            orientation='h',
+            marker_color=piramide_df['Colore'],
+            text=piramide_df['Giocatori'],
+            textposition='outside'
+        ))
+
+        fig.update_layout(
+            title=f"Distribuzione Categorie - {anno_sel}",
+            height=600,
+            xaxis_title="Numero Giocatori",
+            yaxis_title="Categoria",
+            yaxis=dict(categoryorder='array', categoryarray=ordine_categorie),
+            showlegend=False,
+            margin=dict(l=80, r=100)
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+        # Statistiche
+        col1, col2, col3, col4 = st.columns(4)
+        totale = piramide_df['Giocatori'].sum()
+        nc_count = cat_counts.get('NC', 0)
+        top_count = sum(cat_counts.get(c, 0) for c in ['GM', 'LM', 'MS'])
+        cat1_count = sum(cat_counts.get(c, 0) for c in ['1Q', '1C', '1F', '1P'])
+
+        with col1:
+            st.metric("Totale", f"{totale:,}")
+        with col2:
+            st.metric("NC (base)", f"{nc_count:,}", f"{nc_count/totale*100:.1f}%")
+        with col3:
+            st.metric("1a Categoria", f"{cat1_count:,}", f"{cat1_count/totale*100:.1f}%")
+        with col4:
+            st.metric("Master+ (top)", f"{top_count:,}", f"{top_count/totale*100:.1f}%")
+
+        # Nota sulla forma
+        if nc_count / totale > 0.3:
+            st.success("✅ Forma piramidale: base ampia di NC")
+        else:
+            st.warning("⚠️ Base ristretta: pochi NC rispetto al totale")
+
 # ============================================================================
 # PAGINA: ANALISI REGIONALE
 # ============================================================================
