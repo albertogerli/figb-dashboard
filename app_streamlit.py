@@ -502,12 +502,26 @@ elif pagina == "📈 Trend Temporale":
         'GM'   # Grand Master
     ]
 
-    # Selettore anno
-    anni_disponibili = sorted(df_filtered['Anno'].unique())
-    anno_sel = st.select_slider("Seleziona anno:", options=anni_disponibili, value=anni_disponibili[-1])
+    # Filtri: anno e classe d'età
+    col_filtro1, col_filtro2 = st.columns(2)
+
+    with col_filtro1:
+        anni_disponibili = sorted(df_filtered['Anno'].unique())
+        anno_sel = st.select_slider("Seleziona anno:", options=anni_disponibili, value=anni_disponibili[-1])
+
+    with col_filtro2:
+        fasce_eta = ['Tutte', '<30', '30-39', '40-49', '50-59', '60-69', '70-79', '80+']
+        fascia_sel = st.selectbox("Filtra per classe d'età:", fasce_eta)
 
     # Filtra per anno selezionato
-    df_anno = df_filtered[df_filtered['Anno'] == anno_sel]
+    df_anno = df_filtered[df_filtered['Anno'] == anno_sel].copy()
+
+    # Applica filtro età se selezionato
+    if fascia_sel != 'Tutte':
+        df_anno['FasciaEta'] = pd.cut(df_anno['Anni'],
+                                       bins=[0, 30, 40, 50, 60, 70, 80, 150],
+                                       labels=['<30', '30-39', '40-49', '50-59', '60-69', '70-79', '80+'])
+        df_anno = df_anno[df_anno['FasciaEta'] == fascia_sel]
 
     # Conta per categoria
     cat_counts = df_anno['CatLabel'].value_counts()
