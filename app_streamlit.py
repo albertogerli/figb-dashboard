@@ -3630,17 +3630,88 @@ elif pagina == "🧩 Cluster e Territori":
                          markers=True)
             st.plotly_chart(fig, use_container_width=True)
 
+            # ANALISI DECLINO: Chi sta morendo di più?
+            st.markdown("#### 📉 Chi Sta Perdendo di Più?")
+
+            # Calcola variazioni dal 2019 (pre-COVID)
+            stats_2019 = stats_area[stats_area['Anno'] == 2019].set_index('TipoArea')
+            stats_2025 = stats_area[stats_area['Anno'] == stats_area['Anno'].max()].set_index('TipoArea')
+
+            if 'Città Metropolitana' in stats_2019.index and 'Provincia' in stats_2019.index:
+                metro_2019 = stats_2019.loc['Città Metropolitana', 'Tesserati']
+                metro_2025 = stats_2025.loc['Città Metropolitana', 'Tesserati']
+                prov_2019 = stats_2019.loc['Provincia', 'Tesserati']
+                prov_2025 = stats_2025.loc['Provincia', 'Tesserati']
+
+                var_metro = (metro_2025 - metro_2019) / metro_2019 * 100
+                var_prov = (prov_2025 - prov_2019) / prov_2019 * 100
+
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    st.metric(
+                        "Città Metropolitane (2019→2025)",
+                        f"{metro_2025:,.0f}",
+                        f"{var_metro:+.1f}%",
+                        delta_color="inverse"
+                    )
+
+                with col2:
+                    st.metric(
+                        "Province (2019→2025)",
+                        f"{prov_2025:,.0f}",
+                        f"{var_prov:+.1f}%",
+                        delta_color="inverse"
+                    )
+
+                if var_metro < var_prov:
+                    st.error(f"🚨 **Le CITTÀ METROPOLITANE stanno peggio!** ({var_metro:+.1f}% vs {var_prov:+.1f}%)")
+                else:
+                    st.error(f"🚨 **Le PROVINCE stanno peggio!** ({var_prov:+.1f}% vs {var_metro:+.1f}%)")
+
+            # Dettaglio singole città metropolitane
+            st.markdown("#### 🏙️ Dettaglio Singole Città Metropolitane")
+
+            citta_metro_list = ['Milano', 'Roma', 'Napoli', 'Torino', 'Firenze', 'Bologna', 'Genova',
+                              'Venezia', 'Bari', 'Palermo', 'Catania', 'Cagliari', 'Messina', 'Reggio Calabria']
+
+            # Calcola variazione per ogni città
+            citta_var = []
+            for citta in citta_metro_list:
+                df_citta = df[df['Provincia'] == citta]
+                t2019 = df_citta[df_citta['Anno'] == 2019]['MmbCode'].nunique()
+                t2025 = df_citta[df_citta['Anno'] == df['Anno'].max()]['MmbCode'].nunique()
+                if t2019 > 0:
+                    var = (t2025 - t2019) / t2019 * 100
+                    citta_var.append({'Città': citta, 'Tess2019': t2019, 'Tess2025': t2025, 'Variazione': var})
+
+            df_citta_var = pd.DataFrame(citta_var).sort_values('Variazione')
+
+            fig = px.bar(df_citta_var, y='Città', x='Variazione', orientation='h',
+                        title="Variazione % Tesserati 2019→2025 per Città",
+                        text='Variazione',
+                        color='Variazione',
+                        color_continuous_scale='RdYlGn',
+                        color_continuous_midpoint=0)
+            fig.update_traces(textposition='auto', cliponaxis=False, texttemplate='%{text:+.1f}%')
+            fig.update_layout(margin=dict(l=100, r=60))
+            st.plotly_chart(fig, use_container_width=True)
+
             # Tabella confronto
             with st.expander("📋 Confronto Dettagliato"):
                 st.dataframe(confronto_metro, use_container_width=True)
 
+            with st.expander("📋 Dettaglio Città Metropolitane"):
+                st.dataframe(df_citta_var.round(1), use_container_width=True)
+
             gap_gare = summary_comp['citta_vs_provincia']['gare_medie_metro'] - summary_comp['citta_vs_provincia']['gare_medie_provincia']
             st.info(f"""
             💡 **Insight:**
-            - Retention simile: Metro {summary_comp['citta_vs_provincia']['retention_metro']:.1f}% vs Provincia {summary_comp['citta_vs_provincia']['retention_provincia']:.1f}%
-            - Metro gioca **+{gap_gare:.0f} gare/anno** in più
-            - Età media più alta in città metropolitana (+3.4 anni)
-            - La provincia sta recuperando terreno (rapporto da 0.90 a 0.81)
+            - **Le grandi città perdono di più** (-32.6% vs -28.2%)
+            - **Milano, Roma, Torino, Genova** perdono ~37%
+            - **Bari e Reggio Calabria** in controtendenza POSITIVA!
+            - Venezia e Messina tengono bene (-5%)
+            - La provincia sta recuperando terreno
             """)
 
     else:
