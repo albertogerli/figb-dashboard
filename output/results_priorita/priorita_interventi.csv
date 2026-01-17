@@ -1,0 +1,9 @@
+Intervento,Target,Evidenza,ImpattoPotenziale,Difficoltà,TempoRitorno,Correlazione,Score
+Far giocare di più i nuovi (Anno 1),"Occasionali (11,788)","Soglia: 37 gare/anno. Occasionali fanno 3.6, Sociali 18.7",799,MEDIA,BREVE,FORTE (r=0.87 gare-retention),87.0
+Espandere corsi ai circoli senza,232 circoli senza corsi,Retention con corsi: 75% vs senza: 49% (+26pp),545,MEDIA,MEDIO,MOLTO FORTE (+26pp retention),65.28410513141426
+Ricontattare Quasi Agganciati,"1,735 ex-tesserati 1-2 anni","Hanno provato, poche gare, poi spariti",173,BASSA,BREVE,MEDIA (conoscono già il gioco),61.660826032540676
+Salvare circoli a rischio chiusura,9 critici + 21 alto rischio,"Trend negativo, età alta, pochi tesserati",450,ALTA,BREVE,DIRETTA (chiusura = perdita totale),59.52816020025031
+"Campagna ""Torna al Bridge"" ex-COVID","5,322 persi post-2020","Età media 80, ma alcuni recuperabili",266,MEDIA,BREVE,BASSA (età avanzata),52.31664580725907
+Piano speciale Milano/Roma/Torino,3 città che perdono -37%,Declino maggiore vs provincia (-32% vs -28%),300,ALTA,MEDIO,DIRETTA (trend negativo chiaro),47.018773466833544
+Marketing fascia 60-70 anni,"3,610 potenziali (gap vs 70-80)",Penetrazione 60-70: 34/100k vs 70-80: 78/100k,180,ALTA,LUNGO,MODERATA (benchmark fascia superiore),32.011264080100126
+Aprire circoli in province scoperte,Province con 0 o pochi circoli,Correlazione circoli-tesserati: 0.94,200,MOLTO ALTA,LUNGO,MOLTO FORTE (r=0.94),28.012515644555695

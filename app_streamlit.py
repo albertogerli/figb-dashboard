@@ -102,7 +102,7 @@ pagina = st.sidebar.selectbox(
      "📍 Analisi Territoriale", "🏆 Mappa Agonismo", "🏢 Analisi Associazioni",
      "🎓 Bridge a Scuola", "⚠️ Giocatori a Rischio", "🔄 Bridgisti Recuperabili",
      "🔮 Modello Predittivo", "🌱 Opportunità Crescita", "🔬 Analisi Avanzate",
-     "🎯 Attività per Età/Sesso", "🧩 Cluster e Territori", "🔍 Esplora Dati"]
+     "🎯 Attività per Età/Sesso", "🧩 Cluster e Territori", "🎖️ Priorità Intervento", "🔍 Esplora Dati"]
 )
 
 st.sidebar.markdown("---")
@@ -3716,6 +3716,187 @@ elif pagina == "🧩 Cluster e Territori":
 
     else:
         st.warning("Dati comportamentali non disponibili. Esegui prima `10_analisi_comportamentali.py`")
+
+# ============================================================================
+# PAGINA: PRIORITÀ INTERVENTO
+# ============================================================================
+elif pagina == "🎖️ Priorità Intervento":
+    st.title("🎖️ Priorità di Intervento")
+
+    st.markdown("""
+    Matrice delle priorità basata su tutte le analisi effettuate.
+    Ogni intervento è valutato per **impatto**, **difficoltà**, **tempo di ritorno** e **forza delle evidenze**.
+    """)
+
+    RESULTS_PRIO = OUTPUT_DIR / 'results_priorita'
+
+    if RESULTS_PRIO.exists():
+        # Carica dati
+        with open(RESULTS_PRIO / 'summary_priorita.json', 'r') as f:
+            summary_prio = json.load(f)
+
+        priorita_df = pd.read_csv(RESULTS_PRIO / 'priorita_interventi.csv')
+
+        # KPI principali
+        st.markdown("### 📊 Riepilogo Impatto")
+
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            st.metric(
+                "Tesserati Attuali",
+                f"{summary_prio['tesserati_attuali']:,}"
+            )
+        with col2:
+            st.metric(
+                "Impatto Totale Stimato",
+                f"+{summary_prio['impatto_totale_stimato']:,}",
+                f"+{100*summary_prio['impatto_totale_stimato']/summary_prio['tesserati_attuali']:.1f}%"
+            )
+        with col3:
+            st.metric(
+                "N. Interventi",
+                len(priorita_df)
+            )
+
+        st.markdown("---")
+
+        # Grafico Score
+        st.markdown("### 🏆 Classifica Priorità (Score)")
+
+        priorita_sorted = priorita_df.sort_values('Score', ascending=True)
+
+        fig = px.bar(priorita_sorted, y='Intervento', x='Score', orientation='h',
+                    title="Score Priorità (0-100)",
+                    text='Score',
+                    color='Score',
+                    color_continuous_scale='RdYlGn')
+        fig.update_traces(textposition='auto', cliponaxis=False, texttemplate='%{text:.0f}')
+        fig.update_layout(margin=dict(l=250, r=60), height=500)
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.markdown("""
+        **Come si calcola lo Score:**
+        - **Impatto potenziale** (40%): quanti tesserati possiamo guadagnare
+        - **Facilità** (30%): quanto è difficile implementare l'intervento
+        - **Tempo di ritorno** (15%): quanto velocemente vediamo i risultati
+        - **Forza evidenze** (15%): quanto sono solide le correlazioni statistiche
+        """)
+
+        st.markdown("---")
+
+        # Dettaglio per intervento
+        st.markdown("### 📋 Dettaglio Interventi per Priorità")
+
+        for idx, row in priorita_df.sort_values('Score', ascending=False).iterrows():
+            rank = priorita_df.sort_values('Score', ascending=False).index.get_loc(idx) + 1
+
+            # Colore basato su priorità
+            if rank <= 3:
+                emoji = "🥇🥈🥉"[rank-1]
+                color = "green" if rank == 1 else "blue" if rank == 2 else "orange"
+            else:
+                emoji = f"#{rank}"
+                color = "gray"
+
+            with st.expander(f"{emoji} **{row['Intervento']}** (Score: {row['Score']:.0f})", expanded=(rank <= 3)):
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    st.markdown(f"**🎯 Target:** {row['Target']}")
+                    st.markdown(f"**📊 Evidenza:** {row['Evidenza']}")
+                    st.markdown(f"**🔗 Correlazione:** {row['Correlazione']}")
+
+                with col2:
+                    st.metric("Impatto Stimato", f"+{row['ImpattoPotenziale']:,} tesserati")
+
+                    diff_color = {'BASSA': '🟢', 'MEDIA': '🟡', 'ALTA': '🟠', 'MOLTO ALTA': '🔴'}
+                    st.markdown(f"**Difficoltà:** {diff_color.get(row['Difficoltà'], '⚪')} {row['Difficoltà']}")
+
+                    tempo_color = {'BREVE': '🟢', 'MEDIO': '🟡', 'LUNGO': '🔴'}
+                    st.markdown(f"**Tempo Ritorno:** {tempo_color.get(row['TempoRitorno'], '⚪')} {row['TempoRitorno']}")
+
+        st.markdown("---")
+
+        # Grafico impatto vs difficoltà
+        st.markdown("### 📈 Matrice Impatto vs Difficoltà")
+
+        diff_map = {'BASSA': 1, 'MEDIA': 2, 'ALTA': 3, 'MOLTO ALTA': 4}
+        priorita_df['DiffNum'] = priorita_df['Difficoltà'].map(diff_map)
+
+        fig = px.scatter(priorita_df, x='DiffNum', y='ImpattoPotenziale',
+                        size='Score', color='TempoRitorno',
+                        hover_name='Intervento',
+                        title="Matrice: Impatto vs Difficoltà",
+                        labels={'DiffNum': 'Difficoltà (1=Bassa, 4=Molto Alta)',
+                               'ImpattoPotenziale': 'Impatto Potenziale (tesserati)'},
+                        color_discrete_map={'BREVE': 'green', 'MEDIO': 'orange', 'LUNGO': 'red'})
+        fig.update_layout(xaxis=dict(tickvals=[1, 2, 3, 4], ticktext=['Bassa', 'Media', 'Alta', 'Molto Alta']))
+
+        # Aggiungi quadranti
+        fig.add_hline(y=priorita_df['ImpattoPotenziale'].median(), line_dash="dash", line_color="gray", opacity=0.5)
+        fig.add_vline(x=2.5, line_dash="dash", line_color="gray", opacity=0.5)
+
+        # Annotazioni quadranti
+        fig.add_annotation(x=1.5, y=priorita_df['ImpattoPotenziale'].max()*0.9,
+                          text="⭐ PRIORITÀ ALTA", showarrow=False, font=dict(color="green", size=12))
+        fig.add_annotation(x=3.5, y=priorita_df['ImpattoPotenziale'].max()*0.9,
+                          text="⚠️ VALUTARE", showarrow=False, font=dict(color="orange", size=12))
+        fig.add_annotation(x=1.5, y=priorita_df['ImpattoPotenziale'].min()*1.5,
+                          text="✓ QUICK WINS", showarrow=False, font=dict(color="blue", size=12))
+        fig.add_annotation(x=3.5, y=priorita_df['ImpattoPotenziale'].min()*1.5,
+                          text="❌ BASSA PRIORITÀ", showarrow=False, font=dict(color="red", size=12))
+
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.markdown("---")
+
+        # Piano d'azione suggerito
+        st.markdown("### 🚀 Piano d'Azione Suggerito")
+
+        top3 = priorita_df.sort_values('Score', ascending=False).head(3)
+
+        st.success(f"""
+        **FASE 1 - AZIONI IMMEDIATE (0-6 mesi):**
+
+        1. **{top3.iloc[0]['Intervento']}**
+           - {top3.iloc[0]['Target']}
+           - Impatto stimato: +{top3.iloc[0]['ImpattoPotenziale']:,} tesserati
+
+        2. **{top3.iloc[1]['Intervento']}**
+           - {top3.iloc[1]['Target']}
+           - Impatto stimato: +{top3.iloc[1]['ImpattoPotenziale']:,} tesserati
+
+        3. **{top3.iloc[2]['Intervento']}**
+           - {top3.iloc[2]['Target']}
+           - Impatto stimato: +{top3.iloc[2]['ImpattoPotenziale']:,} tesserati
+
+        **IMPATTO FASE 1:** +{top3['ImpattoPotenziale'].sum():,} tesserati potenziali
+        """)
+
+        mid_prio = priorita_df.sort_values('Score', ascending=False).iloc[3:6]
+        st.warning(f"""
+        **FASE 2 - AZIONI MEDIO TERMINE (6-18 mesi):**
+
+        4. {mid_prio.iloc[0]['Intervento']} (+{mid_prio.iloc[0]['ImpattoPotenziale']:,})
+        5. {mid_prio.iloc[1]['Intervento']} (+{mid_prio.iloc[1]['ImpattoPotenziale']:,})
+        6. {mid_prio.iloc[2]['Intervento']} (+{mid_prio.iloc[2]['ImpattoPotenziale']:,})
+        """)
+
+        low_prio = priorita_df.sort_values('Score', ascending=False).iloc[6:]
+        if len(low_prio) > 0:
+            st.info(f"""
+            **FASE 3 - AZIONI LUNGO TERMINE (18+ mesi):**
+
+            {', '.join([f"{r['Intervento']} (+{r['ImpattoPotenziale']:,})" for _, r in low_prio.iterrows()])}
+            """)
+
+        # Tabella completa
+        with st.expander("📋 Tabella Completa"):
+            st.dataframe(priorita_df.sort_values('Score', ascending=False), use_container_width=True)
+
+    else:
+        st.warning("Dati priorità non disponibili. Esegui prima l'analisi priorità.")
 
 # ============================================================================
 # PAGINA: ESPLORA DATI

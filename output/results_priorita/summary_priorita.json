@@ -1,0 +1,86 @@
+{
+  "tesserati_attuali": 13661,
+  "impatto_totale_stimato": 2913,
+  "interventi": [
+    {
+      "Intervento": "Far giocare di pi\u00f9 i nuovi (Anno 1)",
+      "Target": "Occasionali (11,788)",
+      "Evidenza": "Soglia: 37 gare/anno. Occasionali fanno 3.6, Sociali 18.7",
+      "ImpattoPotenziale": 799,
+      "Difficolt\u00e0": "MEDIA",
+      "TempoRitorno": "BREVE",
+      "Correlazione": "FORTE (r=0.87 gare-retention)",
+      "Score": 87.0
+    },
+    {
+      "Intervento": "Espandere corsi ai circoli senza",
+      "Target": "232 circoli senza corsi",
+      "Evidenza": "Retention con corsi: 75% vs senza: 49% (+26pp)",
+      "ImpattoPotenziale": 545,
+      "Difficolt\u00e0": "MEDIA",
+      "TempoRitorno": "MEDIO",
+      "Correlazione": "MOLTO FORTE (+26pp retention)",
+      "Score": 65.28410513141426
+    },
+    {
+      "Intervento": "Ricontattare Quasi Agganciati",
+      "Target": "1,735 ex-tesserati 1-2 anni",
+      "Evidenza": "Hanno provato, poche gare, poi spariti",
+      "ImpattoPotenziale": 173,
+      "Difficolt\u00e0": "BASSA",
+      "TempoRitorno": "BREVE",
+      "Correlazione": "MEDIA (conoscono gi\u00e0 il gioco)",
+      "Score": 61.660826032540676
+    },
+    {
+      "Intervento": "Salvare circoli a rischio chiusura",
+      "Target": "9 critici + 21 alto rischio",
+      "Evidenza": "Trend negativo, et\u00e0 alta, pochi tesserati",
+      "ImpattoPotenziale": 450,
+      "Difficolt\u00e0": "ALTA",
+      "TempoRitorno": "BREVE",
+      "Correlazione": "DIRETTA (chiusura = perdita totale)",
+      "Score": 59.52816020025031
+    },
+    {
+      "Intervento": "Campagna \"Torna al Bridge\" ex-COVID",
+      "Target": "5,322 persi post-2020",
+      "Evidenza": "Et\u00e0 media 80, ma alcuni recuperabili",
+      "ImpattoPotenziale": 266,
+      "Difficolt\u00e0": "MEDIA",
+      "TempoRitorno": "BREVE",
+      "Correlazione": "BASSA (et\u00e0 avanzata)",
+      "Score": 52.31664580725907
+    },
+    {
+      "Intervento": "Piano speciale Milano/Roma/Torino",
+      "Target": "3 citt\u00e0 che perdono -37%",
+      "Evidenza": "Declino maggiore vs provincia (-32% vs -28%)",
+      "ImpattoPotenziale": 300,
+      "Difficolt\u00e0": "ALTA",
+      "TempoRitorno": "MEDIO",
+      "Correlazione": "DIRETTA (trend negativo chiaro)",
+      "Score": 47.018773466833544
+    },
+    {
+      "Intervento": "Marketing fascia 60-70 anni",
+      "Target": "3,610 potenziali (gap vs 70-80)",
+      "Evidenza": "Penetrazione 60-70: 34/100k vs 70-80: 78/100k",
+      "ImpattoPotenziale": 180,
+      "Difficolt\u00e0": "ALTA",
+      "TempoRitorno": "LUNGO",
+      "Correlazione": "MODERATA (benchmark fascia superiore)",
+      "Score": 32.011264080100126
+    },
+    {
+      "Intervento": "Aprire circoli in province scoperte",
+      "Target": "Province con 0 o pochi circoli",
+      "Evidenza": "Correlazione circoli-tesserati: 0.94",
+      "ImpattoPotenziale": 200,
+      "Difficolt\u00e0": "MOLTO ALTA",
+      "TempoRitorno": "LUNGO",
+      "Correlazione": "MOLTO FORTE (r=0.94)",
+      "Score": 28.012515644555695
+    }
+  ]
+}
