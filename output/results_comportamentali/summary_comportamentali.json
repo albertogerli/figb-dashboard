@@ -1,0 +1,87 @@
+{
+  "cluster": {
+    "distribuzione": [
+      {
+        "Cluster": "Occasionale",
+        "NumGiocatori": 11788,
+        "GareMedie": 3.6089981202298813,
+        "AnniMedi": 2.0651510010179845,
+        "CampMedi": 249.99647415181434,
+        "EtaMedia": 62.226187397638135,
+        "CircoliMedi": 1.1549881235154393,
+        "Percentuale": 37.9
+      },
+      {
+        "Cluster": "Sociale",
+        "NumGiocatori": 8090,
+        "GareMedie": 18.725897786803227,
+        "AnniMedi": 4.674042027194067,
+        "CampMedi": 1164.3322194753468,
+        "EtaMedia": 73.66811038237842,
+        "CircoliMedi": 1.4328800988875154,
+        "Percentuale": 26.0
+      },
+      {
+        "Cluster": "Regolare Fedele",
+        "NumGiocatori": 7011,
+        "GareMedie": 59.00134029744641,
+        "AnniMedi": 7.168164313222079,
+        "CampMedi": 1561.496275127747,
+        "EtaMedia": 76.20310939951504,
+        "CircoliMedi": 1.5839395236057623,
+        "Percentuale": 22.5
+      },
+      {
+        "Cluster": "Agonista Attivo",
+        "NumGiocatori": 1556,
+        "GareMedie": 80.73546206185988,
+        "AnniMedi": 8.101542416452443,
+        "CampMedi": 9967.869129738443,
+        "EtaMedia": 72.51928020565553,
+        "CircoliMedi": 1.755784061696658,
+        "Percentuale": 5.0
+      },
+      {
+        "Cluster": "Regolare",
+        "NumGiocatori": 1078,
+        "GareMedie": 49.702104611575365,
+        "AnniMedi": 2.5538033395176254,
+        "CampMedi": 297.7072113896627,
+        "EtaMedia": 74.11627906976744,
+        "CircoliMedi": 1.1614100185528757,
+        "Percentuale": 3.5
+      },
+      {
+        "Cluster": "Super Agonista",
+        "NumGiocatori": 1038,
+        "GareMedie": 125.04251383919014,
+        "AnniMedi": 8.446050096339114,
+        "CampMedi": 16938.339896244303,
+        "EtaMedia": 72.74084778420038,
+        "CircoliMedi": 1.8015414258188824,
+        "Percentuale": 3.3
+      },
+      {
+        "Cluster": "Nuovo Entusiasta",
+        "NumGiocatori": 533,
+        "GareMedie": 67.65572232645404,
+        "AnniMedi": 1.673545966228893,
+        "CampMedi": 293.58348968105065,
+        "EtaMedia": 73.02071563088512,
+        "CircoliMedi": 1.0731707317073171,
+        "Percentuale": 1.7
+      }
+    ],
+    "num_giocatori_totali": 31094
+  },
+  "cannibalizzazione": {
+    "correlazione_circoli_tesserati": 0.94404338799112,
+    "cambio_stessa_provincia_pct": 83.8994160409963
+  },
+  "citta_vs_provincia": {
+    "retention_metro": 81.09004744870863,
+    "retention_provincia": 81.86454662687943,
+    "gare_medie_metro": 49.68555366053945,
+    "gare_medie_provincia": 40.474975373446505
+  }
+}

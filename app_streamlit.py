@@ -102,7 +102,7 @@ pagina = st.sidebar.selectbox(
      "📍 Analisi Territoriale", "🏆 Mappa Agonismo", "🏢 Analisi Associazioni",
      "🎓 Bridge a Scuola", "⚠️ Giocatori a Rischio", "🔄 Bridgisti Recuperabili",
      "🔮 Modello Predittivo", "🌱 Opportunità Crescita", "🔬 Analisi Avanzate",
-     "🎯 Attività per Età/Sesso", "🔍 Esplora Dati"]
+     "🎯 Attività per Età/Sesso", "🧩 Cluster e Territori", "🔍 Esplora Dati"]
 )
 
 st.sidebar.markdown("---")
@@ -3391,6 +3391,260 @@ elif pagina == "🎯 Attività per Età/Sesso":
 
     else:
         st.warning("Dati attività non disponibili. Esegui prima l'analisi.")
+
+# ============================================================================
+# PAGINA: CLUSTER E TERRITORI
+# ============================================================================
+elif pagina == "🧩 Cluster e Territori":
+    st.title("🧩 Cluster Comportamentali e Analisi Territoriali")
+
+    st.markdown("""
+    Segmentazione giocatori per comportamento e analisi delle dinamiche territoriali.
+    """)
+
+    RESULTS_COMP = OUTPUT_DIR / 'results_comportamentali'
+
+    if RESULTS_COMP.exists():
+        # Carica dati
+        with open(RESULTS_COMP / 'summary_comportamentali.json', 'r') as f:
+            summary_comp = json.load(f)
+
+        cluster_stats = pd.read_csv(RESULTS_COMP / 'cluster_stats.csv')
+        retention_cluster = pd.read_csv(RESULTS_COMP / 'retention_cluster.csv')
+        confronto_metro = pd.read_csv(RESULTS_COMP / 'confronto_metro_provincia.csv')
+        stats_area = pd.read_csv(RESULTS_COMP / 'stats_per_area.csv')
+        evol_province = pd.read_csv(RESULTS_COMP / 'evoluzione_province.csv')
+
+        # KPI
+        st.markdown("### 📊 Riepilogo")
+
+        col1, col2, col3, col4 = st.columns(4)
+
+        with col1:
+            top_cluster = cluster_stats.iloc[0]
+            st.metric(
+                "Cluster Principale",
+                top_cluster['Cluster'],
+                f"{top_cluster['Percentuale']:.0f}% giocatori"
+            )
+        with col2:
+            best_ret = retention_cluster.sort_values('Retention', ascending=False).iloc[0]
+            st.metric(
+                "Miglior Retention",
+                best_ret['Cluster'],
+                f"{best_ret['Retention']:.0f}%"
+            )
+        with col3:
+            st.metric(
+                "Cambio Circolo Locale",
+                f"{summary_comp['cannibalizzazione']['cambio_stessa_provincia_pct']:.0f}%",
+                "restano in provincia"
+            )
+        with col4:
+            ret_metro = summary_comp['citta_vs_provincia']['retention_metro']
+            ret_prov = summary_comp['citta_vs_provincia']['retention_provincia']
+            st.metric(
+                "Gap Retention Metro/Prov",
+                f"{ret_metro - ret_prov:+.1f}pp"
+            )
+
+        st.markdown("---")
+
+        # Tabs
+        tab1, tab2, tab3 = st.tabs([
+            "🧩 Cluster Comportamentali",
+            "🔄 Cannibalizzazione Circoli",
+            "🏙️ Città vs Provincia"
+        ])
+
+        # TAB 1: Cluster
+        with tab1:
+            st.subheader("🧩 Cluster Comportamentali")
+            st.markdown("""
+            Segmentazione dei giocatori basata su:
+            - Gare giocate (intensità)
+            - Anni di presenza (fedeltà)
+            - Punti campionati (competitività)
+            """)
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                # Distribuzione cluster
+                fig = px.pie(cluster_stats, values='NumGiocatori', names='Cluster',
+                            title="Distribuzione Cluster",
+                            color_discrete_sequence=px.colors.qualitative.Set2)
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col2:
+                # Retention per cluster
+                ret_sorted = retention_cluster.sort_values('Retention', ascending=True)
+                fig = px.bar(ret_sorted, y='Cluster', x='Retention', orientation='h',
+                            title="Retention per Cluster",
+                            text='Retention',
+                            color='Retention',
+                            color_continuous_scale='RdYlGn')
+                fig.update_traces(textposition='auto', cliponaxis=False, texttemplate='%{text:.1f}%')
+                fig.update_layout(margin=dict(r=60))
+                st.plotly_chart(fig, use_container_width=True)
+
+            # Profilo cluster
+            st.markdown("#### Profilo dei Cluster")
+
+            fig = px.scatter(cluster_stats, x='GareMedie', y='AnniMedi',
+                            size='NumGiocatori', color='Cluster',
+                            hover_data=['EtaMedia', 'Percentuale'],
+                            title="Mappa Cluster: Gare vs Anni Presenza",
+                            labels={'GareMedie': 'Gare Medie/Anno', 'AnniMedi': 'Anni Presenza'})
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Tabella dettaglio
+            with st.expander("📋 Dettaglio Cluster"):
+                st.dataframe(cluster_stats.round(1), use_container_width=True)
+
+            st.info("""
+            💡 **Insight:**
+            - **37.9% Occasionali**: giocano poco, restano poco → target per engagement
+            - **26.0% Sociali**: ~19 gare/anno, 4.7 anni presenza → base stabile
+            - **Super Agonisti** hanno **86.7% retention** → modello da replicare
+            - Il segreto: più gare = più retention!
+            """)
+
+        # TAB 2: Cannibalizzazione
+        with tab2:
+            st.subheader("🔄 Cannibalizzazione Circoli")
+            st.markdown("""
+            I circoli vicini si rubano iscritti o crescono insieme?
+            """)
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                # Correlazione
+                corr = summary_comp['cannibalizzazione']['correlazione_circoli_tesserati']
+                if corr:
+                    st.metric("Correlazione Circoli-Tesserati", f"{corr:.2f}",
+                             help="Più circoli = più tesserati?")
+
+                    if corr > 0.7:
+                        st.success("✅ Correlazione FORTE: più circoli nella provincia = più tesserati totali!")
+                    elif corr > 0.4:
+                        st.warning("⚠️ Correlazione moderata")
+                    else:
+                        st.error("❌ Correlazione debole")
+
+            with col2:
+                # Cambio circolo
+                cambio_locale = summary_comp['cannibalizzazione']['cambio_stessa_provincia_pct']
+                cambio_data = pd.DataFrame({
+                    'Tipo': ['Stessa Provincia', 'Altra Provincia'],
+                    'Percentuale': [cambio_locale, 100 - cambio_locale]
+                })
+
+                fig = px.pie(cambio_data, values='Percentuale', names='Tipo',
+                            title="Chi Cambia Circolo Dove Va?",
+                            color_discrete_sequence=['#3498db', '#e74c3c'])
+                st.plotly_chart(fig, use_container_width=True)
+
+            # Evoluzione province
+            st.markdown("#### Evoluzione Province (Circoli vs Tesserati)")
+
+            # Province che hanno aggiunto circoli
+            prov_piu = evol_province[evol_province['DeltaCircoli'] > 0].sort_values('DeltaCircoli', ascending=False).head(10)
+            prov_meno = evol_province[evol_province['DeltaCircoli'] < 0].sort_values('DeltaCircoli').head(10)
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.markdown("**Province che hanno AGGIUNTO circoli:**")
+                if len(prov_piu) > 0:
+                    fig = px.bar(prov_piu, x='Provincia', y='DeltaTessPct',
+                                title="Effetto su Tesserati",
+                                text='DeltaTessPct',
+                                color='DeltaTessPct',
+                                color_continuous_scale='RdYlGn',
+                                color_continuous_midpoint=0)
+                    fig.update_traces(textposition='auto', cliponaxis=False, texttemplate='%{text:+.0f}%')
+                    st.plotly_chart(fig, use_container_width=True)
+                else:
+                    st.info("Nessuna provincia ha aggiunto circoli")
+
+            with col2:
+                st.markdown("**Province che hanno PERSO circoli:**")
+                if len(prov_meno) > 0:
+                    fig = px.bar(prov_meno, x='Provincia', y='DeltaTessPct',
+                                title="Effetto su Tesserati",
+                                text='DeltaTessPct',
+                                color='DeltaTessPct',
+                                color_continuous_scale='RdYlGn',
+                                color_continuous_midpoint=0)
+                    fig.update_traces(textposition='auto', cliponaxis=False, texttemplate='%{text:+.0f}%')
+                    st.plotly_chart(fig, use_container_width=True)
+                else:
+                    st.info("Nessuna provincia ha perso circoli")
+
+            st.info("""
+            💡 **Insight:**
+            - Correlazione 0.94: **PIÙ circoli = PIÙ tesserati** (non cannibalizzazione!)
+            - **83.9%** di chi cambia circolo resta nella stessa provincia
+            - Aprire nuovi circoli è positivo per il territorio
+            """)
+
+        # TAB 3: Città vs Provincia
+        with tab3:
+            st.subheader("🏙️ Città Metropolitana vs Provincia")
+            st.markdown("""
+            Confronto delle dinamiche tra aree metropolitane e province.
+            """)
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                # Confronto metriche
+                fig = px.bar(confronto_metro, x='Metrica', y=['Città Metro', 'Provincia'],
+                            title="Confronto Metriche",
+                            barmode='group')
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col2:
+                # Retention
+                ret_data = pd.DataFrame({
+                    'Area': ['Città Metropolitana', 'Provincia'],
+                    'Retention': [summary_comp['citta_vs_provincia']['retention_metro'],
+                                 summary_comp['citta_vs_provincia']['retention_provincia']]
+                })
+
+                fig = px.bar(ret_data, x='Area', y='Retention',
+                            title="Retention per Tipo Area",
+                            text='Retention',
+                            color='Area',
+                            color_discrete_map={'Città Metropolitana': '#3498db', 'Provincia': '#2ecc71'})
+                fig.update_traces(textposition='auto', cliponaxis=False, texttemplate='%{text:.1f}%')
+                st.plotly_chart(fig, use_container_width=True)
+
+            # Trend nel tempo
+            st.markdown("#### Trend Tesserati nel Tempo")
+
+            fig = px.line(stats_area, x='Anno', y='Tesserati', color='TipoArea',
+                         title="Evoluzione Tesserati: Metro vs Provincia",
+                         markers=True)
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Tabella confronto
+            with st.expander("📋 Confronto Dettagliato"):
+                st.dataframe(confronto_metro, use_container_width=True)
+
+            gap_gare = summary_comp['citta_vs_provincia']['gare_medie_metro'] - summary_comp['citta_vs_provincia']['gare_medie_provincia']
+            st.info(f"""
+            💡 **Insight:**
+            - Retention simile: Metro {summary_comp['citta_vs_provincia']['retention_metro']:.1f}% vs Provincia {summary_comp['citta_vs_provincia']['retention_provincia']:.1f}%
+            - Metro gioca **+{gap_gare:.0f} gare/anno** in più
+            - Età media più alta in città metropolitana (+3.4 anni)
+            - La provincia sta recuperando terreno (rapporto da 0.90 a 0.81)
+            """)
+
+    else:
+        st.warning("Dati comportamentali non disponibili. Esegui prima `10_analisi_comportamentali.py`")
 
 # ============================================================================
 # PAGINA: ESPLORA DATI
