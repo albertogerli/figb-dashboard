@@ -2837,11 +2837,12 @@ elif pagina == "🌱 Opportunità Crescita":
                 st.markdown("#### Profilo Persi COVID")
                 col1, col2, col3 = st.columns(3)
                 with col1:
-                    st.metric("Età Media Attuale", f"{persi_covid['EtaAttuale'].mean():.0f} anni")
+                    st.metric("Età Media Attuale", f"{persi_covid['Eta'].mean():.0f} anni")
                 with col2:
-                    st.metric("Gare Medie (quando attivi)", f"{persi_covid['GareMedie'].mean():.0f}")
+                    gare_medie = persi_covid['GareTotali'].sum() / persi_covid['AnniTotali'].sum() if persi_covid['AnniTotali'].sum() > 0 else 0
+                    st.metric("Gare Medie (quando attivi)", f"{gare_medie:.0f}")
                 with col3:
-                    st.metric("Anni Tessera", f"{persi_covid['AnniTessera'].mean():.1f}")
+                    st.metric("Anni Tessera", f"{persi_covid['AnniTotali'].mean():.1f}")
 
                 # Alta priorità
                 alta_priorita = persi_covid[persi_covid['Recuperabile'] == 'Alta Priorità']
@@ -2852,9 +2853,9 @@ elif pagina == "🌱 Opportunità Crescita":
                     with st.expander("📋 Dettaglio Alta Priorità per Associazione"):
                         ap_ass = alta_priorita.groupby('Associazione').agg({
                             'MmbCode': 'count',
-                            'GareMedie': 'mean'
+                            'GareTotali': 'mean'
                         }).reset_index()
-                        ap_ass.columns = ['Associazione', 'Numero', 'GareMedie']
+                        ap_ass.columns = ['Associazione', 'Numero', 'GareTotaliMedie']
                         ap_ass = ap_ass.sort_values('Numero', ascending=False).head(30)
                         st.dataframe(ap_ass, use_container_width=True)
             else:
