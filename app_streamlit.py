@@ -415,10 +415,48 @@ elif pagina == "📈 Trend Temporale":
 
     with col1:
         st.subheader("Distribuzione Categorie")
-        cat_trend = df_filtered.groupby(['Anno', 'CatLabel']).size().reset_index(name='Count')
-        fig = px.bar(cat_trend, x='Anno', y='Count', color='CatLabel',
-                     title="Tesserati per Categoria")
+        # Raggruppa categorie in macro-classi
+        df_cat = df_filtered.copy()
+
+        def macro_categoria(cat):
+            if pd.isna(cat):
+                return 'NC'
+            cat = str(cat)
+            if cat.startswith('1'):
+                return '1a Categoria'
+            elif cat.startswith('2'):
+                return '2a Categoria'
+            elif cat.startswith('3'):
+                return '3a Categoria'
+            elif cat.startswith('4'):
+                return '4a Categoria'
+            elif cat in ['NC', 'Ordinario Sportivo']:
+                return 'Non Classificati'
+            elif cat.startswith('H') or cat in ['GM', 'LM', 'MS']:
+                return 'Onorarie/Speciali'
+            else:
+                return 'Altro'
+
+        df_cat['MacroCategoria'] = df_cat['CatLabel'].apply(macro_categoria)
+        cat_trend = df_cat.groupby(['Anno', 'MacroCategoria']).size().reset_index(name='Count')
+
+        # Ordine logico
+        cat_order = ['Non Classificati', '1a Categoria', '2a Categoria', '3a Categoria', '4a Categoria', 'Onorarie/Speciali', 'Altro']
+        cat_trend['MacroCategoria'] = pd.Categorical(cat_trend['MacroCategoria'], categories=cat_order, ordered=True)
+
+        fig = px.bar(cat_trend, x='Anno', y='Count', color='MacroCategoria',
+                     title="Tesserati per Categoria",
+                     color_discrete_map={
+                         'Non Classificati': '#95a5a6',
+                         '1a Categoria': '#27ae60',
+                         '2a Categoria': '#3498db',
+                         '3a Categoria': '#9b59b6',
+                         '4a Categoria': '#e74c3c',
+                         'Onorarie/Speciali': '#f39c12',
+                         'Altro': '#7f8c8d'
+                     })
         fig.update_xaxes(dtick=1)
+        fig.update_layout(legend=dict(orientation='h', yanchor='bottom', y=1.02))
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
