@@ -493,10 +493,10 @@ elif pagina == "📈 Trend Temporale":
         '3Q', '3C', '3F', '3P',  # 3a categoria
         '2Q', '2C', '2F', '2P',  # 2a categoria
         '1Q', '1C', '1F', '1P',  # 1a categoria
-        'HJ',  # Honorary Junior
-        'HA',  # Honorary A
-        'HK',  # Honorary K
-        'HQ',  # Honorary Q
+        'HJ',  # Honorary Jack (più bassa)
+        'HQ',  # Honorary Queen
+        'HK',  # Honorary King
+        'HA',  # Honorary Ace (più alta)
         'MS',  # Master
         'LM',  # Life Master
         'GM'   # Grand Master
@@ -512,15 +512,12 @@ elif pagina == "📈 Trend Temporale":
     # Conta per categoria
     cat_counts = df_anno['CatLabel'].value_counts()
 
-    # Prepara dati per il grafico
+    # Prepara dati per il grafico (solo categorie con giocatori)
     piramide_data = []
     for cat in ordine_categorie:
         count = cat_counts.get(cat, 0)
-        if count > 0 or cat not in ['4Q', '4C', '4F', '4P']:  # Mostra sempre tranne 4a cat se 0
+        if count > 0:
             piramide_data.append({'Categoria': cat, 'Giocatori': count})
-
-    # Rimuovi categorie vuote della 4a se non esistono
-    piramide_data = [d for d in piramide_data if d['Giocatori'] > 0 or not d['Categoria'].startswith('4')]
 
     if piramide_data:
         piramide_df = pd.DataFrame(piramide_data)
@@ -544,26 +541,53 @@ elif pagina == "📈 Trend Temporale":
 
         piramide_df['Colore'] = piramide_df['Categoria'].apply(get_color)
 
-        # Grafico orizzontale (piramide)
+        # Mantieni ordine corretto
+        cat_presenti = [c for c in ordine_categorie if c in piramide_df['Categoria'].values]
+
+        # Grafico piramide centrata (barre sovrapposte simmetriche)
         fig = go.Figure()
 
+        # Barre a sinistra (valori negativi per centrare)
         fig.add_trace(go.Bar(
             y=piramide_df['Categoria'],
-            x=piramide_df['Giocatori'],
+            x=-piramide_df['Giocatori'] / 2,
             orientation='h',
             marker_color=piramide_df['Colore'],
-            text=piramide_df['Giocatori'],
-            textposition='outside'
+            hovertemplate='%{y}: %{customdata:,}<extra></extra>',
+            customdata=piramide_df['Giocatori'],
+            showlegend=False
+        ))
+
+        # Barre a destra (valori positivi)
+        fig.add_trace(go.Bar(
+            y=piramide_df['Categoria'],
+            x=piramide_df['Giocatori'] / 2,
+            orientation='h',
+            marker_color=piramide_df['Colore'],
+            text=piramide_df['Giocatori'].apply(lambda x: f'{x:,}'),
+            textposition='outside',
+            hovertemplate='%{y}: %{customdata:,}<extra></extra>',
+            customdata=piramide_df['Giocatori'],
+            showlegend=False
         ))
 
         fig.update_layout(
-            title=f"Distribuzione Categorie - {anno_sel}",
-            height=600,
-            xaxis_title="Numero Giocatori",
-            yaxis_title="Categoria",
-            yaxis=dict(categoryorder='array', categoryarray=ordine_categorie),
+            title=f"Piramide Categorie - {anno_sel}",
+            height=650,
+            barmode='overlay',
+            bargap=0.1,
+            xaxis=dict(
+                showticklabels=False,
+                zeroline=True,
+                zerolinewidth=2,
+                zerolinecolor='#333'
+            ),
+            yaxis=dict(
+                categoryorder='array',
+                categoryarray=cat_presenti
+            ),
             showlegend=False,
-            margin=dict(l=80, r=100)
+            margin=dict(l=60, r=100)
         )
 
         st.plotly_chart(fig, use_container_width=True)
