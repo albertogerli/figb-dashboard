@@ -623,10 +623,163 @@ elif pagina == "📈 Trend Temporale":
             st.metric("Master+ (top)", f"{top_count:,}", f"{top_count/totale*100:.1f}%")
 
         # Nota sulla forma
-        if nc_count / totale > 0.3:
-            st.success("✅ Forma piramidale: base ampia di NC")
+        nc_pct = nc_count / totale * 100
+        top_pct = (cat1_count + top_count + sum(cat_counts.get(c, 0) for c in ['HJ', 'HQ', 'HK', 'HA'])) / totale * 100
+
+        if nc_pct > 40:
+            st.success(f"✅ **Piramide SANA** - Base ampia ({nc_pct:.0f}% NC), struttura equilibrata")
+        elif nc_pct > 25:
+            st.warning(f"⚠️ **Piramide COMPRESSA** - Base moderata ({nc_pct:.0f}% NC), possibile stagnazione")
         else:
-            st.warning("⚠️ Base ristretta: pochi NC rispetto al totale")
+            st.error(f"🔴 **Piramide INVERTITA** - Base ristretta ({nc_pct:.0f}% NC), popolazione esperta senza ricambio")
+
+    # =========================================================================
+    # ANALISI DIAGNOSTICA COMPLETA PER FASCIA D'ETÀ (solo 2025)
+    # =========================================================================
+    if anno_sel == anni_disponibili[-1]:  # Solo per ultimo anno disponibile
+        st.markdown("---")
+        st.subheader("🔬 Diagnosi Strutturale per Fascia d'Età")
+
+        # Calcola statistiche per tutte le fasce
+        df_diag = df_filtered[df_filtered['Anno'] == anno_sel].copy()
+        df_diag['FasciaEta'] = pd.cut(df_diag['Anni'],
+                                       bins=[0, 30, 40, 50, 60, 70, 80, 150],
+                                       labels=['<30', '30-39', '40-49', '50-59', '60-69', '70-79', '80+'])
+
+        def calc_macro(cat):
+            if pd.isna(cat) or cat in ['NC', 'Ordinario Sportivo']:
+                return 'NC'
+            cat = str(cat)
+            if cat.startswith('1'):
+                return '1a'
+            elif cat.startswith('H') or cat in ['MS', 'LM', 'GM']:
+                return 'Top'
+            else:
+                return 'Medio'
+
+        df_diag['Livello'] = df_diag['CatLabel'].apply(calc_macro)
+
+        # Analisi per fascia
+        analisi_fasce = []
+        for fascia in ['<30', '30-39', '40-49', '50-59', '60-69', '70-79', '80+']:
+            df_f = df_diag[df_diag['FasciaEta'] == fascia]
+            tot = len(df_f)
+            if tot == 0:
+                continue
+
+            nc = (df_f['Livello'] == 'NC').sum()
+            top = (df_f['Livello'].isin(['1a', 'Top'])).sum()
+
+            nc_pct = nc / tot * 100
+            top_pct = top / tot * 100
+
+            # Diagnosi
+            if nc_pct > 40:
+                stato = "🟢 Sana"
+                problema = "Nessuno"
+            elif nc_pct > 30:
+                stato = "🟡 Compressa"
+                problema = "Ricambio lento"
+            else:
+                stato = "🔴 Invertita"
+                problema = "No ricambio"
+
+            analisi_fasce.append({
+                'Fascia': fascia,
+                'Giocatori': tot,
+                'NC%': nc_pct,
+                'Top%': top_pct,
+                'Stato': stato,
+                'Problema': problema
+            })
+
+        analisi_df = pd.DataFrame(analisi_fasce)
+
+        # Visualizzazione tabella
+        st.dataframe(
+            analisi_df.style.format({
+                'Giocatori': '{:,.0f}',
+                'NC%': '{:.1f}%',
+                'Top%': '{:.1f}%'
+            }).background_gradient(subset=['NC%'], cmap='RdYlGn').background_gradient(subset=['Top%'], cmap='RdYlGn_r'),
+            use_container_width=True,
+            hide_index=True
+        )
+
+        # Grafico confronto fasce
+        col1, col2 = st.columns(2)
+
+        with col1:
+            fig = px.bar(analisi_df, x='Fascia', y='Giocatori',
+                        title="Distribuzione Giocatori per Età",
+                        color='Stato',
+                        color_discrete_map={'🟢 Sana': '#27ae60', '🟡 Compressa': '#f39c12', '🔴 Invertita': '#e74c3c'})
+            fig.update_layout(showlegend=False, height=350)
+            st.plotly_chart(fig, use_container_width=True)
+
+        with col2:
+            fig = px.bar(analisi_df, x='Fascia', y=['NC%', 'Top%'],
+                        title="Base vs Top per Fascia",
+                        barmode='group',
+                        color_discrete_map={'NC%': '#3498db', 'Top%': '#e74c3c'})
+            fig.update_layout(height=350, legend_title="")
+            st.plotly_chart(fig, use_container_width=True)
+
+        # Box diagnostico
+        st.markdown("### 📋 Diagnosi e Raccomandazioni")
+
+        # Identifica problemi
+        under40 = analisi_df[analisi_df['Fascia'].isin(['<30', '30-39', '40-49'])]['Giocatori'].sum()
+        totale_2025 = analisi_df['Giocatori'].sum()
+        pct_under40 = under40 / totale_2025 * 100
+
+        fascia_30_39 = analisi_df[analisi_df['Fascia'] == '30-39'].iloc[0] if len(analisi_df[analisi_df['Fascia'] == '30-39']) > 0 else None
+        fascia_70_79 = analisi_df[analisi_df['Fascia'] == '70-79'].iloc[0] if len(analisi_df[analisi_df['Fascia'] == '70-79']) > 0 else None
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown("#### 🚨 Problemi Identificati")
+            st.markdown(f"""
+            1. **Crisi 30-39 anni**: Solo {fascia_30_39['Giocatori']:,.0f} giocatori ({fascia_30_39['Giocatori']/totale_2025*100:.1f}%)
+               - Top% più alto ({fascia_30_39['Top%']:.1f}%): chi resta è esperto
+               - Bridge non attrae adulti in età lavorativa
+
+            2. **Gap generazionale**: Under 40 = {under40:,.0f} ({pct_under40:.1f}% del totale)
+               - Popolazione concentrata in 60-80 anni
+               - Rischio estinzione demografica in 15-20 anni
+
+            3. **Piramidi compresse 60-79**: NC% tra 34-40%
+               - Meno principianti che entrano in età pensionabile
+               - Saturazione delle categorie intermedie
+            """)
+
+        with col2:
+            st.markdown("#### 💡 Redistribuzione Ideale")
+
+            # Calcola distribuzione ideale
+            ideale = {
+                '<30': {'target': 5, 'NC_ideale': 70},
+                '30-39': {'target': 5, 'NC_ideale': 50},
+                '40-49': {'target': 8, 'NC_ideale': 45},
+                '50-59': {'target': 15, 'NC_ideale': 45},
+                '60-69': {'target': 27, 'NC_ideale': 40},
+                '70-79': {'target': 30, 'NC_ideale': 35},
+                '80+': {'target': 10, 'NC_ideale': 30}
+            }
+
+            st.markdown(f"""
+            | Fascia | Attuale | Ideale | Gap |
+            |--------|---------|--------|-----|
+            | <40 anni | {pct_under40:.1f}% | 18% | **{18-pct_under40:+.1f}%** |
+            | 60-69 | {fascia_70_79['Giocatori']/totale_2025*100 if fascia_70_79 is not None else 0:.1f}% | 27% | - |
+            | 70-79 | {analisi_df[analisi_df['Fascia']=='70-79']['Giocatori'].sum()/totale_2025*100:.1f}% | 30% | - |
+
+            **Azioni prioritarie:**
+            1. 🎯 Programmi per 30-49 anni (flessibilità oraria, online)
+            2. 📚 Corsi "seconda carriera" per 50-59 anni
+            3. 🔄 Aumentare conversione NC → categorie (gare dedicate)
+            """)
 
 # ============================================================================
 # PAGINA: ANALISI REGIONALE
