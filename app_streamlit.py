@@ -90,7 +90,7 @@ df = data['df']
 metriche = data['metriche']
 
 # Carica deceduti (se disponibile)
-deceduti_file = BASE_DIR / 'deceduti.xlsx'
+deceduti_file = BASE_DIR / 'Deceduti.xlsx'
 deceduti_df = None
 if deceduti_file.exists():
     deceduti_df = pd.read_excel(deceduti_file)
@@ -2590,7 +2590,7 @@ elif pagina == "🌱 Opportunità Crescita":
         persi_covid = pd.read_csv(RESULTS_OPP / 'persi_covid.csv')
 
         # Carica deceduti e filtra dalle liste da ricontattare
-        deceduti_file = BASE_DIR / 'deceduti.xlsx'
+        deceduti_file = BASE_DIR / 'Deceduti.xlsx'
         deceduti_codes = set()
         n_deceduti_qa = 0
         n_deceduti_covid = 0
