@@ -2578,7 +2578,7 @@ elif pagina == "🌱 Opportunità Crescita":
         with col3:
             st.metric(
                 "Gap 60-70 anni",
-                f"{summary_opp['gap_demografico']['gap_60_70']:,}",
+                f"{summary_opp['gap_60_70']['gap']:,}",
                 help="Bridgisti potenziali nella fascia 60-70"
             )
         with col4:
