@@ -314,6 +314,7 @@ if pagina == "🏠 Overview":
         trend.columns = ['Anno', 'Tesserati']
         fig = px.line(trend, x='Anno', y='Tesserati', markers=True)
         fig.update_layout(height=350)
+        fig.update_xaxes(dtick=1)
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
@@ -365,6 +366,7 @@ elif pagina == "📈 Trend Temporale":
                   title="Numero Tesserati per Anno")
     fig.add_vline(x=2020, line_dash="dash", line_color="red",
                   annotation_text="COVID-19")
+    fig.update_xaxes(dtick=1)
     st.plotly_chart(fig, use_container_width=True)
 
     # Trend per categoria
@@ -375,6 +377,7 @@ elif pagina == "📈 Trend Temporale":
         cat_trend = df_filtered.groupby(['Anno', 'CatLabel']).size().reset_index(name='Count')
         fig = px.bar(cat_trend, x='Anno', y='Count', color='CatLabel',
                      title="Tesserati per Categoria")
+        fig.update_xaxes(dtick=1)
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
@@ -384,6 +387,7 @@ elif pagina == "📈 Trend Temporale":
                       title="Evoluzione Età Media")
         fig.add_hline(y=70, line_dash="dash", line_color="red",
                       annotation_text="Soglia critica")
+        fig.update_xaxes(dtick=1)
         st.plotly_chart(fig, use_container_width=True)
 
     # Gare medie
@@ -392,6 +396,7 @@ elif pagina == "📈 Trend Temporale":
     fig = px.bar(gare_trend, x='Anno', y='GareGiocate',
                  title="Gare Medie per Anno", color='GareGiocate',
                  color_continuous_scale='Viridis')
+    fig.update_xaxes(dtick=1)
     st.plotly_chart(fig, use_container_width=True)
 
 # ============================================================================
@@ -1019,6 +1024,7 @@ elif pagina == "📍 Analisi Territoriale":
             fig.add_vline(x=2020, line_dash="dash", line_color="red",
                          annotation_text="COVID-19")
             fig.update_layout(height=500)
+            fig.update_xaxes(dtick=1)
             st.plotly_chart(fig, use_container_width=True)
 
             # Variazione % per provincia
@@ -1873,6 +1879,7 @@ elif pagina == "🎓 Bridge a Scuola":
                     ))
                     fig_stud.add_vline(x=2020, line_dash="dash", line_color="red", opacity=0.5)
                     fig_stud.update_layout(title="Studenti per Anno", height=350)
+                    fig_stud.update_xaxes(dtick=1)
                     st.plotly_chart(fig_stud, use_container_width=True)
 
                 with col2:
@@ -2469,6 +2476,7 @@ elif pagina == "🔮 Modello Predittivo":
         ))
 
         fig.update_layout(height=400, xaxis_title="Anno", yaxis_title="Tesserati")
+        fig.update_xaxes(dtick=1)
         st.plotly_chart(fig, use_container_width=True)
 
         # Evoluzione età
@@ -2479,6 +2487,7 @@ elif pagina == "🔮 Modello Predittivo":
             fig = px.line(proiezioni, x='Anno', y='EtaMedia', markers=True)
             fig.add_hline(y=70, line_dash="dash", line_color="red",
                          annotation_text="Soglia critica")
+            fig.update_xaxes(dtick=1)
             st.plotly_chart(fig, use_container_width=True)
 
         with col2:
@@ -2489,6 +2498,7 @@ elif pagina == "🔮 Modello Predittivo":
             fig.add_trace(go.Bar(x=proiezioni['Anno'], y=proiezioni['Usciti'],
                                 name='Usciti', marker_color='#DC3545'))
             fig.update_layout(barmode='group')
+            fig.update_xaxes(dtick=1)
             st.plotly_chart(fig, use_container_width=True)
 
         # Scenario simulator
@@ -2637,6 +2647,7 @@ elif pagina == "🌱 Opportunità Crescita":
                                 title="Quando hanno abbandonato",
                                 text='Numero')
                     fig.update_traces(textposition='auto', cliponaxis=False)
+                    fig.update_xaxes(dtick=1)
                     st.plotly_chart(fig, use_container_width=True)
 
                 # Profilo
@@ -3628,6 +3639,7 @@ elif pagina == "🧩 Cluster e Territori":
             fig = px.line(stats_area, x='Anno', y='Tesserati', color='TipoArea',
                          title="Evoluzione Tesserati: Metro vs Provincia",
                          markers=True)
+            fig.update_xaxes(dtick=1)
             st.plotly_chart(fig, use_container_width=True)
 
             # ANALISI DECLINO: Chi sta morendo di più?
@@ -4001,12 +4013,14 @@ elif pagina == "🔍 Esplora Dati":
                                      x='Anno', y='GareGiocate',
                                      title=f"Gare per anno - {selected}",
                                      markers=True)
+                        fig.update_xaxes(dtick=1)
                         st.plotly_chart(fig, use_container_width=True)
 
                     with col2:
                         fig = px.bar(player_data.sort_values('Anno'),
                                     x='Anno', y='PuntiTotali',
                                     title=f"Punti per anno - {selected}")
+                        fig.update_xaxes(dtick=1)
                         st.plotly_chart(fig, use_container_width=True)
         else:
             st.info("Nessun giocatore trovato con questo nome")
