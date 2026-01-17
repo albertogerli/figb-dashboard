@@ -2878,8 +2878,12 @@ elif pagina == "🌱 Opportunità Crescita":
                         text='Gap',
                         color='Per100k',
                         color_continuous_scale='RdYlGn')
-            fig.update_traces(textposition='auto', cliponaxis=False)
-            fig.update_layout(margin=dict(r=60))
+            fig.update_traces(textposition='outside', cliponaxis=False, texttemplate='%{text:.0f}')
+            fig.update_layout(
+                height=600,
+                margin=dict(l=150, r=80),
+                yaxis=dict(tickfont=dict(size=11))
+            )
             st.plotly_chart(fig, use_container_width=True)
 
             # Dettagli
