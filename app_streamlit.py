@@ -1973,8 +1973,8 @@ elif pagina == "🏆 Mappa Agonismo":
     with col_filtri2:
         top_x = st.selectbox("Top X giocatori per media", [10, 20, 50, 100, 200, 500, "Tutti"], index=6)
 
-    # Usa dati già filtrati dalla sidebar + filtro anno e punti > 0
-    df_anno = df_filtered[(df_filtered['Anno'] == anno_mappa) & (df_filtered['PuntiCampionati'] > 0)]
+    # Usa dati già filtrati dalla sidebar + filtro anno e tessera Agonista
+    df_anno = df_filtered[(df_filtered['Anno'] == anno_mappa) & (df_filtered['MbtDesc'] == 'Agonista')]
 
     # Funzione per calcolare media top X per regione
     def calcola_media_top_x(group, x):
