@@ -89,6 +89,13 @@ data = load_data()
 df = data['df']
 metriche = data['metriche']
 
+# Carica deceduti (se disponibile)
+deceduti_file = BASE_DIR / 'deceduti.xlsx'
+deceduti_df = None
+if deceduti_file.exists():
+    deceduti_df = pd.read_excel(deceduti_file)
+    deceduti_df['MmbCode'] = deceduti_df['MmbCode'].str.strip()
+
 # ============================================================================
 # SIDEBAR - FILTRI
 # ============================================================================
@@ -350,6 +357,20 @@ if pagina == "🏠 Overview":
     }).round(1)
     summary.columns = ['Tesserati', 'Gare Medie', 'Età Media']
     st.dataframe(summary, use_container_width=True)
+
+    # Churn naturale per anno (discreto)
+    if deceduti_df is not None and len(deceduti_df) > 0:
+        st.markdown("---")
+        with st.expander("📋 Nota: Churn naturale per anno", expanded=False):
+            churn_naturale = deceduti_df.groupby('UltimoAnnoTess').size().reset_index(name='N')
+            churn_naturale = churn_naturale[churn_naturale['UltimoAnnoTess'] >= 2017].sort_values('UltimoAnnoTess')
+            churn_naturale.columns = ['Anno', 'Persone']
+
+            col1, col2 = st.columns([2, 3])
+            with col1:
+                st.dataframe(churn_naturale, use_container_width=True, hide_index=True)
+            with col2:
+                st.caption("Numero di tesserati il cui ultimo anno di tessera coincide con l'anno indicato, per cause naturali.")
 
 # ============================================================================
 # PAGINA: TREND TEMPORALE
@@ -2568,6 +2589,24 @@ elif pagina == "🌱 Opportunità Crescita":
         opp_geo = pd.read_csv(RESULTS_OPP / 'opportunita_geografiche.csv')
         persi_covid = pd.read_csv(RESULTS_OPP / 'persi_covid.csv')
 
+        # Carica deceduti e filtra dalle liste da ricontattare
+        deceduti_file = BASE_DIR / 'deceduti.xlsx'
+        deceduti_codes = set()
+        n_deceduti_qa = 0
+        n_deceduti_covid = 0
+
+        if deceduti_file.exists():
+            deceduti_df = pd.read_excel(deceduti_file)
+            deceduti_codes = set(deceduti_df['MmbCode'].str.strip())
+
+            # Filtra quasi_agganciati
+            n_deceduti_qa = quasi_agganciati['MmbCode'].str.strip().isin(deceduti_codes).sum()
+            quasi_agganciati = quasi_agganciati[~quasi_agganciati['MmbCode'].str.strip().isin(deceduti_codes)]
+
+            # Filtra persi_covid
+            n_deceduti_covid = persi_covid['MmbCode'].str.strip().isin(deceduti_codes).sum()
+            persi_covid = persi_covid[~persi_covid['MmbCode'].str.strip().isin(deceduti_codes)]
+
         # Overview KPI
         st.markdown("### 📊 Riepilogo Opportunità")
 
@@ -2576,13 +2615,13 @@ elif pagina == "🌱 Opportunità Crescita":
         with col1:
             st.metric(
                 "Quasi Agganciati",
-                f"{summary_opp['quasi_agganciati']['totale']:,}",
-                help="Hanno provato 1-2 anni, poche gare, poi spariti"
+                f"{len(quasi_agganciati):,}",
+                help="Hanno provato 1-2 anni, poche gare, poi spariti (filtrati deceduti)"
             )
         with col2:
             st.metric(
                 "Dormienti",
-                f"{summary_opp['dormienti']['totale']:,}",
+                f"{len(dormienti):,}",
                 help="Tesserati attivi che non giocano gare"
             )
         with col3:
@@ -2594,9 +2633,13 @@ elif pagina == "🌱 Opportunità Crescita":
         with col4:
             st.metric(
                 "Persi COVID",
-                f"{summary_opp['persi_covid']['totale']:,}",
-                help="Non tornati dopo il 2020"
+                f"{len(persi_covid):,}",
+                help="Non tornati dopo il 2020 (filtrati deceduti)"
             )
+
+        # Nota discreta sui filtrati
+        if n_deceduti_qa > 0 or n_deceduti_covid > 0:
+            st.caption(f"ℹ️ Liste nettificate: esclusi {n_deceduti_qa + n_deceduti_covid} nominativi non più ricontattabili")
 
         st.markdown("---")
 
