@@ -107,7 +107,7 @@ pagina = st.sidebar.selectbox(
     "📊 Sezione",
     ["📊 Executive Summary", "🏠 Overview", "📈 Trend Temporale", "🗺️ Analisi Regionale",
      "📍 Analisi Territoriale", "🏆 Mappa Agonismo", "🏢 Analisi Associazioni",
-     "🎓 Bridge a Scuola", "⚠️ Giocatori a Rischio", "🔄 Bridgisti Recuperabili",
+     "🎓 Bridge a Scuola", "🎯 Focus Puglia", "⚠️ Giocatori a Rischio", "🔄 Bridgisti Recuperabili",
      "🔮 Modello Predittivo", "🌱 Opportunità Crescita", "🔬 Analisi Avanzate",
      "🎯 Attività per Età/Sesso", "🧩 Cluster e Territori", "🎖️ Priorità Intervento", "🔍 Esplora Dati"]
 )
@@ -2771,6 +2771,586 @@ elif pagina == "🎓 Bridge a Scuola":
                     st.info("Nessuno studente con punti campionato nel periodo selezionato.")
             else:
                 st.info("Nessun dato studenti per i filtri selezionati.")
+
+# ============================================================================
+# PAGINA: FOCUS PUGLIA
+# ============================================================================
+elif pagina == "🎯 Focus Puglia":
+    st.title("🎯 Focus Puglia 2022-2025")
+    st.markdown("""
+    Analisi approfondita della **Puglia** negli ultimi 4 anni, con focus su:
+    - Trend tesseramenti e composizione per tipo tessera
+    - **Bridge a Scuola**: conversione allievi in giocatori
+    - Tracciamento individuale: da allievo a quale tessera
+    - Performance per circolo
+    """)
+
+    # =========================================================================
+    # FILTRO DATI PUGLIA 2022-2025
+    # =========================================================================
+    ANNI_PUGLIA = [2022, 2023, 2024, 2025]
+
+    df_puglia = df[
+        (df['GrpArea'] == 'PUG') &
+        (df['Anno'].isin(ANNI_PUGLIA))
+    ].copy()
+
+    if len(df_puglia) == 0:
+        st.warning("Nessun dato disponibile per la Puglia nel periodo 2022-2025.")
+    else:
+        # =====================================================================
+        # TAB
+        # =====================================================================
+        tab1, tab2, tab3, tab4, tab5 = st.tabs([
+            "📊 Overview", "🎓 Conversione Allievi", "📋 Dettaglio Conversione",
+            "🏢 Circoli", "📈 Confronto Nazionale"
+        ])
+
+        # =====================================================================
+        # TAB 1: OVERVIEW
+        # =====================================================================
+        with tab1:
+            st.subheader("Panoramica Puglia 2022-2025")
+
+            # Trend per anno
+            trend_puglia = df_puglia.groupby('Anno').agg({
+                'MmbCode': 'nunique',
+                'GareGiocate': 'mean',
+                'PuntiTotali': 'mean'
+            }).reset_index()
+            trend_puglia.columns = ['Anno', 'Tesserati', 'GareMedia', 'PuntiMedi']
+
+            # Calcola variazioni
+            tess_2022 = trend_puglia[trend_puglia['Anno'] == 2022]['Tesserati'].values
+            tess_2025 = trend_puglia[trend_puglia['Anno'] == 2025]['Tesserati'].values
+            tess_2022 = tess_2022[0] if len(tess_2022) > 0 else 0
+            tess_2025 = tess_2025[0] if len(tess_2025) > 0 else 0
+            var_4_anni = ((tess_2025 - tess_2022) / tess_2022 * 100) if tess_2022 > 0 else 0
+
+            # KPI principali
+            col1, col2, col3, col4 = st.columns(4)
+
+            with col1:
+                st.metric("Tesserati 2025", f"{tess_2025:,}",
+                         delta=f"{var_4_anni:+.1f}% vs 2022")
+            with col2:
+                st.metric("Tesserati 2022", f"{tess_2022:,}")
+            with col3:
+                gare_media = df_puglia['GareGiocate'].mean()
+                st.metric("Gare Medie", f"{gare_media:.1f}")
+            with col4:
+                eta_media = df_puglia['Anni'].mean() if 'Anni' in df_puglia.columns else 0
+                st.metric("Età Media", f"{eta_media:.1f} anni")
+
+            st.markdown("---")
+
+            # Grafico trend
+            fig_trend = px.bar(
+                trend_puglia, x='Anno', y='Tesserati',
+                title="Trend Tesserati Puglia 2022-2025",
+                text='Tesserati',
+                color='Tesserati',
+                color_continuous_scale='Blues'
+            )
+            fig_trend.update_traces(texttemplate='%{text:,}', textposition='outside', cliponaxis=False)
+            fig_trend.update_layout(showlegend=False, height=400)
+            st.plotly_chart(fig_trend, use_container_width=True)
+
+            # Composizione per tipo tessera
+            st.markdown("### Composizione per Tipo Tessera")
+
+            tessere_puglia = df_puglia.groupby(['Anno', 'MbtDesc']).agg({
+                'MmbCode': 'nunique'
+            }).reset_index()
+            tessere_puglia.columns = ['Anno', 'TipoTessera', 'Tesserati']
+
+            # Filtra tessere principali
+            tessere_principali = ['Scuola Bridge', 'Ordinario Sportivo', 'Agonista', 'Ordinario Amatoriale']
+            tessere_plot = tessere_puglia[tessere_puglia['TipoTessera'].isin(tessere_principali)]
+
+            fig_tessere = px.bar(
+                tessere_plot, x='Anno', y='Tesserati', color='TipoTessera',
+                title="Composizione Tessere Puglia",
+                barmode='group'
+            )
+            fig_tessere.update_layout(height=400)
+            st.plotly_chart(fig_tessere, use_container_width=True)
+
+            # Tabella riepilogo
+            with st.expander("📋 Dati Dettagliati"):
+                pivot_tessere = tessere_puglia.pivot(index='Anno', columns='TipoTessera', values='Tesserati').fillna(0)
+                st.dataframe(pivot_tessere, use_container_width=True)
+
+        # =====================================================================
+        # TAB 2: CONVERSIONE ALLIEVI
+        # =====================================================================
+        with tab2:
+            st.subheader("🎓 Conversione Allievi Scuola Bridge")
+
+            st.markdown("""
+            **Focus principale**: quanti allievi della Scuola Bridge si sono trasformati in giocatori
+            e con quale tipo di tessera.
+            """)
+
+            # Identifica tutti gli allievi Scuola Bridge in Puglia
+            allievi_sb = df_puglia[df_puglia['MbtDesc'] == 'Scuola Bridge']
+            allievi_codes = allievi_sb['MmbCode'].unique()
+
+            st.info(f"**{len(allievi_codes):,}** allievi unici in Scuola Bridge in Puglia 2022-2025")
+
+            # Traccia conversione per ogni allievo
+            tessere_regolari = ['Ordinario Sportivo', 'Agonista', 'Ordinario Amatoriale', 'Non Agonista']
+            risultati_conv = []
+
+            for mmbcode in allievi_codes:
+                # Storia completa del giocatore in Puglia (tutti gli anni)
+                storia = df[(df['MmbCode'] == mmbcode) & (df['GrpArea'] == 'PUG')].sort_values('Anno')
+
+                storia_sb = storia[storia['MbtDesc'] == 'Scuola Bridge']
+                if len(storia_sb) == 0:
+                    continue
+
+                anno_inizio = storia_sb['Anno'].min()
+                anni_in_sb = storia_sb['Anno'].nunique()
+                gare_in_sb = storia_sb['GareGiocate'].sum()
+
+                # Verifica se ha cambiato tessera
+                storia_non_sb = storia[storia['MbtDesc'].isin(tessere_regolari)]
+
+                if len(storia_non_sb) > 0:
+                    prima_conv = storia_non_sb.sort_values('Anno').iloc[0]
+                    anno_conv = prima_conv['Anno']
+                    tessera_dest = prima_conv['MbtDesc']
+                    post_conv = storia_non_sb[storia_non_sb['Anno'] >= anno_conv]
+                    gare_post = post_conv['GareGiocate'].sum()
+                    punti_post = post_conv['PuntiTotali'].sum()
+                    convertito = True
+                else:
+                    anno_conv = None
+                    tessera_dest = 'Non Convertito'
+                    gare_post = 0
+                    punti_post = 0
+                    convertito = False
+
+                ultimo_anno = storia['Anno'].max()
+
+                risultati_conv.append({
+                    'MmbCode': mmbcode,
+                    'AnnoInizio': anno_inizio,
+                    'AnniInSB': anni_in_sb,
+                    'GareInSB': gare_in_sb,
+                    'Convertito': convertito,
+                    'AnnoConversione': anno_conv,
+                    'TesseraDestinazione': tessera_dest,
+                    'GareDopoConv': gare_post,
+                    'PuntiDopoConv': punti_post,
+                    'UltimoAnno': ultimo_anno
+                })
+
+            df_conv = pd.DataFrame(risultati_conv)
+
+            if len(df_conv) > 0:
+                # Statistiche aggregate
+                n_totale = len(df_conv)
+                n_convertiti = df_conv['Convertito'].sum()
+                n_non_conv = n_totale - n_convertiti
+                tasso_conv = (n_convertiti / n_totale * 100) if n_totale > 0 else 0
+
+                # KPI conversione
+                col1, col2, col3, col4 = st.columns(4)
+
+                with col1:
+                    st.metric("Allievi Totali", f"{n_totale:,}")
+                with col2:
+                    st.metric("Convertiti", f"{n_convertiti:,}",
+                             delta=f"{tasso_conv:.1f}%")
+                with col3:
+                    st.metric("In Formazione / Persi", f"{n_non_conv:,}",
+                             delta=f"{100-tasso_conv:.1f}%", delta_color="inverse")
+                with col4:
+                    convertiti_df = df_conv[df_conv['Convertito']]
+                    if len(convertiti_df) > 0:
+                        convertiti_df = convertiti_df.copy()
+                        convertiti_df['TempoConv'] = convertiti_df['AnnoConversione'] - convertiti_df['AnnoInizio']
+                        tempo_medio = convertiti_df['TempoConv'].mean()
+                    else:
+                        tempo_medio = 0
+                    st.metric("Tempo Medio Conversione", f"{tempo_medio:.1f} anni")
+
+                st.markdown("---")
+
+                # Funnel conversione
+                st.markdown("### Funnel Conversione")
+
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    fig_funnel = go.Figure(go.Funnel(
+                        y=['Allievi Totali', 'Convertiti'],
+                        x=[n_totale, n_convertiti],
+                        textinfo="value+percent initial",
+                        marker_color=['#3b82f6', '#22c55e']
+                    ))
+                    fig_funnel.update_layout(title="Funnel Conversione", height=350)
+                    st.plotly_chart(fig_funnel, use_container_width=True)
+
+                with col2:
+                    # Tessere di destinazione
+                    if n_convertiti > 0:
+                        dest_counts = convertiti_df['TesseraDestinazione'].value_counts().reset_index()
+                        dest_counts.columns = ['Tessera', 'Numero']
+
+                        fig_dest = px.pie(
+                            dest_counts, values='Numero', names='Tessera',
+                            title="Tessere di Destinazione",
+                            color_discrete_sequence=px.colors.qualitative.Set2
+                        )
+                        fig_dest.update_layout(height=350)
+                        st.plotly_chart(fig_dest, use_container_width=True)
+
+                # Insight principale
+                if n_convertiti > 0:
+                    tessera_principale = convertiti_df['TesseraDestinazione'].value_counts().index[0]
+                    tessera_principale_pct = convertiti_df['TesseraDestinazione'].value_counts().iloc[0] / n_convertiti * 100
+                    gare_media_conv = convertiti_df['GareDopoConv'].mean()
+
+                    st.success(f"""
+                    **📊 Insight Chiave:**
+                    - **{tasso_conv:.1f}%** degli allievi si è convertito in giocatore
+                    - La tessera di destinazione principale è **{tessera_principale}** ({tessera_principale_pct:.0f}%)
+                    - Tempo medio di conversione: **{tempo_medio:.1f} anni**
+                    - Gare medie dopo conversione: **{gare_media_conv:.0f}**
+                    """)
+
+                # Conversione per anno di inizio
+                st.markdown("### Conversione per Anno di Inizio")
+
+                conv_per_anno = df_conv.groupby('AnnoInizio').agg({
+                    'MmbCode': 'count',
+                    'Convertito': ['sum', 'mean']
+                }).reset_index()
+                conv_per_anno.columns = ['AnnoInizio', 'Totale', 'Convertiti', 'TassoConv']
+                conv_per_anno['TassoConv'] = (conv_per_anno['TassoConv'] * 100).round(1)
+
+                fig_anno = px.bar(
+                    conv_per_anno, x='AnnoInizio', y='TassoConv',
+                    text='TassoConv',
+                    title="Tasso di Conversione per Anno di Inizio Corso",
+                    color='TassoConv',
+                    color_continuous_scale='RdYlGn'
+                )
+                fig_anno.update_traces(texttemplate='%{text:.1f}%', textposition='outside', cliponaxis=False)
+                fig_anno.update_layout(height=400, showlegend=False)
+                st.plotly_chart(fig_anno, use_container_width=True)
+
+                st.caption("Nota: gli allievi più recenti (2024-2025) hanno avuto meno tempo per convertirsi.")
+
+        # =====================================================================
+        # TAB 3: DETTAGLIO CONVERSIONE
+        # =====================================================================
+        with tab3:
+            st.subheader("📋 Dettaglio Conversione Individuale")
+
+            if len(df_conv) > 0:
+                # Filtri
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    filtro_stato = st.selectbox(
+                        "Stato",
+                        ["Tutti", "Solo Convertiti", "Solo Non Convertiti"]
+                    )
+
+                with col2:
+                    if filtro_stato == "Solo Convertiti":
+                        tessere_uniche = df_conv[df_conv['Convertito']]['TesseraDestinazione'].unique().tolist()
+                        filtro_tessera = st.selectbox("Tessera Destinazione", ["Tutte"] + tessere_uniche)
+                    else:
+                        filtro_tessera = "Tutte"
+
+                # Applica filtri
+                df_show = df_conv.copy()
+
+                if filtro_stato == "Solo Convertiti":
+                    df_show = df_show[df_show['Convertito']]
+                elif filtro_stato == "Solo Non Convertiti":
+                    df_show = df_show[~df_show['Convertito']]
+
+                if filtro_tessera != "Tutte":
+                    df_show = df_show[df_show['TesseraDestinazione'] == filtro_tessera]
+
+                # Mostra tabella
+                st.markdown(f"**{len(df_show):,}** record trovati")
+
+                # Prepara per visualizzazione
+                df_display = df_show[[
+                    'MmbCode', 'AnnoInizio', 'AnniInSB', 'GareInSB',
+                    'Convertito', 'AnnoConversione', 'TesseraDestinazione',
+                    'GareDopoConv', 'PuntiDopoConv', 'UltimoAnno'
+                ]].copy()
+
+                df_display['Convertito'] = df_display['Convertito'].map({True: '✅ Sì', False: '❌ No'})
+                df_display['AnnoConversione'] = df_display['AnnoConversione'].fillna('-')
+
+                st.dataframe(df_display, use_container_width=True, height=500)
+
+                # Download
+                csv = df_show.to_csv(index=False).encode('utf-8')
+                st.download_button(
+                    "📥 Scarica CSV",
+                    csv,
+                    "conversione_puglia_dettaglio.csv",
+                    "text/csv"
+                )
+
+                # Statistiche aggiuntive
+                st.markdown("---")
+                st.markdown("### Statistiche per Tessera di Destinazione")
+
+                stats_tessera = df_conv.groupby('TesseraDestinazione').agg({
+                    'MmbCode': 'count',
+                    'AnniInSB': 'mean',
+                    'GareInSB': 'mean',
+                    'GareDopoConv': 'mean',
+                    'PuntiDopoConv': 'mean'
+                }).reset_index()
+                stats_tessera.columns = ['Tessera', 'Numero', 'AnniMediInSB', 'GareMedieInSB', 'GareMediePost', 'PuntiMediPost']
+                stats_tessera = stats_tessera.sort_values('Numero', ascending=False)
+
+                st.dataframe(stats_tessera.round(1), use_container_width=True)
+
+        # =====================================================================
+        # TAB 4: CIRCOLI
+        # =====================================================================
+        with tab4:
+            st.subheader("🏢 Performance Circoli Pugliesi")
+
+            # Statistiche per circolo
+            col_assoc = 'Associazione' if 'Associazione' in df_puglia.columns else 'GrpName'
+
+            circoli = df_puglia.groupby(col_assoc).agg({
+                'MmbCode': 'nunique',
+                'GareGiocate': 'mean',
+                'PuntiTotali': 'mean',
+                'Anno': lambda x: len(x.unique())
+            }).reset_index()
+            circoli.columns = ['Circolo', 'Tesserati', 'GareMedia', 'PuntiMedi', 'AnniAttivi']
+            circoli = circoli.sort_values('Tesserati', ascending=False)
+
+            # Allievi per circolo
+            sb_circoli = df_puglia[df_puglia['MbtDesc'] == 'Scuola Bridge'].groupby(col_assoc).agg({
+                'MmbCode': 'nunique'
+            }).reset_index()
+            sb_circoli.columns = ['Circolo', 'AllieviSB']
+
+            circoli = circoli.merge(sb_circoli, on='Circolo', how='left')
+            circoli['AllieviSB'] = circoli['AllieviSB'].fillna(0).astype(int)
+            circoli['QuotaSB'] = (circoli['AllieviSB'] / circoli['Tesserati'] * 100).round(1)
+
+            # KPI
+            col1, col2, col3 = st.columns(3)
+
+            with col1:
+                st.metric("Circoli Attivi", f"{len(circoli):,}")
+            with col2:
+                st.metric("Tesserati Totali", f"{circoli['Tesserati'].sum():,}")
+            with col3:
+                st.metric("Allievi SB Totali", f"{circoli['AllieviSB'].sum():,}")
+
+            st.markdown("---")
+
+            # Grafico top circoli
+            top_n = min(15, len(circoli))
+            top_circoli = circoli.head(top_n)
+
+            fig_circoli = px.bar(
+                top_circoli, x='Tesserati', y='Circolo',
+                orientation='h',
+                title=f"Top {top_n} Circoli Puglia per Tesserati",
+                color='GareMedia',
+                color_continuous_scale='Blues'
+            )
+            fig_circoli.update_layout(height=500, yaxis={'categoryorder': 'total ascending'})
+            st.plotly_chart(fig_circoli, use_container_width=True)
+
+            # Tabella completa
+            st.markdown("### Tabella Completa")
+            st.dataframe(
+                circoli.round(1),
+                use_container_width=True,
+                column_config={
+                    'Circolo': 'Associazione',
+                    'Tesserati': st.column_config.NumberColumn('Tesserati', format='%d'),
+                    'GareMedia': st.column_config.NumberColumn('Gare Media', format='%.1f'),
+                    'PuntiMedi': st.column_config.NumberColumn('Punti Medi', format='%.0f'),
+                    'AllieviSB': st.column_config.NumberColumn('Allievi SB', format='%d'),
+                    'QuotaSB': st.column_config.NumberColumn('% SB', format='%.1f%%')
+                }
+            )
+
+            # Analisi conversione per circolo (se abbiamo i dati)
+            if len(df_conv) > 0:
+                st.markdown("---")
+                st.markdown("### Conversione per Circolo")
+
+                # Aggiungi associazione al df conversione
+                assoc_map = df_puglia[df_puglia['MbtDesc'] == 'Scuola Bridge'].groupby('MmbCode')[col_assoc].first().to_dict()
+                df_conv['Circolo'] = df_conv['MmbCode'].map(assoc_map)
+
+                conv_circolo = df_conv.groupby('Circolo').agg({
+                    'MmbCode': 'count',
+                    'Convertito': ['sum', 'mean']
+                }).reset_index()
+                conv_circolo.columns = ['Circolo', 'Allievi', 'Convertiti', 'TassoConv']
+                conv_circolo['TassoConv'] = (conv_circolo['TassoConv'] * 100).round(1)
+                conv_circolo = conv_circolo[conv_circolo['Allievi'] >= 3]  # Min 3 allievi
+                conv_circolo = conv_circolo.sort_values('TassoConv', ascending=False)
+
+                if len(conv_circolo) > 0:
+                    fig_conv_circ = px.bar(
+                        conv_circolo.head(15), x='TassoConv', y='Circolo',
+                        orientation='h',
+                        title="Top Circoli per Tasso di Conversione",
+                        text='TassoConv',
+                        color='TassoConv',
+                        color_continuous_scale='RdYlGn'
+                    )
+                    fig_conv_circ.update_traces(texttemplate='%{text:.0f}%', textposition='outside', cliponaxis=False)
+                    fig_conv_circ.update_layout(height=450, yaxis={'categoryorder': 'total ascending'})
+                    st.plotly_chart(fig_conv_circ, use_container_width=True)
+
+        # =====================================================================
+        # TAB 5: CONFRONTO NAZIONALE
+        # =====================================================================
+        with tab5:
+            st.subheader("📈 Confronto Puglia vs Nazionale")
+
+            # Calcola metriche nazionali per 2022-2025
+            df_naz = df[df['Anno'].isin(ANNI_PUGLIA)]
+
+            naz_tesserati = df_naz['MmbCode'].nunique()
+            pug_tesserati = df_puglia['MmbCode'].nunique()
+            quota_nazionale = (pug_tesserati / naz_tesserati * 100) if naz_tesserati > 0 else 0
+
+            naz_gare = df_naz['GareGiocate'].mean()
+            pug_gare = df_puglia['GareGiocate'].mean()
+
+            naz_eta = df_naz['Anni'].mean() if 'Anni' in df_naz.columns else 0
+            pug_eta = df_puglia['Anni'].mean() if 'Anni' in df_puglia.columns else 0
+
+            # Scuola Bridge nazionale
+            naz_sb = df_naz[df_naz['MbtDesc'] == 'Scuola Bridge']['MmbCode'].nunique()
+            pug_sb = df_puglia[df_puglia['MbtDesc'] == 'Scuola Bridge']['MmbCode'].nunique()
+
+            # Tabella confronto
+            confronto_data = pd.DataFrame({
+                'Metrica': ['Tesserati Unici', 'Gare Medie', 'Età Media', 'Allievi Scuola Bridge'],
+                'Italia': [f"{naz_tesserati:,}", f"{naz_gare:.1f}", f"{naz_eta:.1f}", f"{naz_sb:,}"],
+                'Puglia': [f"{pug_tesserati:,}", f"{pug_gare:.1f}", f"{pug_eta:.1f}", f"{pug_sb:,}"],
+                'Differenza': [
+                    f"{quota_nazionale:.2f}% del totale",
+                    f"{pug_gare - naz_gare:+.1f}",
+                    f"{pug_eta - naz_eta:+.1f} anni",
+                    f"{pug_sb / naz_sb * 100:.1f}% del totale" if naz_sb > 0 else "N/A"
+                ]
+            })
+
+            st.dataframe(confronto_data, use_container_width=True, hide_index=True)
+
+            st.markdown("---")
+
+            # Confronto trend
+            st.markdown("### Trend Comparativo")
+
+            trend_naz = df_naz.groupby('Anno')['MmbCode'].nunique().reset_index()
+            trend_naz.columns = ['Anno', 'Italia']
+
+            trend_pug = df_puglia.groupby('Anno')['MmbCode'].nunique().reset_index()
+            trend_pug.columns = ['Anno', 'Puglia']
+
+            # Normalizza per confronto (base 100 = 2022)
+            trend_merged = trend_naz.merge(trend_pug, on='Anno')
+
+            base_naz = trend_merged[trend_merged['Anno'] == 2022]['Italia'].values
+            base_pug = trend_merged[trend_merged['Anno'] == 2022]['Puglia'].values
+
+            if len(base_naz) > 0 and base_naz[0] > 0:
+                trend_merged['Italia_idx'] = (trend_merged['Italia'] / base_naz[0] * 100).round(1)
+            else:
+                trend_merged['Italia_idx'] = 100
+
+            if len(base_pug) > 0 and base_pug[0] > 0:
+                trend_merged['Puglia_idx'] = (trend_merged['Puglia'] / base_pug[0] * 100).round(1)
+            else:
+                trend_merged['Puglia_idx'] = 100
+
+            fig_confronto = go.Figure()
+
+            fig_confronto.add_trace(go.Scatter(
+                x=trend_merged['Anno'], y=trend_merged['Italia_idx'],
+                mode='lines+markers', name='Italia',
+                line=dict(color='#64748b', width=3),
+                marker=dict(size=10)
+            ))
+
+            fig_confronto.add_trace(go.Scatter(
+                x=trend_merged['Anno'], y=trend_merged['Puglia_idx'],
+                mode='lines+markers', name='Puglia',
+                line=dict(color='#3b82f6', width=3),
+                marker=dict(size=10)
+            ))
+
+            fig_confronto.add_hline(y=100, line_dash="dash", line_color="gray",
+                                    annotation_text="Base 2022 = 100")
+
+            fig_confronto.update_layout(
+                title="Trend Normalizzato (Base 2022 = 100)",
+                xaxis_title="Anno",
+                yaxis_title="Indice (2022 = 100)",
+                height=400,
+                legend=dict(orientation='h', yanchor='bottom', y=1.02)
+            )
+            st.plotly_chart(fig_confronto, use_container_width=True)
+
+            # Posizionamento tra regioni del Sud
+            st.markdown("---")
+            st.markdown("### Posizionamento nel Sud Italia")
+
+            REGIONI_SUD = ['ABR', 'MOL', 'CAM', 'PUG', 'BAS', 'CAB', 'SIC', 'SAR']
+            df_sud = df_naz[df_naz['GrpArea'].isin(REGIONI_SUD)]
+
+            ranking_sud = df_sud.groupby('GrpArea').agg({
+                'MmbCode': 'nunique',
+                'GareGiocate': 'mean'
+            }).reset_index()
+            ranking_sud.columns = ['Regione', 'Tesserati', 'GareMedia']
+            ranking_sud['NomeRegione'] = ranking_sud['Regione'].map(NOMI_REGIONI_COMPLETI)
+            ranking_sud = ranking_sud.sort_values('Tesserati', ascending=False)
+            ranking_sud['Posizione'] = range(1, len(ranking_sud) + 1)
+
+            # Evidenzia Puglia
+            ranking_sud['Colore'] = ranking_sud['Regione'].apply(
+                lambda x: '#3b82f6' if x == 'PUG' else '#94a3b8'
+            )
+
+            fig_ranking = px.bar(
+                ranking_sud, x='Tesserati', y='NomeRegione',
+                orientation='h',
+                title="Classifica Regioni Sud + Isole per Tesserati",
+                color='Colore',
+                color_discrete_map='identity'
+            )
+            fig_ranking.update_layout(
+                height=400,
+                showlegend=False,
+                yaxis={'categoryorder': 'total ascending'}
+            )
+            st.plotly_chart(fig_ranking, use_container_width=True)
+
+            # Posizione Puglia
+            pos_puglia = ranking_sud[ranking_sud['Regione'] == 'PUG']['Posizione'].values
+            if len(pos_puglia) > 0:
+                st.info(f"📍 La Puglia è al **{pos_puglia[0]}° posto** tra le regioni del Sud + Isole per numero di tesserati.")
 
 # ============================================================================
 # PAGINA: GIOCATORI A RISCHIO
