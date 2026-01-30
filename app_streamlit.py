@@ -3301,28 +3301,32 @@ elif pagina == "🎯 Focus Puglia":
             # Analisi conversione per circolo (se abbiamo i dati)
             if len(df_conv) > 0:
                 st.markdown("---")
-                st.markdown("### Conversione per Circolo")
+                st.markdown("### Esiti per Circolo")
 
                 # Aggiungi associazione al df conversione
                 assoc_map = df_puglia[df_puglia['MbtDesc'] == 'Scuola Bridge'].groupby('MmbCode')[col_assoc].first().to_dict()
-                df_conv['Circolo'] = df_conv['MmbCode'].map(assoc_map)
+                df_conv_circ = df_conv.copy()
+                df_conv_circ['Circolo'] = df_conv_circ['MmbCode'].map(assoc_map)
 
-                conv_circolo = df_conv.groupby('Circolo').agg({
+                # Calcola successo (Convertito o In Formazione) vs Perso
+                df_conv_circ['Successo'] = df_conv_circ['Stato'].isin(['Convertito', 'In Formazione'])
+
+                conv_circolo = df_conv_circ.groupby('Circolo').agg({
                     'MmbCode': 'count',
-                    'Convertito': ['sum', 'mean']
+                    'Successo': ['sum', 'mean']
                 }).reset_index()
-                conv_circolo.columns = ['Circolo', 'Allievi', 'Convertiti', 'TassoConv']
-                conv_circolo['TassoConv'] = (conv_circolo['TassoConv'] * 100).round(1)
+                conv_circolo.columns = ['Circolo', 'Allievi', 'Successi', 'TassoSuccesso']
+                conv_circolo['TassoSuccesso'] = (conv_circolo['TassoSuccesso'] * 100).round(1)
                 conv_circolo = conv_circolo[conv_circolo['Allievi'] >= 3]  # Min 3 allievi
-                conv_circolo = conv_circolo.sort_values('TassoConv', ascending=False)
+                conv_circolo = conv_circolo.sort_values('TassoSuccesso', ascending=False)
 
                 if len(conv_circolo) > 0:
                     fig_conv_circ = px.bar(
-                        conv_circolo.head(15), x='TassoConv', y='Circolo',
+                        conv_circolo.head(15), x='TassoSuccesso', y='Circolo',
                         orientation='h',
-                        title="Top Circoli per Tasso di Conversione",
-                        text='TassoConv',
-                        color='TassoConv',
+                        title="Top Circoli per Tasso di Successo (Convertiti + In Formazione)",
+                        text='TassoSuccesso',
+                        color='TassoSuccesso',
                         color_continuous_scale='RdYlGn'
                     )
                     fig_conv_circ.update_traces(texttemplate='%{text:.0f}%', textposition='outside', cliponaxis=False)
