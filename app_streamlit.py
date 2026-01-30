@@ -2914,24 +2914,26 @@ elif pagina == "🎯 Focus Puglia":
             risultati_conv = []
 
             for mmbcode in allievi_maturi:
-                # Storia completa del giocatore in Puglia (tutti gli anni)
-                storia = df[(df['MmbCode'] == mmbcode) & (df['GrpArea'] == 'PUG')].sort_values('Anno')
+                # Storia in Puglia come Scuola Bridge
+                storia_pug = df[(df['MmbCode'] == mmbcode) & (df['GrpArea'] == 'PUG')].sort_values('Anno')
+                storia_sb_pug = storia_pug[storia_pug['MbtDesc'] == 'Scuola Bridge']
 
-                storia_sb = storia[storia['MbtDesc'] == 'Scuola Bridge']
-                if len(storia_sb) == 0:
+                if len(storia_sb_pug) == 0:
                     continue
 
-                anno_inizio = storia_sb['Anno'].min()
-                anni_in_sb = storia_sb['Anno'].nunique()
-                gare_in_sb = storia_sb['GareGiocate'].sum()
-                ultimo_anno = storia['Anno'].max()
-                ultimo_anno_sb = storia_sb['Anno'].max()
+                anno_inizio = storia_sb_pug['Anno'].min()
+                anni_in_sb = storia_sb_pug['Anno'].nunique()
+                gare_in_sb = storia_sb_pug['GareGiocate'].sum()
 
-                # Verifica se ha cambiato tessera (CONVERTITO)
-                storia_regolare = storia[storia['MbtDesc'].isin(tessere_regolari)]
+                # Storia COMPLETA del giocatore in TUTTA ITALIA (per vedere se si è convertito altrove)
+                storia_totale = df[df['MmbCode'] == mmbcode].sort_values('Anno')
+                ultimo_anno_totale = storia_totale['Anno'].max()
+
+                # Verifica se ha cambiato tessera (CONVERTITO) - in tutta Italia
+                storia_regolare = storia_totale[storia_totale['MbtDesc'].isin(tessere_regolari)]
 
                 if len(storia_regolare) > 0:
-                    # CONVERTITO - è passato a tessera regolare
+                    # CONVERTITO - è passato a tessera regolare (anche in altra regione)
                     prima_conv = storia_regolare.sort_values('Anno').iloc[0]
                     anno_conv = prima_conv['Anno']
                     tessera_dest = prima_conv['MbtDesc']
@@ -2939,15 +2941,15 @@ elif pagina == "🎯 Focus Puglia":
                     gare_post = post_conv['GareGiocate'].sum()
                     punti_post = post_conv['PuntiTotali'].sum()
                     stato = 'Convertito'
-                elif ultimo_anno >= 2024:
-                    # ANCORA IN FORMAZIONE - ancora SB e attivo di recente
+                elif ultimo_anno_totale >= 2024:
+                    # ANCORA IN FORMAZIONE - ancora SB e attivo di recente (in qualsiasi regione)
                     anno_conv = None
                     tessera_dest = 'Ancora in Formazione'
                     gare_post = 0
                     punti_post = 0
                     stato = 'In Formazione'
                 else:
-                    # PERSO - non si è più ritesserato (ultimo anno < 2024)
+                    # PERSO - non si è più ritesserato da nessuna parte (ultimo anno < 2024)
                     anno_conv = None
                     tessera_dest = 'Perso (Abbandono)'
                     gare_post = 0
@@ -2964,7 +2966,7 @@ elif pagina == "🎯 Focus Puglia":
                     'TesseraDestinazione': tessera_dest,
                     'GareDopoConv': gare_post,
                     'PuntiDopoConv': punti_post,
-                    'UltimoAnno': ultimo_anno
+                    'UltimoAnno': ultimo_anno_totale
                 })
 
             df_conv = pd.DataFrame(risultati_conv)
